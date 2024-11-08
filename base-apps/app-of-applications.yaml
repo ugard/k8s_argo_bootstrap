@@ -8,8 +8,15 @@ spec:
   source:
     repoURL: 'https://github.com/ugard/k8s_argo_bootstrap'
     targetRevision: master
-    path: apps
+    path: base-apps
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: argocd  # Namespace, w którym działa Argo CD
+  sources:
+    # - repoURL: 'https://github.com/your-repo-url'
+    #   targetRevision: main
+    #   path: apps/traefik  # Ścieżka do aplikacji Traefik
+    - repoURL: 'https://github.com/your-repo-url'
+      targetRevision: master
+      path: apps/postgres  # Ścieżka do aplikacji PostgreSQL
  
