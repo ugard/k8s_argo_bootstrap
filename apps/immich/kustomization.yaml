@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - immich.pvc.yaml
-  - migrate.yaml
+  # - migrate.yaml
+  - sealed_secret.yaml
