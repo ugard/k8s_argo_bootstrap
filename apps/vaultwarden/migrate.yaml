@@ -33,6 +33,14 @@ spec:
         - name: dest
           persistentVolumeClaim:
             claimName: vw-data-ceph
+      nodeAffinity:
+        required:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: openebs.io/nodeid
+              operator: In
+              values:
+              - talos-95t-m8m
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
