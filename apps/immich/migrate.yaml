@@ -202,35 +202,35 @@ spec:
         command: [ "/bin/sh", "-c", "--" ]
         args: [ "while true; do sleep 30; done;" ]
         volumeMounts:
-          - name: source_immich
+          - name: source-immich
             mountPath: /source
-          - name: source_pg
+          - name: source-pg
             mountPath: /source_pg
-          - name: source_redis
+          - name: source-redis
             mountPath: /source_redis
-          - name: dest_immich
+          - name: dest-immich
             mountPath: /dest
-          - name: dest_pg
+          - name: dest-pg
             mountPath: /dest_pg
-          - name: dest_redis
+          - name: dest-redis
             mountPath: /dest_redis
       volumes:
-        - name: source_immich
+        - name: source-immich
           persistentVolumeClaim:
             claimName: immich-data-dr
-        - name: dest_immich
+        - name: dest-immich
           persistentVolumeClaim:
             claimName: immich-data-pvc
-        - name: source_redis
+        - name: source-redis
           persistentVolumeClaim:
             claimName: immich-redis-dr
-        - name: dest_redis
+        - name: dest-redis
           persistentVolumeClaim:
             claimName: immich-redis-pvc
-        - name: source_pg
+        - name: source-pg
           persistentVolumeClaim:
             claimName: immich-postgres-dr
-        - name: dest_pg
+        - name: dest-pg
           persistentVolumeClaim:
             claimName: immich-postgres-pvc
       
