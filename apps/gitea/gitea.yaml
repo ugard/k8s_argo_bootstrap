@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitea-web
+  namespace: gitea
+spec:
+  ports:
+  - name: web
+    port: 80
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: gitea
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitea-ssh
+  namespace: gitea
+spec:
+  ports:
+  - name: ssh
+    port: 22
+    targetPort: 2222
+    protocol: TCP
+  selector:
+    app: gitea
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: gitea
+  name: gitea
+  namespace: gitea
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitea
+  serviceName: gitea-web
+  template:
+    metadata:
+      labels:
+        app: gitea
+    spec:
+      containers:
+      - image: gitea/gitea:latest
+        name: gitea
+        ## debug:
+        ## command: ["/bin/sh", "-c", "sleep 99999999999"]
+        volumeMounts:
+          - name: data
+            mountPath: /data
+          - name: config
+            mountPath: /data/gitea/conf
+        ports:
+        - containerPort: 3000
+          name: web
+        - containerPort: 2222
+          name: ssh
+        env:
+          - name: INSTALL_LOCK
+            value: "true"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: gitea-data-ceph
+        - name: config
+          secret:
+            secretName: gitea
