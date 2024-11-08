@@ -63,7 +63,6 @@ metadata:
     volume.kubernetes.io/provisioner-deletion-secret-namespace: rook-ceph2
   creationTimestamp: "2024-09-15T19:52:43Z"
   finalizers:
-  - external-provisioner.volume.kubernetes.io/finalizer
   - kubernetes.io/pv-protection
   name: pvc-4a8b58c0-fc92-44a7-a7ce-e47decf0d9fb-2
   resourceVersion: "122715812"
