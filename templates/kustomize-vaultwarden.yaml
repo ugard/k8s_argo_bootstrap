@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kustomize-gitea
+  name: kustomize-vaultwarden
   namespace: argocd
 spec:
   destination:
