@@ -52,5 +52,5 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 500Gi
+      storage: 96Mi
   storageClassName: openebs-zfspv
