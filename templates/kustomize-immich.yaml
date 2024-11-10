@@ -16,114 +16,116 @@ spec:
       release-name: immich
       valueFiles:
       - immich/values.yaml
-      # valuesObject:
-      #   env:
-      #     # REDIS_HOSTNAME: 'broker.paperless'
-      #     # DB_HOSTNAME: "postgres.postgres"
-      #     DB_USERNAME: "immich"
-      #     DB_DATABASE_NAME: "immich"
-      #     # -- You should provide your own secret outside of this helm-chart and use `postgresql.global.postgresql.auth.existingSecret` to provide credentials to the postgresql instance
-      #     # DB_PASSWORD: ""
-      #     # IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
+      valuesObject:
+        env:
+          # REDIS_HOSTNAME: 'broker.paperless'
+          # DB_HOSTNAME: "postgres.postgres"
+          DB_USERNAME: "immich"
+          DB_DATABASE_NAME: "immich"
+          # -- You should provide your own secret outside of this helm-chart and use `postgresql.global.postgresql.auth.existingSecret` to provide credentials to the postgresql instance
+          # DB_PASSWORD: ""
+          # IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
 
-      #   image:
-      #     tag: v1.119.0
+        image:
+          tag: v1.119.0
 
-      #   immich:
-      #     metrics:
-      #       # Enabling this will create the service monitors needed to monitor immich with the prometheus operator
-      #       enabled: false
-      #     persistence:
-      #       # Main data store for all photos shared between different components.
-      #       library:
-      #         # Automatically creating the library volume is not supported by this chart
-      #         # You have to specify an existing PVC to use
-      #         existingClaim: immich-data-pvc
-      #     # configuration is immich-config.json converted to yaml
-      #     # ref: https://immich.app/docs/install/config-file/
-      #     #
-      #     configuration: {}
+        immich:
+          metrics:
+            # Enabling this will create the service monitors needed to monitor immich with the prometheus operator
+            enabled: false
+          persistence:
+            # Main data store for all photos shared between different components.
+            library:
+              # Automatically creating the library volume is not supported by this chart
+              # You have to specify an existing PVC to use
+              existingClaim: immich-data-pvc
+          # configuration is immich-config.json converted to yaml
+          # ref: https://immich.app/docs/install/config-file/
+          #
+          configuration: {}
 
-      #   postgresql:
-      #     enabled: true
-      #     image:
-      #       repository: tensorchord/pgvecto-rs
-      #       tag: pg14-v0.2.0
-      #     global:
-      #       postgresql:
-      #         auth:
-      #           existingSecret: immich
-      #           secretKeys:
-      #             userPasswordKey: PG_PASSWORD
-      #           username: immich
-      #           database: immich
-      #     persistence:
-      #       existingClaim: "immich-postgres-pvc"
-      #     primary:
-      #       initdb:
-      #         scripts:
-      #           create-extensions.sql: |
-      #             CREATE EXTENSION cube;
-      #             CREATE EXTENSION earthdistance;
-      #             CREATE EXTENSION vectors;
+        postgresql:
+          enabled: true
+          image:
+            repository: tensorchord/pgvecto-rs
+            tag: pg14-v0.2.0
+          global:
+            postgresql:
+              auth:
+                existingSecret: immich
+                secretKeys:
+                  userPasswordKey: PG_PASSWORD
+                username: immich
+                database: immich
+          
+          primary:
+            persistence:
+              existingClaim: "immich-postgres-pvc"
+            initdb:
+              scripts:
+                create-extensions.sql: |
+                  CREATE EXTENSION cube;
+                  CREATE EXTENSION earthdistance;
+                  CREATE EXTENSION vectors;
 
-      #   redis:
-      #     enabled: true
-      #     architecture: standalone
-      #     auth:
-      #       enabled: false
-      #     persistence:
-      #       existingClaim: "immich-redis-pvc"
+        redis:
+          enabled: true
+          architecture: standalone
+          auth:
+            enabled: false
+          master:
+            persistence:
+              existingClaim: "immich-redis-pvc"
 
-      #   # Immich components
+        # Immich components
 
-      #   server:
-      #     enabled: true
-      #     image:
-      #       repository: ghcr.io/immich-app/immich-server
-      #       pullPolicy: IfNotPresent
-      #     ingress:
-      #       main:
-      #         enabled: true
-      #         annotations:
-      #           # proxy-body-size is set to 0 to remove the body limit on file uploads
-      #           nginx.ingress.kubernetes.io/proxy-body-size: "0"
-      #           cert-manager.io/cluster-issuer: "letsencrypt"
-      #         hosts:
-      #           - host: immich.ugard.mywire.org
-      #             paths:
-      #               - path: "/"
-      #         tls:
-      #         - hosts:
-      #             - immich.ugard.mywire.org
-      #           secretName: tls-immich-ingress-http
-      #     probes:
-      #       liveness:
-      #         spec:
-      #           failureThreshold: 30
-      #       readiness:
-      #         spec:
-      #           failureThreshold: 30
+        server:
+          enabled: true
+          image:
+            repository: ghcr.io/immich-app/immich-server
+            pullPolicy: IfNotPresent
+          ingress:
+            main:
+              enabled: true
+              annotations:
+                # proxy-body-size is set to 0 to remove the body limit on file uploads
+                nginx.ingress.kubernetes.io/proxy-body-size: "0"
+                cert-manager.io/cluster-issuer: "letsencrypt"
+              hosts:
+                - host: immich.ugard.mywire.org
+                  paths:
+                    - path: "/"
+              tls:
+              - hosts:
+                  - immich.ugard.mywire.org
+                secretName: tls-immich-ingress-http
+          probes:
+            liveness:
+              spec:
+                failureThreshold: 30
+            readiness:
+              spec:
+                failureThreshold: 30
 
-      #   machine-learning:
-      #     enabled: true
-      #     image:
-      #       repository: ghcr.io/immich-app/immich-machine-learning
-      #       pullPolicy: IfNotPresent
-      #     env:
-      #       TRANSFORMERS_CACHE: /cache
-      #     probes:
-      #       liveness:
-      #         spec:
-      #           failureThreshold: 30
-      #       readiness:
-      #         spec:
-      #           failureThreshold: 30
-      #     persistence:
-      #       cache:
-      #         enabled: true
-      #         size: 10Gi
-      #         # Optional: Set this to pvc to avoid downloading the ML models every start.
-      #         type: emptyDir
-      #         accessMode: ReadWriteMany
-      #         storageClass: rook-ceph-block
+        machine-learning:
+          enabled: true
+          image:
+            repository: ghcr.io/immich-app/immich-machine-learning
+            pullPolicy: IfNotPresent
+          env:
+            TRANSFORMERS_CACHE: /cache
+          probes:
+            liveness:
+              spec:
+                failureThreshold: 30
+            readiness:
+              spec:
+                failureThreshold: 30
+          persistence:
+            cache:
+              enabled: true
+              size: 10Gi
+              # Optional: Set this to pvc to avoid downloading the ML models every start.
+              type: emptyDir
+              accessMode: ReadWriteMany
+              storageClass: rook-ceph-block
