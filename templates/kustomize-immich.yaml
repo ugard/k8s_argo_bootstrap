@@ -14,8 +14,6 @@ spec:
     targetRevision: 0.8.4
     helm:
       release-name: immich
-      valueFiles:
-      - immich/values.yaml
       valuesObject:
         env:
           # REDIS_HOSTNAME: 'broker.paperless'
