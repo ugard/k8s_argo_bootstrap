@@ -51,8 +51,6 @@ spec:
             postgresql:
               auth:
                 existingSecret: immich
-                secretKeys:
-                  userPasswordKey: PG_PASSWORD
                 username: immich
                 database: immich
           
