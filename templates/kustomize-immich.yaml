@@ -102,7 +102,9 @@ spec:
             readiness:
               spec:
                 failureThreshold: 90
-
+          resources:
+            requests:
+              cpu: 2000m
         machine-learning:
           enabled: true
           image:
