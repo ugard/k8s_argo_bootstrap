@@ -41,14 +41,6 @@ spec:
           # ref: https://immich.app/docs/install/config-file/
           #
           configuration: {}
-            # trash:
-            #   enabled: false
-            #   days: 30
-            # storageTemplate:
-            #   enabled: true
-            #   template: "{{y}}/{{y}}-{{MM}}-{{dd}}/{{filename}}"
-
-        # Dependencies
 
         postgresql:
           enabled: true
