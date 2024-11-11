@@ -105,6 +105,10 @@ spec:
           resources:
             requests:
               cpu: 2000m
+          affinities:
+            nodes:
+              hard:
+                kubernetes.io/arch: "amd64"
         machine-learning:
           enabled: true
           image:
