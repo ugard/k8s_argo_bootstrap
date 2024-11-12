@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lychee
+  namespace: lychee
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: lychee.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: lychee
+              port:
+                number: 80
+  tls:
+  - hosts:
+    - lychee.ugard.mywire.org
+    secretName: tls-lychee-ingress-http

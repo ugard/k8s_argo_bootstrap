@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: lychee
+  namespace: lychee
+spec:
+  ports:
+  - name: web
+    port: 80
+  selector:
+    app: lychee
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: lychee
+  name: lychee
+  namespace: lychee
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lychee
+  serviceName: lychee
+  template:
+    metadata:
+      labels:
+        app: lychee
+    spec:
+      containers:
+      - image: docker.io/lycheeorg/lychee:latest
+        name: lychee
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+          - name: lychee-conf
+            mountPath: /conf
+          - name: lychee-uploads
+            mountPath: /uploads
+          - name: lychee-sym
+            mountPath: /sym
+        env:
+        - name: LIVEWIRE_ENABLED
+          value: "false"
+        - name: DB_CONNECTION
+          value: pgsql
+        - name: DB_HOST
+          value: postgres.postgres
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: postgresdb
+              key: PGSQL_DATABASE
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: postgresdb
+              key: PGSQL_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresdb
+              key: PGSQL_PASSWORD
+        - name: APP_URL
+          value: "https://lychee.ugard.mywire.org/"
+        - name: TRUSTED_PROXIES
+          value: "*"
+      volumes:
+        - name: lychee-conf
+          persistentVolumeClaim:
+            claimName: lychee-conf
+        - name: lychee-uploads
+          persistentVolumeClaim:
+            claimName: lychee-uploads
+        - name: lychee-sym
+          persistentVolumeClaim:
+            claimName: lychee-sym
+        
