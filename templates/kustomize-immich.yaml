@@ -57,6 +57,9 @@ spec:
           primary:
             persistence:
               existingClaim: "immich-postgres-pvc"
+            resources:
+              requests:
+                memory: 4Gi
             initdb:
               scripts:
                 create-extensions.sql: |
