@@ -16,12 +16,12 @@ spec:
       containers:
       - name: adguard-home
         image: adguard/adguardhome:latest
-        # env:
-        # - name: AGH_CONFIG
-          # valueFrom:
-            # configMapKeyRef:
-              # name: adguard-config
-              # key: AdGuardHome.yaml
+        env:
+        - name: AGH_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: adguard-config
+              key: AdGuardHome.yaml
         ports:
         - containerPort: 53 #dns
           name: dns
@@ -33,11 +33,16 @@ spec:
           protocol: TCP
         volumeMounts:
         - name: adguard-data
-          mountPath: /opt/adguardhome/
+          mountPath: /opt/adguardhome/work
+        - name: adguard-config
+          mountPath: /opt/adguardhome/config
       volumes:
       - name: adguard-data
         persistentVolumeClaim:
           claimName: adguard-pvc
+      - name: adguard-config
+        persistentVolumeClaim:
+          claimName: adguard-config
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -50,6 +55,19 @@ spec:
   resources:
     requests:
       storage: 1Gi
+  storageClassName: rook-ceph-block
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: adguard-config
+  namespace: adguard
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
   storageClassName: rook-ceph-block
 ---
 apiVersion: v1
