@@ -57,9 +57,8 @@ spec:
           primary:
             persistence:
               existingClaim: "immich-postgres-pvc"
-            resources:
-              requests:
-                memory: 4Gi
+            nodeSelector:
+              kubernetes.io/arch: "amd64"
             initdb:
               scripts:
                 create-extensions.sql: |
@@ -83,6 +82,8 @@ spec:
           image:
             repository: ghcr.io/immich-app/immich-server
             pullPolicy: IfNotPresent
+          nodeSelector:
+            kubernetes.io/arch: "amd64"
           ingress:
             main:
               enabled: true
@@ -105,13 +106,6 @@ spec:
             readiness:
               spec:
                 failureThreshold: 90
-          resources:
-            requests:
-              memory: 4Gi
-          affinities:
-            nodes:
-              hard:
-                kubernetes.io/arch: "amd64"
         machine-learning:
           enabled: true
           image:
