@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kustomize-tailscale-operator
+  namespace: argocd
+spec:
+  destination:
+    namespace: tailscale
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  source:
+    chart: tailscale-operator
+    repoURL: https://pkgs.tailscale.com/helmcharts
+    targetRevision: 1.76.6
+    helm:
+      release-name: tailscale-operator
+      
