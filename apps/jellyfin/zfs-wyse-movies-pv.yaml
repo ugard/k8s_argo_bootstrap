@@ -1,0 +1,46 @@
+apiVersion: zfs.openebs.io/v1
+kind: ZFSVolume
+metadata:
+  name: movies
+  namespace: openebs
+spec:
+  capacity: "2748779069440" #2.5TB
+  fsType: zfs
+  shared: "yes"
+  ownerNodeID: talos-jly-e8b
+  poolName: wdc
+  volumeType: DATASET
+status:
+  state: Ready
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: wyse-movies
+spec:
+  capacity:
+    storage: 2500Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: wyse-movies-pvc
+    namespace: jellyfin
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: openebs-zfspv
+  csi:
+    driver: zfs.csi.openebs.io
+    fsType: zfs
+    volumeAttributes:
+      openebs.io/poolname: wdc
+    volumeHandle: movies
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - talos-jly-e8b # change the hostname where volume is present
