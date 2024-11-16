@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kustomize-jellyfin
+  namespace: argocd
+spec:
+  destination:
+    namespace: jellyfin
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  source:
+    chart: jellyfin
+    repoURL: https://jellyfin.github.io/jellyfin-helm
+    targetRevision: 2.1.0
+    helm:
+      release-name: jellyfin
+      valuesObject:
+        ingress:
+          enabled: true
+          annotations:
+            cert-manager.io/cluster-issuer: "letsencrypt"
+          hosts:
+            - host: jellyfin.ugard.mywire.org
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - secretName: tls-jellyfin-ingress-http
+              hosts:
+                - jellyfin.ugard.mywire.org
+        persistence:
+          media:
+            enabled: false
+            
