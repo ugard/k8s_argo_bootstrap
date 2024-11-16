@@ -31,6 +31,28 @@ spec:
           persistence:
             media:
               enabled: false
+          volumes:
+            - name: bajki
+              persistentVolumeClaim:
+                claimName: wyse-bajki-pvc
+            - name: movies
+              persistentVolumeClaim:
+                claimName: wyse-movies-pvc
+            - name: przyroda
+              persistentVolumeClaim:
+                claimName: wyse-przyroda-pvc
+
+          # -- Additional volume mounts for the Jellyfin container.
+          volumeMounts:
+            - name: bajki
+              mountPath: /media/bajki
+              readOnly: True
+            - name: movies
+              mountPath: /media/movies
+              readOnly: True
+            - name: przyroda
+              mountPath: /media/przyroda
+              readOnly: True
     - path: apps/jellyfin
       repoURL: {{ .Values.spec.source.repoURL }}
       targetRevision: {{ .Values.spec.source.targetRevision }}
