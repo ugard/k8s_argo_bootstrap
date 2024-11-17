@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: config-data-dr
+  namespace: rtorrent
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: rook-ceph-block
+  volumeMode: Filesystem
+  volumeName: pvc-3704e8b1-7f00-4927-8254-8d477e1d1636-dr
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    pv.kubernetes.io/provisioned-by: rook-ceph2.rbd.csi.ceph.com
+    volume.kubernetes.io/provisioner-deletion-secret-name: rook-csi-rbd-provisioner
+    volume.kubernetes.io/provisioner-deletion-secret-namespace: rook-ceph2
+  creationTimestamp: "2024-10-01T19:07:20Z"
+  finalizers:
+  - external-provisioner.volume.kubernetes.io/finalizer
+  - kubernetes.io/pv-protection
+  name: pvc-3704e8b1-7f00-4927-8254-8d477e1d1636-dr
+  resourceVersion: "125511184"
+  uid: e2068842-8a9c-4650-b0bf-ede4d6230ef1
+spec:
+  accessModes:
+  - ReadWriteOnce
+  capacity:
+    storage: 5Gi
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: config-data
+    namespace: rtorrent
+  csi:
+    controllerExpandSecretRef:
+      name: rook-csi-rbd-provisioner
+      namespace: rook-ceph2
+    driver: rook-ceph2.rbd.csi.ceph.com
+    fsType: ext4
+    nodeStageSecretRef:
+      name: rook-csi-rbd-node
+      namespace: rook-ceph2
+    volumeAttributes:
+      clusterID: rook-ceph2
+      imageFeatures: layering
+      imageFormat: "2"
+      imageName: csi-vol-66b35016-0997-4e16-ba8e-6ddcc2dbb36f
+      journalPool: ceph-blockpool
+      pool: ceph-blockpool
+      storage.kubernetes.io/csiProvisionerIdentity: 1726425819863-8158-rook-ceph.rbd.csi.ceph.com
+    volumeHandle: 0001-000a-rook-ceph-0000000000000001-66b35016-0997-4e16-ba8e-6ddcc2dbb36f
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: rook-ceph-block
+  volumeMode: Filesystem
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: migrate
+  name: migrate
+  namespace: rtorrent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: migrate
+  serviceName: migrate
+  template:
+    metadata:
+      labels:
+        app: migrate
+    spec:
+      containers:
+      - image: docker.io/alpine:latest
+        name: shell
+        command: [ "/bin/sh", "-c", "--" ]
+        args: [ "while true; do sleep 30; done;" ]
+        volumeMounts:
+          - name: source-config
+            mountPath: /source
+          - name: dest-config
+            mountPath: /dest
+      volumes:
+        - name: source-config
+          persistentVolumeClaim:
+            claimName: config-data-dr
+        - name: dest-config
+          persistentVolumeClaim:
+            claimName: config-data
+       

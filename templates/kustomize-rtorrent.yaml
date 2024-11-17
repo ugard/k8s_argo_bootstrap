@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kustomize-rtorrent
+  namespace: argocd
+spec:
+  destination:
+    namespace: rtorrent
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  source:
+    path: apps/rtorrent
+    repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
