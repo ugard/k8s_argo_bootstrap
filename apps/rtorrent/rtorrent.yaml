@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rtorrent
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rtorrent
+  namespace: rtorrent
+spec:
+  selector:
+    matchLabels:
+      app: rtorrent
+      namespace: rtorrent
+  template:
+    metadata:
+      labels:
+        app: rtorrent
+        namespace: rtorrent
+    spec:
+      initContainers:
+      - name: gluetun
+        image: "ghcr.io/qdm12/gluetun:latest"
+        restartPolicy: Always
+        envFrom:
+         - secretRef:
+            name: rtorrent
+            optional: false
+        env:
+        - name: TZ
+          value: "Europe/Warsaw"
+        - name: FIREWALL_DEBUG
+          value: "on"
+        - name: FIREWALL_INPUT_PORTS
+          value: "8080"
+        - name: HTTP_CONTROL_SERVER_ADDRESS
+          value: ":18000"
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+      containers:
+      - name: rtorrent
+        image: ghcr.io/crazy-max/rtorrent-rutorrent:latest
+        volumeMounts:
+        - name: config-data
+          mountPath: /data
+        - name: media-zfs
+          mountPath: /downloads
+      volumes:
+      - name: config-data
+        persistentVolumeClaim:
+          claimName: config-data
+      - name: media-zfs
+        persistentVolumeClaim:
+          claimName: media-zfs
