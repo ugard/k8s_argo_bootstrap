@@ -23,3 +23,9 @@ persistence:
     annotations: {}
     # -- If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
     storageClass: 'openebs-zfspv'
+extraContainers:
+  - name: sftpgo
+    image: docker.io/drakkan/sftpgo:latest
+    volumeMounts:
+    - name: media
+      mountPath: /data/jellyfin
