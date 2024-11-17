@@ -53,6 +53,11 @@ spec:
           mountPath: /data
         - name: media-zfs
           mountPath: /downloads
+      - name: rclone
+        image: docker.io/rclone/rclone:latest
+        volumeMounts:
+        - name: media-zfs
+          mountPath: /media
       volumes:
       - name: config-data
         persistentVolumeClaim:
