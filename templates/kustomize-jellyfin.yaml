@@ -15,11 +15,10 @@ spec:
       helm:
         release-name: jellyfin
         valueFiles:
-          - $values/values.yaml
-    # - repoURL: {{ .Values.spec.source.repoURL }}
-      # targetRevision: {{ .Values.spec.source.targetRevision }}
-      # ref: values
+          - $values/apps/jellyfin/values.yaml
+    - repoURL: {{ .Values.spec.source.repoURL }}
+      targetRevision: {{ .Values.spec.source.targetRevision }}
+      ref: values
     - repoURL: {{ .Values.spec.source.repoURL }}
       targetRevision: {{ .Values.spec.source.targetRevision }}
       path: apps/jellyfin
-      ref: values
