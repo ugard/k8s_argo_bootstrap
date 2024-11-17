@@ -12,3 +12,18 @@ spec:
     requests:
       storage: 5Gi
   storageClassName: rook-ceph-block
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media-zfs
+  namespace: rtorrent
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: openebs-zfspv
+  volumeMode: Filesystem
+  volumeName: pvc-da1d3eb5-b347-4c98-86f2-683a5d8b5cb9
