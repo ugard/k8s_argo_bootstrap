@@ -30,29 +30,14 @@ spec:
                   - jellyfin.ugard.mywire.org
           persistence:
             media:
-              enabled: false
-          volumes:
-            - name: bajki
-              persistentVolumeClaim:
-                claimName: wyse-bajki-pvc
-            - name: movies
-              persistentVolumeClaim:
-                claimName: wyse-movies-pvc
-            - name: przyroda
-              persistentVolumeClaim:
-                claimName: wyse-przyroda-pvc
-
-          # -- Additional volume mounts for the Jellyfin container.
-          volumeMounts:
-            - name: bajki
-              mountPath: /media/bajki
-              readOnly: True
-            - name: movies
-              mountPath: /media/movies
-              readOnly: True
-            - name: przyroda
-              mountPath: /media/przyroda
-              readOnly: True
-    - path: apps/jellyfin
-      repoURL: {{ .Values.spec.source.repoURL }}
-      targetRevision: {{ .Values.spec.source.targetRevision }}
+              # -- set to false to use emptyDir
+              enabled: true
+              accessMode: ReadWriteOnce
+              size: 500Gi
+              # -- Custom annotations to be added to the PVC
+              annotations: {}
+              # -- If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
+              storageClass: 'openebs-zfspv'
+    # - path: apps/jellyfin
+    #   repoURL: {{ .Values.spec.source.repoURL }}
+    #   targetRevision: {{ .Values.spec.source.targetRevision }}
