@@ -4,4 +4,4 @@ resources:
   # - namespace.yaml
   # - immich.pvc.yaml
   # - migrate.yaml
-  - sftpgo-service.yaml
+  - ftp-service.yaml

@@ -6,7 +6,7 @@ spec:
   type: ClusterIP
   ports:
     - name: service
-      port: 8080
+      port: 2121
       protocol: TCP
       targetPort: http
   selector:
