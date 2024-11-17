@@ -54,7 +54,7 @@ spec:
         args:
         - serve
         - ftp
-        - -addr
+        - --addr
         - :2121
         - /media
         restartPolicy: Always
