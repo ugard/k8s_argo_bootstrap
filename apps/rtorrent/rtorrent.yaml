@@ -42,6 +42,9 @@ spec:
           capabilities:
             add:
             - NET_ADMIN
+        resources:
+          limits:
+            squat.ai/tun: "1"
       containers:
       - name: rtorrent
         image: ghcr.io/crazy-max/rtorrent-rutorrent:latest
