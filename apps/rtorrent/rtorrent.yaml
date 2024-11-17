@@ -54,6 +54,8 @@ spec:
         args:
         - serve
         - ftp
+        - -addr
+        - :2121
         - /media
         restartPolicy: Always
       containers:
@@ -71,3 +73,21 @@ spec:
       - name: media-zfs
         persistentVolumeClaim:
           claimName: media-zfs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rtorrent
+  namespace: rtorrent
+spec:
+  selector:
+    app: rtorrent
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: web
+    protocol: TCP
+  - port: 2121
+    targetPort: 2121
+    name: ftp
+    protocol: TCP
