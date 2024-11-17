@@ -35,7 +35,7 @@ spec:
         - name: FIREWALL_DEBUG
           value: "on"
         - name: FIREWALL_INPUT_PORTS
-          value: "8080"
+          value: "8080,2121"
         - name: HTTP_CONTROL_SERVER_ADDRESS
           value: ":18000"
         securityContext:
@@ -50,8 +50,11 @@ spec:
         volumeMounts:
         - name: media-zfs
           mountPath: /media
-        command: [ "/bin/sh", "-c", "--" ]
-        args: [ "while true; do sleep 30; done;" ]
+          command: [ "rclone" ]
+          args:
+          - serve
+          - ftp
+          - /media
         restartPolicy: Always
       containers:
       - name: rtorrent
