@@ -35,7 +35,7 @@ spec:
   claimRef:
     apiVersion: v1
     kind: PersistentVolumeClaim
-    name: config-data
+    name: config-data-dr
     namespace: rtorrent
   csi:
     controllerExpandSecretRef:
