@@ -14,6 +14,11 @@ ingress:
 service:
   type: LoadBalancer
   port: 8096
+volumes:
+- name: rclone-config
+  secret:
+    secretName: rclone-rtorrent
+    optional: false
 persistence:
   media:
     # -- set to false to use emptyDir
@@ -27,11 +32,11 @@ persistence:
 extraContainers:
   - name: rclone
     image: docker.io/rclone/rclone:latest
-    command: [ "rclone" ]
-    args:
-    - serve
-    - ftp
-    - /data/jellyfin
+    command: [ "/bin/sh", "-c", "--" ]
+    args: [ "while true; do sleep 30; done;" ]
     volumeMounts:
     - name: media
       mountPath: /data/jellyfin
+    - name: rclone-config
+      mountPath: /config/rclone
+      readOnly: true
