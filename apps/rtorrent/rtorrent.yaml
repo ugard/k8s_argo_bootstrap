@@ -91,3 +91,27 @@ spec:
     targetPort: 8888
     name: webdav
     protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rtorrent
+  namespace: rtorrent
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: rtorrent.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: rtorrent
+              port:
+                number: 8080
+  tls:
+  - hosts:
+    - rtorrent.ugard.mywire.org
+    secretName: tls-rtorrent-ingress-http
