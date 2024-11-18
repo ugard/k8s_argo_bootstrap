@@ -124,7 +124,7 @@ metadata:
   labels:
     app: migrate
   name: migrate
-  namespace: immich
+  namespace: paperless
 spec:
   replicas: 1
   selector:
@@ -142,35 +142,24 @@ spec:
         command: [ "/bin/sh", "-c", "--" ]
         args: [ "while true; do sleep 30; done;" ]
         volumeMounts:
-          - name: source-immich
+          - name: source-data
             mountPath: /source
-          - name: source-pg
+          - name: source-media
             mountPath: /source_pg
-          - name: source-redis
-            mountPath: /source_redis
-          - name: dest-immich
+          - name: dest-data
             mountPath: /dest
-          - name: dest-pg
+          - name: dest-media
             mountPath: /dest_pg
-          - name: dest-redis
-            mountPath: /dest_redis
       volumes:
-        - name: source-immich
+        - name: source-data
           persistentVolumeClaim:
-            claimName: immich-data-dr
-        - name: dest-immich
+            claimName: paperless-data-dr
+        - name: dest-data
           persistentVolumeClaim:
-            claimName: immich-data-pvc
-        - name: source-redis
+            claimName: paperless-data
+        - name: source-media
           persistentVolumeClaim:
-            claimName: immich-redis-dr
-        - name: dest-redis
+            claimName: paperless-media-dr
+        - name: dest-media
           persistentVolumeClaim:
-            claimName: immich-redis-pvc
-        - name: source-pg
-          persistentVolumeClaim:
-            claimName: immich-postgres-dr
-        - name: dest-pg
-          persistentVolumeClaim:
-            claimName: immich-postgres-pvc
-      
+            claimName: paperless-media
