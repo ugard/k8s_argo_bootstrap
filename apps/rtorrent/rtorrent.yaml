@@ -35,7 +35,7 @@ spec:
         - name: FIREWALL_DEBUG
           value: "on"
         - name: FIREWALL_INPUT_PORTS
-          value: "8080,2121"
+          value: "8080,8888"
         - name: HTTP_CONTROL_SERVER_ADDRESS
           value: ":18000"
         securityContext:
@@ -53,9 +53,9 @@ spec:
         command: [ "rclone" ]
         args:
         - serve
-        - ftp
+        - webdav
         - --addr
-        - :2121
+        - :8888
         - /media
         restartPolicy: Always
       containers:
@@ -87,7 +87,7 @@ spec:
     targetPort: 8080
     name: web
     protocol: TCP
-  - port: 2121
-    targetPort: 2121
-    name: ftp
+  - port: 8888
+    targetPort: 8888
+    name: webdav
     protocol: TCP
