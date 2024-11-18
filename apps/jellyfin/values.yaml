@@ -37,6 +37,6 @@ extraContainers:
     volumeMounts:
     - name: media
       mountPath: /data/jellyfin
-    # - name: rclone-config
-      # mountPath: /config/rclone
-      # readOnly: true
+    - name: rclone-config
+      mountPath: /config/rclone
+      readOnly: true
