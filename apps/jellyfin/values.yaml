@@ -19,6 +19,10 @@ volumes:
   secret:
     secretName: rclone-rtorrent
     optional: false
+jellyfin:
+  env:
+    - name: JELLYFIN_PublishedServerUrl
+      value: jellyfin.ugard.mywire.org
 persistence:
   media:
     # -- set to false to use emptyDir
