@@ -4,4 +4,5 @@ resources:
   # - namespace.yaml
   # - immich.pvc.yaml
   # - migrate.yaml
-  - ftp-service.yaml
+  # - ftp-service.yaml
+  - rclone_secret.yaml
