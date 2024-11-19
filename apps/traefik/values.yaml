@@ -1,5 +1,5 @@
 service:
   annotations:
     tailscale.com/expose: "true"
-  loadBalancerIP: 192.168.10.253
-  
+  spec:
+    loadBalancerIP: 192.168.10.253
