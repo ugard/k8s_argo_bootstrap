@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - paperless.pvc.yaml
   - migrate.yaml
-  # - sealed_secret.yaml
+  - postgres.sealed_secret.yaml
+  - paperless.yaml
