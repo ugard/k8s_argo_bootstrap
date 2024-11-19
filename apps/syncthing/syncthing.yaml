@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: syncthing
+  namespace: syncthing
+spec:
+  ports:
+  - name: http
+    port: 8384
+    protocol: TCP
+  selector:
+    app: syncthing
+  type: LoadBalancer
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: syncthing
+  namespace: syncthing
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host(`syncthing.ugard.mywire.org`)
+    services:
+    - name: syncthing
+      port: 8384
+  tls:
+    certResolver: default
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: syncthing
+  name: syncthing
+  namespace: syncthing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: syncthing
+  template:
+    metadata:
+      labels:
+        app: syncthing
+    spec:
+      hostNetwork: true
+      containers:
+      - image: docker.io/syncthing/syncthing:latest
+        name: syncthing
+        ports:
+        - name: http
+          containerPort: 8384
+          protocol: TCP
+        - name: tcp-ft
+          containerPort: 22000
+          protocol: TCP
+        - name: quic-ft
+          containerPort: 22000
+          protocol: UDP
+        - name: local-discovery
+          containerPort: 21027
+          protocol: UDP
+        readinessProbe:
+          tcpSocket:
+            port: 8384
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 8384
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        volumeMounts:
+          - name: syncthing-data
+            mountPath: /var/syncthing
+      volumes:
+        - name: syncthing-data
+          persistentVolumeClaim:
+            claimName: syncthing-data
