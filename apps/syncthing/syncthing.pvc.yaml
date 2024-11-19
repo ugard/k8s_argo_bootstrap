@@ -8,7 +8,7 @@ spec:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 70G
+      storage: 100G
   storageClassName: openebs-zfspv
   volumeMode: Filesystem
   volumeName: pvc-add4a0b1-1554-45f5-b73a-6d43abde46fd
