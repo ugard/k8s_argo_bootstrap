@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: broker
+  namespace: paperless
+spec:
+  selector:
+    app: broker
+  ports:
+  - port: 6379
+    targetPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gotenberg
+  namespace: paperless
+spec:
+  selector:
+    app: gotenberg
+  ports:
+  - port: 3000
+    targetPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webserver
+  namespace: paperless
+spec:
+  selector:
+    app: webserver
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: web
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tika
+  namespace: paperless
+spec:
+  selector:
+    app: tika
+  ports:
+  - port: 9998
+    targetPort: 9998
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: paperless
+  namespace: paperless
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: paperless.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: webserver
+              port:
+                number: 8000
+  tls:
+  - hosts:
+    - paperless.ugard.mywire.org
+    secretName: tls-paperless-ingress-http
