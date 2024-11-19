@@ -8,6 +8,15 @@ spec:
   - name: http
     port: 8384
     protocol: TCP
+  - name: tcp-ft
+    port: 22000
+    protocol: TCP
+  - name: quic-ft
+    port: 22000
+    protocol: UDP
+  - name: local-discovery
+    port: 21027
+    protocol: UDP
   selector:
     app: syncthing
   type: LoadBalancer
@@ -29,7 +38,7 @@ spec:
       labels:
         app: syncthing
     spec:
-      hostNetwork: true
+      # hostNetwork: true
       containers:
       - image: docker.io/syncthing/syncthing:latest
         name: syncthing
