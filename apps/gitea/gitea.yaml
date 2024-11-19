@@ -17,6 +17,8 @@ kind: Service
 metadata:
   name: gitea-ssh
   namespace: gitea
+  annotations:
+    tailscale.com/expose: "true"
 spec:
   ports:
   - name: ssh
