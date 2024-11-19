@@ -12,23 +12,6 @@ spec:
     app: syncthing
   type: LoadBalancer
 ---
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: syncthing
-  namespace: syncthing
-spec:
-  entryPoints:
-  - websecure
-  routes:
-  - kind: Rule
-    match: Host(`syncthing.ugard.mywire.org`)
-    services:
-    - name: syncthing
-      port: 8384
-  tls:
-    certResolver: default
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -80,3 +63,27 @@ spec:
         - name: syncthing-data
           persistentVolumeClaim:
             claimName: syncthing-data
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: syncthing
+  namespace: syncthing
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: syncthing.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: syncthing
+              port:
+                number: 8384
+  tls:
+  - hosts:
+    - syncthing.ugard.mywire.org
+    secretName: tls-syncthing-ingress-http
