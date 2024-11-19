@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kustomize-traefik
+  namespace: argocd
+spec:
+  destination:
+    namespace: traefik
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  sources:
+  - chart: traefik
+    repoURL: https://traefik.github.io/charts
+    targetRevision: 33.0.0
+    helm:
+      release-name: traefik
+      valueFiles:
+      - $values/apps/traefik/values.yaml
+  - repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
+    ref: values
