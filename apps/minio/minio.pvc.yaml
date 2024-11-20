@@ -1,0 +1,14 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: minio-zfspv
+  namespace: minio
+spec:
+  storageClassName: openebs-zfspv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 200Gi
+  volumeMode: Filesystem
+  volumeName: pvc-9d9d4ad7-d862-4fa1-88c5-e4504d5f8b5c
