@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - generate-ceph.sealed_secret.yaml
+  - rook-ceph-mon.sealed_secret.yaml
+  - benji.yaml
+  
