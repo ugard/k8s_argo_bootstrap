@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: victoria-metrics
+  namespace: argocd
+spec:
+  destination:
+    namespace: vm
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  sources:
+    - chart: victoria-metrics-single
+      repoURL: https://victoriametrics.github.io/helm-charts/
+      targetRevision: 0.12.7
+      helm:
+        release-name: victoria-metrics
+        valueFiles:
+          - $values/apps/victoria-metrics/values.yaml
+    - repoURL: {{ .Values.spec.source.repoURL }}
+      targetRevision: {{ .Values.spec.source.targetRevision }}
+      ref: values
