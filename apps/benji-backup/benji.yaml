@@ -218,6 +218,8 @@ spec:
           - name: ceph-config
             mountPath: /script/generate-ceph.sh
             subPath: generate-ceph.sh
+          - mountPath: "/tmp/.config"
+            name: global-config
         env:
           - name: DIR
             value: "/tmp/.config"
