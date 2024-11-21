@@ -213,3 +213,14 @@ spec:
         - name: benji-config
           secret:
             secretName: benji
+        - name: mon-endpoint-volume
+          secret:
+            name: rook-ceph-mon-endpoints
+            items:
+              - key: data
+                path: mon-endpoints
+        - name: ceph-data
+          emptyDir: {}
+        - name: ceph-config
+          secret:
+            secretName: generate-ceph
