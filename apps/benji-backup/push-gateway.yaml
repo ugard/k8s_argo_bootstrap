@@ -76,3 +76,14 @@ spec:
   selector:
     app.kubernetes.io/name: pushgateway
     app.kubernetes.io/instance: benji
+---
+# Source: benji/charts/pushgateway/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/name: pushgateway
+    app.kubernetes.io/instance: benji
+    app.kubernetes.io/version: "v1.5.1"
+  name: benji-pushgateway
+  namespace: backup-system
