@@ -53,6 +53,9 @@ rules:
   - create
   # Also needs GET where kubectl doesn't, see https://github.com/kubernetes-client/python/issues/690#issuecomment-459010364
   - get
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list"]
 ---
 # Source: benji/templates/cluster-role-binding.yaml
 kind: ClusterRoleBinding
@@ -241,3 +244,5 @@ spec:
         - name: ceph-config
           secret:
             secretName: generate-ceph
+        - name: global-config       # shared volume between init and application container
+          emptyDir: {}
