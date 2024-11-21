@@ -5,4 +5,4 @@ resources:
   - generate-ceph.sealed_secret.yaml
   - benji-config.sealed_secret.yaml
   - benji.yaml
-  
+  - push-gateway.yaml
