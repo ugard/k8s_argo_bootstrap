@@ -18,6 +18,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: paperless-media
   namespace: paperless
+  labels:
+    "backup-this-pvc": "true"
 spec:
   accessModes:
     - ReadWriteOnce

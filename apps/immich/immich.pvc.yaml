@@ -3,6 +3,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: immich-data-pvc
   namespace: immich
+  labels:
+    "backup-this-pvc": "true"
 spec:
   accessModes:
   - ReadWriteOnce
@@ -16,6 +18,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: immich-postgres-pvc
   namespace: immich
+  labels:
+    "backup-this-pvc": "true"
 spec:
   accessModes:
   - ReadWriteOnce

@@ -3,6 +3,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: vw-data-ceph
   namespace: vaultwarden
+  labels:
+    "backup-this-pvc": "true"
 spec:
   accessModes:
   - ReadWriteOnce
