@@ -212,7 +212,7 @@ spec:
       volumes:
         - name: benji-config
           secret:
-            secretName: benji
+            secretName: benji-config
         - name: mon-endpoint-volume
           secret:
             secretName: rook-ceph-mon-endpoints
