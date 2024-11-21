@@ -420,6 +420,9 @@ server:
         - job_name: victoriametrics
           static_configs:
             - targets: [ "localhost:8428" ]
+        - job_name: benji-backup
+          static_configs:
+            - targets: [ "benji-pushgateway.backup-system:9091" ]
 
           # COPY from Prometheus helm chart https://github.com/helm/charts/blob/master/stable/prometheus/values.yaml
 
