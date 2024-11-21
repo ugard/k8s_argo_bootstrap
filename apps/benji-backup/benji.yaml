@@ -185,7 +185,24 @@ spec:
               mountPath: /benji/etc
             - name: ceph-data
               mountPath: /etc/ceph
+            - mountPath: "/tmp/.config"
+              name: global-config
+            - name: ceph-config
+              mountPath: /script/generate-ceph.sh
+              subPath: generate-ceph.sh
       initContainers:
+      - name: get-ceph-secrets
+        image: ghcr.io/undistro/kubexns:v0.1.5
+        volumeMounts:
+        - mountPath: "/tmp/.config"
+          name: global-config
+        env:
+          - name: DIR
+            value: "/tmp/.config"
+          - name: CONFIGMAPS
+            value: "rook-ceph2/rook-ceph-mon-endpoints"     # mount the ConfigMap `global-config` from `config` namespace
+          - name: SECRETS
+            value: "rook-ceph2/rook-ceph-mon"                  # match secrets by label selector
       - name: generate-ceph-files
         image: rook/ceph:v1.13.3
         command: ["/usr/bin/bash"]
