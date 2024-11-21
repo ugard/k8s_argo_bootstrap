@@ -188,11 +188,6 @@ spec:
               mountPath: /benji/etc
             - name: ceph-data
               mountPath: /etc/ceph
-            - mountPath: "/tmp/.config"
-              name: global-config
-            - name: ceph-config
-              mountPath: /script/generate-ceph.sh
-              subPath: generate-ceph.sh
       initContainers:
       - name: get-ceph-secrets
         image: ghcr.io/undistro/kubexns:v0.1.5
@@ -211,8 +206,6 @@ spec:
         command: ["/usr/bin/bash"]
         args: ["-c", "bash /script/generate-ceph.sh"]
         volumeMounts:
-          - name: mon-endpoint-volume
-            mountPath: /etc/rook
           - name: ceph-data
             mountPath: /etc/ceph
           - name: ceph-config
@@ -227,12 +220,6 @@ spec:
         - name: benji-config
           secret:
             secretName: benji-config
-        - name: mon-endpoint-volume
-          secret:
-            secretName: rook-ceph-mon-endpoints
-            items:
-              - key: data
-                path: mon-endpoints
         - name: ceph-data
           emptyDir: {}
         - name: ceph-config
