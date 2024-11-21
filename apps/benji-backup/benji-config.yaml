@@ -1,0 +1,34 @@
+configurationVersion: "1"
+databaseEngine: postgresql://benji:benji123#@postgres.postgres:5432/benji
+defaultStorage: s3
+storages:
+  # - name: storage-1
+    # storageId: 1
+    # module: file
+    # configuration:
+      # path: /benji-pg-backup
+  - name: s3
+    storageId: 1
+    module: s3
+    configuration:
+      awsAccessKeyId: "B2U4lJPLnXrd6rCZDwEl"
+      awsSecretAccessKey: "IobL0dOvaXkRGO6o1RQU0oNz4TAFi7rpKbF5EUuh"
+      bucketName: benji-backup
+      regionName: us-east-1
+      endpointUrl: "http://minio.minio:9000/"
+      addressingStyle: "path"
+ios:
+  - module: rbdaio
+    name: ceph-blockpool
+    configuration:
+      simultaneousReads: 3
+      simultaneousWrites: 3
+      cephConfigFile: /etc/ceph/ceph.conf
+      clientIdentifier: admin
+      newImageFeatures:
+        - RBD_FEATURE_LAYERING
+        - RBD_FEATURE_EXCLUSIVE_LOCK
+        - RBD_FEATURE_STRIPINGV2
+        - RBD_FEATURE_OBJECT_MAP
+        - RBD_FEATURE_FAST_DIFF
+        - RBD_FEATURE_DEEP_FLATTEN
