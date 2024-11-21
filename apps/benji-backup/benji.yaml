@@ -219,16 +219,8 @@ spec:
             mountPath: /script/generate-ceph.sh
             subPath: generate-ceph.sh
         env:
-          - name: ROOK_CEPH_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: rook-ceph-mon
-                key: ceph-username
-          - name: ROOK_CEPH_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: rook-ceph-mon
-                key: ceph-secret
+          - name: DIR
+            value: "/tmp/.config"
       volumes:
         - name: benji-config
           secret:
