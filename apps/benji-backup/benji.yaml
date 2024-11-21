@@ -215,7 +215,7 @@ spec:
             secretName: benji
         - name: mon-endpoint-volume
           secret:
-            name: rook-ceph-mon-endpoints
+            secretName: rook-ceph-mon-endpoints
             items:
               - key: data
                 path: mon-endpoints
