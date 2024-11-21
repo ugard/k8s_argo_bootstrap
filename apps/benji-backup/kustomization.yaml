@@ -5,5 +5,6 @@ resources:
   - generate-ceph.sealed_secret.yaml
   - rook-ceph-mon.sealed_secret.yaml
   - rook-ceph-mon-endpoints.sealed_secret.yaml
+  - benji-config.sealed_secret.yaml
   - benji.yaml
   
