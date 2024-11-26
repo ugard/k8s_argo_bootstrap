@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kustomize-grafana
+  namespace: argocd
+spec:
+  destination:
+    namespace: grafana
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  source:
+    path: apps/grafana
+    repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
