@@ -11,7 +11,7 @@ spec:
   sources:
   - chart: node-red
     repoURL: https://schwarzit.github.io/node-red-chart/
-    targetRevision: 0.33.0
+    targetRevision: 0.33.1
     helm:
       release-name: node-red
       valueFiles:
