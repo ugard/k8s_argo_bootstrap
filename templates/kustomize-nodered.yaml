@@ -1,34 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kustomize-node-red
+  name: node-red
   namespace: argocd
 spec:
   destination:
     namespace: node-red
     server: {{ .Values.spec.destination.server }}
   project: default
-  source:
-    chart: node-red
+  sources:
+  - chart: node-red
     repoURL: https://schwarzit.github.io/node-red-chart/
     targetRevision: 0.33.0
     helm:
       release-name: node-red
-      valuesObject:
-        server:
-          persistence:
-            enabled: true
-            storageClassName: rook-ceph-block
-          ingress:
-            enabled: true
-            annotations:
-                cert-manager.io/cluster-issuer: "letsencrypt"
-            hosts:
-            - name: nodered.ugard.mywire.org
-              path: /
-              port: http
-            tls:
-            - hosts:
-              - nodered.ugard.mywire.org
-              secretName: tls-nodered-ingress-http
-        
+      valueFiles:
+      - $values/apps/node-red/values.yaml
+  - repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
+    ref: values

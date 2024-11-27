@@ -1,0 +1,16 @@
+server:
+  persistence:
+    enabled: true
+    storageClassName: rook-ceph-block
+  ingress:
+    enabled: true
+    annotations:
+        cert-manager.io/cluster-issuer: "letsencrypt"
+    hosts:
+    - name: nodered.ugard.mywire.org
+      path: /
+      port: http
+    tls:
+    - hosts:
+      - nodered.ugard.mywire.org
+      secretName: tls-nodered-ingress-http
