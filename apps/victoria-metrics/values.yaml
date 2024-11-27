@@ -423,6 +423,9 @@ server:
         - job_name: benji-backup
           static_configs:
             - targets: [ "benji-pushgateway.backup-system:9091" ]
+        - job_name: node-red-exporter
+          static_configs:
+            - targets: [ "node-red.node-red:1880/metrics" ]
 
           # COPY from Prometheus helm chart https://github.com/helm/charts/blob/master/stable/prometheus/values.yaml
 
