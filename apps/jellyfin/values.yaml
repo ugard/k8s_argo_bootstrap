@@ -28,7 +28,7 @@ persistence:
     # -- set to false to use emptyDir
     enabled: true
     accessMode: ReadWriteOnce
-    size: 500Gi
+    size: 2500Gi
     # -- Custom annotations to be added to the PVC
     annotations: {}
     # -- If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
