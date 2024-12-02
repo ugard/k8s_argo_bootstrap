@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flashweb
+  namespace: flashweb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flashweb
+  template:
+    metadata:
+      labels:
+        app: flashweb
+    spec:
+      containers:
+      - name: flashweb
+        image: zot-registry.registry/flashweb:latest
+        ports:
+        - containerPort: 9876
+          name: http
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flashweb
+  namespace: flashweb
+spec:
+  selector:
+    app: flashweb
+  ports:
+  - protocol: TCP
+    port: 9876
+    targetPort: 9876
+    name: http
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: flashweb
+  namespace: flashweb
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: flashweb.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: flashweb
+              port:
+                number: 9876
+  tls:
+  - hosts:
+    - flashweb.ugard.mywire.org
+    secretName: tls-flashweb-ingress-http
