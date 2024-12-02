@@ -21,6 +21,7 @@ spec:
           enabled: "true"
           annotations:
             cert-manager.io/cluster-issuer: "letsencrypt"
+          pathtype: Prefix
           hosts:
           - host: registry.ugard.mywire.org
             paths:
