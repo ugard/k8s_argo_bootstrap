@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: flashweb
-        image: zot-registry.registry/flashweb:latest
+        image: registry.ugard.mywire.org/flashweb:latest
         ports:
         - containerPort: 9876
           name: http
