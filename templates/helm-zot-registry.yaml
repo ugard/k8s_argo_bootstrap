@@ -22,9 +22,9 @@ spec:
           annotations:
             cert-manager.io/cluster-issuer: "letsencrypt"
           hosts:
-          - name: registry.ugard.mywire.org
-            path: /
-            port: http
+          - host: registry.ugard.mywire.org
+            paths:
+            - path: /
           tls:
             - secretName: registry-ingress-tls
               hosts:
