@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: zot-registry
+  namespace: argocd
+spec:
+  destination:
+    namespace: registry
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  sources:
+  - chart: zot 
+    repoURL: https://zotregistry.dev/helm-charts/
+    targetRevision: 0.1.65
+    helm:
+      release-name: zot 
+        valuesObject:
+          service:
+            type: ClusterIP
+          ingress:
+            enabled: "true"
+            annotations:
+              cert-manager.io/cluster-issuer: "letsencrypt"
+            hosts:
+            - name: registry.ugard.mywire.org
+              path: /
+              port: http
+            tls:
+              - secretName: registry-ingress-tls
+                hosts:
+                  - registry.ugard.mywire.org
+          persistence: "true"
+          pvc:
+            create: "true"
+          metrics:
+            enabled: "true"
+            
