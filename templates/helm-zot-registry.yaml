@@ -19,7 +19,7 @@ spec:
           type: ClusterIP
         ingress:
           enabled: "true"
-          ingressClassName: ""
+          ingressClassName: "kustomize-traefik"
           annotations:
             cert-manager.io/cluster-issuer: "letsencrypt"
           pathtype: Prefix
