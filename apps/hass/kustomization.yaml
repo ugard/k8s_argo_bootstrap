@@ -6,3 +6,5 @@ resources:
   - hass.ingress.yaml
   - mosquitto.yaml
   - otgw-test.yaml
+  - otgw-ds.yaml
+  
