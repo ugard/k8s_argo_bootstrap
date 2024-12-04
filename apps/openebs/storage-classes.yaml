@@ -1,0 +1,28 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: openebs-zfspv
+parameters:
+  recordsize: "128k"
+  compression: "off"
+  dedup: "off"
+  fstype: "zfs"
+  poolname: "wdc/talos"
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+provisioner: zfs.csi.openebs.io
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: openebs-zfspv-affinity
+parameters:
+  recordsize: "128k"
+  compression: "off"
+  dedup: "off"
+  fstype: "zfs"
+  poolname: "wdc/talos"
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+provisioner: zfs.csi.openebs.io
+volumeBindingMode: WaitForFirstConsumer
