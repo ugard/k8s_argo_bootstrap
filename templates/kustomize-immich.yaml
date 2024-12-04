@@ -15,7 +15,7 @@ spec:
     helm:
       release-name: immich
       valueFiles:
-          - $values/apps/immich/values.yaml
+      - $values/apps/immich/values.yaml
     - repoURL: {{ .Values.spec.source.repoURL }}
       targetRevision: {{ .Values.spec.source.targetRevision }}
       ref: values
