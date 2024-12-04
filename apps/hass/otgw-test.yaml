@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otgw
+  namespace: hass
+spec:
+  selector:
+    matchLabels:
+      app: otgw
+      namespace: hass
+  template:
+    metadata:
+      labels:
+        app: otgw
+        namespace: hass
+    spec:
+      containers:
+      - image: docker.io/hvxl/otmonitor:stable
+        imagePullPolicy: IfNotPresent
+        name: otgw
+        ports:
+        - name: proxy
+          containerPort: 7686
+          protocol: TCP
+        - name: web
+          containerPort: 8080
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /data/otmonitor.conf
+          subPath: otmonitor.conf
+          name: config
+        resources:
+          limits:
+            squat.ai/serial: "1"
+        # securityContext:
+        #   allowPrivilegeEscalation: false
+        #   capabilities:
+        #     drop:
+        #       - ALL
+      restartPolicy: Always
+      volumes:
+      - name: config
+        configMap:
+          name: otmonitor-config  
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otmonitor-config
+  namespace: hass
+data:
+  otmonitor.conf: |
+    connection {
+      device /dev/ttyUSB0
+      type serial
+      port 25238
+      host localhost
+      enable true
+    }
+    server {
+      relay true
+      enable true
+      port 7686
+    }
+    otgw {
+      pic 16f88
+    }
+    mqtt {
+      retransmit 10
+      format json2
+      port 1883
+      qos 1
+      keepalive 120
+      eventtopic events/central_heating/otmonitor
+      username {}
+      actiontopic actions/otmonitor
+      password {}
+      secure false
+      enable true
+      messages true
+      version 5
+      client otgw-5d89c4f99-q4hgr-otmon
+      broker mosquitto-mqtt
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otgw
+  namespace: hass
+spec:
+  ports:
+  - name: proxy
+    port: 7686
+  - name: web
+    port: 8080
+  selector:
+    app: otgw
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: otgw
+  namespace: hass
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: otgw.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: otgw
+              port:
+                number: 8080
+  tls:
+  - hosts:
+    - otgw.ugard.mywire.org
+    secretName: tls-otgw-ingress-http

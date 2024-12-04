@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mosquitto-mqtt
+  namespace: hass
+spec:
+  ports:
+  - name: mqtt
+    port: 1883
+    targetPort: 1883
+    protocol: TCP
+  selector:
+    app: mosquitto
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto
+  namespace: hass
+spec:
+  selector:
+    matchLabels:
+      app: mosquitto
+      namespace: hass
+  template:
+    metadata:
+      labels:
+        app: mosquitto
+        namespace: hass
+    spec:
+      containers:
+      - name: mosquitto
+        image: docker.io/eclipse-mosquitto:latest
+        ports:
+        - containerPort: 1883
+        volumeMounts:
+        - mountPath: /mosquitto/config/mosquitto.conf
+          subPath: mosquitto.conf
+          name: config
+      volumes:
+      - name: config
+        configMap:
+          name: mosquitto-config  
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mosquitto-config
+  namespace: hass
+data:
+  mosquitto.conf: |
+    allow_anonymous true
+
+    listener 1883
+    protocol mqtt
