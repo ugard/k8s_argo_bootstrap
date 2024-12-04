@@ -32,7 +32,7 @@ persistence:
     # -- Custom annotations to be added to the PVC
     annotations: {}
     # -- If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
-    storageClass: 'openebs-zfspv'
+    storageClass: 'openebs-zfspv-affinity'
 extraContainers:
   - name: rclone
     image: docker.io/rclone/rclone:latest
@@ -44,3 +44,5 @@ extraContainers:
     - name: rclone-config
       mountPath: /config/rclone
       readOnly: true
+nodeSelector:
+  kubernetes.io/hostname: talos-jly-e8b
