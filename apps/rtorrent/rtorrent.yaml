@@ -66,6 +66,8 @@ spec:
           mountPath: /data
         - name: media-zfs
           mountPath: /downloads
+        - name: media-zfs-migrate
+          mountPath: /downloads/migrate
       volumes:
       - name: config-data
         persistentVolumeClaim:
@@ -73,6 +75,9 @@ spec:
       - name: media-zfs
         persistentVolumeClaim:
           claimName: media-zfs
+      - name: media-zfs-migrate
+        persistentVolumeClaim:
+          claimName: media-zfs-migrate
 ---
 apiVersion: v1
 kind: Service
