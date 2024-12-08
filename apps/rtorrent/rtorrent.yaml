@@ -50,8 +50,6 @@ spec:
         volumeMounts:
         - name: media-zfs
           mountPath: /media
-        - name: media-zfs-migrate
-          mountPath: /media/migrate
         command: [ "rclone" ]
         args:
         - serve
