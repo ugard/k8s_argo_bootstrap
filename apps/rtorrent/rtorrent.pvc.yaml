@@ -23,22 +23,7 @@ spec:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 100Gi
+      storage: 1000Gi
   storageClassName: openebs-zfspv
   volumeMode: Filesystem
   volumeName: pvc-da1d3eb5-b347-4c98-86f2-683a5d8b5cb9
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: media-zfs-migrate
-  namespace: rtorrent
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2500Gi
-  storageClassName: openebs-zfspv
-  volumeMode: Filesystem
-  volumeName: pvc-e5cc5bbe-3b71-49f1-acca-f93705402382
