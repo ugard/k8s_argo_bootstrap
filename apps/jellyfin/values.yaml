@@ -36,8 +36,8 @@ persistence:
 extraContainers:
   - name: rclone
     image: docker.io/rclone/rclone:latest
-    command: [ "/bin/sh", "-c", "--" ]
-    args: [ "while true; do sleep 30; done;" ]
+    command: [ "/usr/local/bin/rclone" ]
+    args: [ "rcd", "--rcd-web-gui", "--rc-no-auth" ]
     volumeMounts:
     - name: media
       mountPath: /data/jellyfin
