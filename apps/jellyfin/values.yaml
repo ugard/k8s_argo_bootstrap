@@ -37,7 +37,7 @@ extraContainers:
   - name: rclone
     image: docker.io/rclone/rclone:latest
     command: [ "/usr/local/bin/rclone" ]
-    args: [ "rcd", "--rcd-web-gui", "--rc-no-auth" ]
+    args: [ "rcd", "--rc-web-gui", "--rc-no-auth" ]
     volumeMounts:
     - name: media
       mountPath: /data/jellyfin
