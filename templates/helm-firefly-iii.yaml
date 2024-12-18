@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: firefly-iii
+  namespace: argocd
+spec:
+  destination:
+    namespace: firefly
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  sources:
+    - chart: firefly-iii
+      repoURL: https://firefly-iii.github.io/kubernetes
+      targetRevision: 1.8.2
+      helm:
+        release-name: firefly
+        valueFiles:
+          - $values/apps/firefly/values.yaml
+    # - chart: importer
+      # repoURL: https://firefly-iii.github.io/kubernetes
+      # targetRevision: 1.4.0
+      # helm:
+        # release-name: firefly-importer
+        # valueFiles:
+          # - $values/apps/firefly/values-importer.yaml
+    - repoURL: {{ .Values.spec.source.repoURL }}
+      targetRevision: {{ .Values.spec.source.targetRevision }}
+      ref: values
+    - repoURL: {{ .Values.spec.source.repoURL }}
+      targetRevision: {{ .Values.spec.source.targetRevision }}
+      path: apps/firefly

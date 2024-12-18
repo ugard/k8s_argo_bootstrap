@@ -1,0 +1,14 @@
+persistence:
+  storageClassName: "rook-ceph-block"
+config:
+  existingSecret: firefly-iii-secret
+image:
+  tag: version-6.1.24
+ingress:
+  enabled: true
+  hosts:
+  - firefly.ugard.mywire.org
+  tls:
+  - hosts:
+    - firefly.ugard.mywire.org
+    secretName: tls-firefly-ingress-http
