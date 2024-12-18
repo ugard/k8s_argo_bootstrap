@@ -16,13 +16,13 @@ spec:
         release-name: firefly
         valueFiles:
           - $values/apps/firefly/values.yaml
-    # - chart: importer
-      # repoURL: https://firefly-iii.github.io/kubernetes
-      # targetRevision: 1.4.0
-      # helm:
-        # release-name: firefly-importer
-        # valueFiles:
-          # - $values/apps/firefly/values-importer.yaml
+    - chart: importer
+      repoURL: https://firefly-iii.github.io/kubernetes
+      targetRevision: 1.4.0
+      helm:
+        release-name: firefly-importer
+        valueFiles:
+          - $values/apps/firefly/values-importer.yaml
     - repoURL: {{ .Values.spec.source.repoURL }}
       targetRevision: {{ .Values.spec.source.targetRevision }}
       ref: values
