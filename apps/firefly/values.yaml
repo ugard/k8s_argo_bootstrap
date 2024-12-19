@@ -6,6 +6,8 @@ image:
   tag: version-6.1.24
 ingress:
   enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
   hosts:
   - firefly.ugard.mywire.org
   tls:
