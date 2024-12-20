@@ -29,6 +29,8 @@ spec:
           name: host-root
         nodeSelector:
           kubernetes.io/hostname: "talos-95t-m8m"
+        securityContext:
+          privileged: true
       volumes:
       - hostPath:
           path: /
