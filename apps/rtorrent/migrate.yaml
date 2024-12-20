@@ -24,6 +24,14 @@ spec:
         - --addr
         - :8888
         - /home
+        volumeMounts:
+        - mountPath: /host
+          name: host-root
+      volumes:
+      - hostPath:
+          path: /
+          type: ""
+        name: host-root
 ---
 apiVersion: v1
 kind: Service
