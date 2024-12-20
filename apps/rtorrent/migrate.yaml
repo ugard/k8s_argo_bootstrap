@@ -27,6 +27,8 @@ spec:
         volumeMounts:
         - mountPath: /host
           name: host-root
+        nodeSelector:
+          kubernetes.io/hostname: "talos-95t-m8m"
       volumes:
       - hostPath:
           path: /
