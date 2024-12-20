@@ -23,4 +23,18 @@ spec:
         - webdav
         - --addr
         - :8888
-        - /media
+        - /home
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rclone
+  namespace: rtorrent
+spec:
+  selector:
+    app: rclone
+  ports:
+  - port: 8888
+    targetPort: 8888
+    name: webdav
+    protocol: TCP
