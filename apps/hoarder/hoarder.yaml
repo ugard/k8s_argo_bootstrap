@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hoarder-web
+  template:
+    metadata:
+      labels:
+        app: hoarder-web
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/hoarder-app/hoarder:0.21.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: MEILI_ADDR
+              value: http://meilisearch:7700
+            - name: BROWSER_WEB_URL
+              value: http://chrome:9222
+            - name: DATA_DIR
+              value: /data
+            # Add OPENAI_API_KEY to the ConfigMap if necessary
+          volumeMounts:
+            - mountPath: /data
+              name: data
+          envFrom:
+            - secretRef:
+                name: hoarder-env
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  selector:
+    app: hoarder-web
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: rook-ceph-block
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hoarder
+  namespace: hoarder
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: hoarder.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: hoarder
+              port:
+                number: 3000
+  tls:
+  - hosts:
+    - hoarder.ugard.mywire.org
+    secretName: tls-hoarder-ingress-http

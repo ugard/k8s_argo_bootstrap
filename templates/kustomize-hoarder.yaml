@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hoarder
+  namespace: argocd
+spec:
+  destination:
+    namespace: hoarder
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  source:
+    path: apps/hoarder
+    repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
