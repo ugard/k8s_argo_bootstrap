@@ -10,4 +10,16 @@ spec:
     requests:
       storage: 5Gi
   storageClassName: openebs-zfspv
-
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data-ceph
+  namespace: postgres
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: rook-ceph-block
