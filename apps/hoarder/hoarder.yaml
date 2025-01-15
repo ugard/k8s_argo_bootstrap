@@ -77,7 +77,7 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: hoarder
+              name: hoarder-web
               port:
                 number: 3000
   tls:
