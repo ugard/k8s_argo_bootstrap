@@ -22,7 +22,7 @@ spec:
             - mountPath: /meili_data
               name: meilisearch
           envFrom:
-            - configMapRef:
+            - secretRef:
                 name: hoarder-env
       volumes:
         - name: meilisearch
@@ -52,4 +52,3 @@ spec:
     - protocol: TCP
       port: 7700
       targetPort: 7700
-      
