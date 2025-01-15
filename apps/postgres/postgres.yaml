@@ -23,7 +23,7 @@ spec:
     matchLabels:
       app: postgres
   serviceName: postgres
-  replicas: 0
+  replicas: 1
   template:
     metadata:
       labels:

@@ -6,7 +6,7 @@ metadata:
   name: migrate
   namespace: postgres
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: migrate
