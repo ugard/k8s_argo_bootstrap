@@ -10,7 +10,7 @@ spec:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 50G
+      storage: 80G
   storageClassName: rook-ceph-block
 ---
 apiVersion: v1
