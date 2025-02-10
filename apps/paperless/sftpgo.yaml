@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ftp-port
+  namespace: paperless
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.10.200
+spec:
+  ports:
+  - name: ftp
+    port: 21
+    targetPort: 21
+    protocol: TCP
+  - name: ftp-passive
+    port: 50000
+    targetPort: 50000
+    protocol: TCP
+  - name: ftp-passive1
+    port: 50001
+    targetPort: 50001
+    protocol: TCP
+  - name: ftp-passive2
+    port: 50002
+    targetPort: 50002
+    protocol: TCP
+  - name: ftp-passive3
+    port: 50003
+    targetPort: 50003
+    protocol: TCP
+  - name: ftp-passive4
+    port: 50004
+    targetPort: 50004
+    protocol: TCP
+  - name: ftp-passive5
+    port: 50005
+    targetPort: 50005
+    protocol: TCP
+  - name: ftp-passive6
+    port: 50006
+    targetPort: 50006
+    protocol: TCP
+  selector:
+    app: sftpgo
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: sftpgo
+  name: sftpgo
+  namespace: paperless
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sftpgo
+  serviceName: ftp-port
+  template:
+    metadata:
+      labels:
+        app: sftpgo
+    spec:
+      containers:
+      - image: ghcr.io/instrumentisto/pure-ftpd:latest
+        name: sftpgo
+        command: [ "pure-ftpd" ]
+        args:
+        - "-e"
+        - "-p"
+        - "50000:50006"
+        - "-P"
+        - "192.168.10.200"
+        ports:
+        - containerPort: 21
+          name: ftp
+        - containerPort: 50000
+          name: ftp-passive
+        - containerPort: 50001
+          name: ftp-passive1
+        - containerPort: 50002
+          name: ftp-passive2
+        - containerPort: 50003
+          name: ftp-passive3
+        - containerPort: 50004
+          name: ftp-passive4
+        - containerPort: 50005
+          name: ftp-passive5
+        - containerPort: 50006
+          name: ftp-passive6
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/ftp/
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: paperless-consume
+        
+

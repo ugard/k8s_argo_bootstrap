@@ -6,4 +6,5 @@ resources:
   - postgres.sealed_secret.yaml
   - paperless.yaml
   - paperless.network.yaml
+  - sftpgo.yaml
   
