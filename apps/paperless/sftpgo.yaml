@@ -91,7 +91,6 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /var/lib/ftp/
-          subPath: BROTHER
       volumes:
       - name: data
         persistentVolumeClaim:
