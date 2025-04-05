@@ -19,7 +19,7 @@ spec:
         image: ghcr.io/hotio/prowlarr
         volumeMounts:
         - name: config-data
-          mountPath: /data
+          mountPath: /config
       volumes:
       - name: config-data
         persistentVolumeClaim:
@@ -77,4 +77,3 @@ spec:
     requests:
       storage: 1Gi
   storageClassName: rook-ceph-block
-  
