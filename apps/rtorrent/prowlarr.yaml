@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prowlarr
+  namespace: rtorrent
+spec:
+  selector:
+    matchLabels:
+      app: prowlarr
+      namespace: rtorrent
+  template:
+    metadata:
+      labels:
+        app: prowlarr
+        namespace: rtorrent
+    spec:
+      containers:
+      - name: prowlarr
+        image: ghcr.io/hotio/prowlarr
+        volumeMounts:
+        - name: config-data
+          mountPath: /data
+      volumes:
+      - name: config-data
+        persistentVolumeClaim:
+          claimName: prowlarr-config-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prowlarr
+  namespace: rtorrent
+spec:
+  selector:
+    app: prowlarr
+  ports:
+  - port: 9696
+    targetPort: 9696
+    name: web
+    protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prowlarr
+  namespace: rtorrent
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: prowlarr.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: prowlarr
+              port:
+                number: 9696
+  tls:
+  - hosts:
+    - prowlarr.ugard.mywire.org
+    secretName: tls-prowlarr-ingress-http
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prowlarr-config-data
+  namespace: rtorrent
+  labels:
+    "backup-this-pvc": "true"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: rook-ceph-block
+  
