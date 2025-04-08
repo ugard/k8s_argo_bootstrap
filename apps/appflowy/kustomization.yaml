@@ -4,4 +4,4 @@ resources:
   - namespace.yaml
   - sealed_secret.yaml
   - database.yaml
-  
+  - ai.yaml
