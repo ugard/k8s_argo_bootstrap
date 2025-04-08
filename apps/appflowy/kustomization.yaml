@@ -6,4 +6,5 @@ resources:
   - database.yaml
   - ai.yaml
   - gotrue.yaml
+  - cloud.yaml
   
