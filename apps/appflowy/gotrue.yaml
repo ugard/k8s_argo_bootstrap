@@ -68,6 +68,8 @@ spec:
           value: "9999"
         - name: API_EXTERNAL_URL
           value: https://appflowy.ugard.mywire.org/gotrue
+        - name: GOTRUE_DB_DRIVER
+          value: postgres
 ---
 
     # environment:
