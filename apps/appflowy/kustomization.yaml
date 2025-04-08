@@ -5,3 +5,4 @@ resources:
   - sealed_secret.yaml
   - database.yaml
   - ai.yaml
+  - gotrue.yaml
