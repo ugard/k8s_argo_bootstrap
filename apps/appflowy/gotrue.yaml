@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
       - name: gotrue
-        image: appflowyinc/gotrue:latest}
+        image: appflowyinc/gotrue:latest
         ports:
         - containerPort: 9999
         env:
