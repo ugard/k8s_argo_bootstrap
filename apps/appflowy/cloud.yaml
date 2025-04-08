@@ -1,36 +1,36 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: appflowy_cloud
+  name: appflowy-cloud
   namespace: appflowy
 spec:
   selector:
-    app: appflowy_cloud
+    app: appflowy-cloud
   type: ClusterIP
   ports:
     - port: 9999
       targetPort: 9999
-      name: appflowy_cloud
+      name: appflowy-cloud
       protocol: TCP
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: appflowy_cloud
+  name: appflowy-cloud
   namespace: appflowy
 spec:
   selector:
     matchLabels:
-      app: appflowy_cloud
+      app: appflowy-cloud
       namespace: appflowy
   template:
     metadata:
       labels:
-        app: appflowy_cloud
+        app: appflowy-cloud
         namespace: appflowy
     spec:
       containers:
-      - name: appflowy_cloud
+      - name: appflowy-cloud
         image: appflowyinc/appflowy_cloud:latest
         ports:
         - containerPort: 9999
