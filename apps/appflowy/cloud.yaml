@@ -68,7 +68,7 @@ spec:
         - name: GOTRUE_JWT_EXP
           value: "7200"
         - name: APPFLOWY_DATABASE_URL
-          value: "postgres://(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/appflowy"
+          value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/appflowy"
         - name: APPFLOWY_ENVIRONMENT
           value: "production"
         - name: APPFLOWY_REDIS_URI
