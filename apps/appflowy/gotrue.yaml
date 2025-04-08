@@ -70,6 +70,8 @@ spec:
           value: https://appflowy.ugard.mywire.org/gotrue
         - name: GOTRUE_DB_DRIVER
           value: postgres
+        - name:  GOTRUE_SITE_URL
+          value: appflowy-flutter://
 ---
 
     # environment:
