@@ -16,17 +16,17 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ai
+  name: gotrue
   namespace: appflowy
 spec:
   selector:
     matchLabels:
-      app: ai
+      app: gotrue
       namespace: appflowy
   template:
     metadata:
       labels:
-        app: ai
+        app: gotrue
         namespace: appflowy
     spec:
       containers:
