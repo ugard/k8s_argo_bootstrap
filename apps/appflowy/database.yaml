@@ -106,6 +106,24 @@ data:
         ALTER USER supabase_auth_admin SET search_path = 'auth';
     EOSQL
 ---
-  # redis:
-    # restart: on-failure
-  #  image: redis
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: appflowy
+spec:
+  selector:
+    matchLabels:
+      app: redis
+      namespace: appflowy
+  template:
+    metadata:
+      labels:
+        app: redis
+        namespace: appflowy
+    spec:
+      containers:
+      - name: redis
+        image: docker.io/library/redis:7
+        ports:
+        - containerPort: 6379
