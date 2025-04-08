@@ -30,6 +30,11 @@ spec:
             secretKeyRef:
               name: appflowy
               key: POSTGRES_PASSWORD
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: appflowy
+              key: OPENAI_API_KEY
         - name: AI_SERVER_PORT
           value: "5001"
         - name: AI_SERVER_HOST
