@@ -35,13 +35,11 @@ spec:
             secretKeyRef:
               name: appflowy
               key: OPENAI_API_KEY
-        - name: AI_SERVER_PORT
+        - name: APPFLOWY_AI_SERVER_PORT
           value: "5001"
-        - name: AI_SERVER_HOST
-          value: ai
-        - name: AI_DATABASE_URL
+        - name: APPFLOWY_AI_DATABASE_URL
           value: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/appflowy
-        - name: AI_REDIS_URL
+        - name: APPFLOWY_AI_REDIS_URL
           value: redis://redis:6379
 ---
 apiVersion: v1
