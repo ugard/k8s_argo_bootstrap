@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai
+  namespace: appflowy
+spec:
+  selector:
+    matchLabels:
+      app: ai
+      namespace: appflowy
+  template:
+    metadata:
+      labels:
+        app: ai
+        namespace: appflowy
+    spec:
+      containers:
+      - name: ai
+        image: appflowyinc/appflowy_ai:latest
+        ports:
+        - containerPort: 5001
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: appflowy
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: appflowy
+              key: POSTGRES_PASSWORD
+        - name: AI_SERVER_PORT
+          value: "5001"
+        - name: AI_SERVER_HOST
+          value: ai
+        - name: AI_DATABASE_URL
+          value: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/appflowy
+        - name: AI_REDIS_URL
+          value: redis://redis:6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai
+  namespace: appflowy
+spec:
+  selector:
+    app: ai
+  type: ClusterIP
+  ports:
+    - port: 5001
+      targetPort: 5001
+      name: pgsql
+      protocol: TCP
