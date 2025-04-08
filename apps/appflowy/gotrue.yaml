@@ -66,6 +66,8 @@ spec:
           value: "supabase_admin"
         - name: PORT
           value: "9999"
+        - name: API_EXTERNAL_URL
+          value: https://appflowy.ugard.mywire.org/gotrue
 ---
 
     # environment:
