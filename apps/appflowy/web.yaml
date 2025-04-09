@@ -55,12 +55,13 @@ metadata:
   namespace: appflowy
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt"
+    traefik.ingress.kubernetes.io/router.middlewares: appflowy-console-stripprefix@kubernetescrd
 spec:
   rules:
-  - host: admin.appflowy.ugard.mywire.org
+  - host: appflowy.ugard.mywire.org
     http:
       paths:
-        - path: "/"
+        - path: "/console"
           pathType: Prefix
           backend:
             service:
@@ -69,8 +70,18 @@ spec:
                 number: 80
   tls:
   - hosts:
-    - admin.appflowy.ugard.mywire.org
-    secretName: tls-admin-appflowy-ingress-http
+    - appflowy.ugard.mywire.org
+    secretName: tls-appflowy-ingress-http
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: console-stripprefix
+  namespace: appflowy
+spec:
+  stripPrefix:
+    prefixes:
+      - /console
 ---
 apiVersion: v1
 kind: Service
