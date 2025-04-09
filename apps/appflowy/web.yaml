@@ -112,7 +112,7 @@ spec:
         - name: AF_BASE_URL
           value: https://appflowy.ugard.mywire.org/
         - name: AF_GOTRUE_URL
-          value: https://gotrue.appflowy.ugard.mywire.org/
+          value: https://appflowy.ugard.mywire.org/gotrue
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

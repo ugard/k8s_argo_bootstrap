@@ -64,7 +64,7 @@ spec:
         - name: PORT
           value: "9999"
         - name: API_EXTERNAL_URL
-          value: https://gotrue.appflowy.ugard.mywire.org/
+          value: https://appflowy.ugard.mywire.org/gotrue
         - name: GOTRUE_DB_DRIVER
           value: postgres
         - name:  GOTRUE_SITE_URL
@@ -77,12 +77,13 @@ metadata:
   namespace: appflowy
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt"
+    traefik.ingress.kubernetes.io/router.middlewares: appflowy-gotrue-stripprefix@kubernetescrd
 spec:
   rules:
-  - host: gotrue.appflowy.ugard.mywire.org
+  - host: appflowy.ugard.mywire.org
     http:
       paths:
-        - path: "/"
+        - path: "/gotrue"
           pathType: Prefix
           backend:
             service:
@@ -91,5 +92,15 @@ spec:
                 number: 9999
   tls:
   - hosts:
-    - gotrue.appflowy.ugard.mywire.org
+    - appflowy.ugard.mywire.org
     secretName: tls-gotrue-appflowy-ingress-http
+---
+apiVersion: traefik.io/v1
+kind: Middleware
+metadata:
+  name: gotrue-stripprefix
+  namespace: appflowy
+spec:
+  stripPrefix:
+    prefixes:
+      - /gotrue
