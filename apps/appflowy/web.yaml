@@ -123,7 +123,7 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt"
 spec:
   rules:
-  - host: appflowy.ugard.mywire.org
+  - host: web.appflowy.ugard.mywire.org
     http:
       paths:
         - path: "/"
@@ -135,5 +135,5 @@ spec:
                 number: 80
   tls:
   - hosts:
-    - appflowy.ugard.mywire.org
-    secretName: tls-appflowy-ingress-http
+    - web.appflowy.ugard.mywire.org
+    secretName: tls-web-appflowy-ingress-http

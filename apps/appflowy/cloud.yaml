@@ -105,7 +105,29 @@ spec:
           value: https://appflowy.ugard.mywire.org/
 #       - APPFLOWY_S3_REGION=${APPFLOWY_S3_REGION}
 ---
-
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: appflowy-cloud
+  namespace: appflowy
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: appflowy.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: appflowy-cloud
+              port:
+                number: 8000
+  tls:
+  - hosts:
+    - appflowy.ugard.mywire.org
+    secretName: tls-appflowy-ingress-http
 
 # appflowy_cloud:
 #     restart: on-failure
