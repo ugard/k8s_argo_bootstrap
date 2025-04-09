@@ -75,6 +75,26 @@ spec:
             secretKeyRef:
               name: appflowy
               key: GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI         
+        - name: GOTRUE_SMTP_HOST
+          valueFrom:
+            secretKeyRef:
+              name: appflowy
+              key: APPFLOWY_MAILER_SMTP_HOST
+        - name: GOTRUE_SMTP_PORT
+          valueFrom:
+            secretKeyRef:
+              name: appflowy
+              key: APPFLOWY_MAILER_SMTP_PORT
+        - name: GOTRUE_SMTP_USER
+          valueFrom:
+            secretKeyRef:
+              name: appflowy
+              key: APPFLOWY_MAILER_SMTP_EMAIL
+        - name: GOTRUE_SMTP_PASS
+          valueFrom:
+            secretKeyRef:
+              name: appflowy
+              key: APPFLOWY_MAILER_SMTP_PASSWORD
         - name: GOTRUE_JWT_EXP
           value: "7200"
         - name: DATABASE_URL
