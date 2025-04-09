@@ -64,7 +64,7 @@ spec:
         - name: PORT
           value: "9999"
         - name: API_EXTERNAL_URL
-          value: https://appflowy.ugard.mywire.org/gotrue
+          value: https://gotrue.appflowy.ugard.mywire.org/
         - name: GOTRUE_DB_DRIVER
           value: postgres
         - name:  GOTRUE_SITE_URL
@@ -79,10 +79,10 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt"
 spec:
   rules:
-  - host: appflowy.ugard.mywire.org
+  - host: gotrue.appflowy.ugard.mywire.org
     http:
       paths:
-        - path: "/gotrue"
+        - path: "/"
           pathType: Prefix
           backend:
             service:
@@ -91,5 +91,5 @@ spec:
                 number: 9999
   tls:
   - hosts:
-    - appflowy.ugard.mywire.org
+    - gotrue.appflowy.ugard.mywire.org
     secretName: tls-gotrue-appflowy-ingress-http
