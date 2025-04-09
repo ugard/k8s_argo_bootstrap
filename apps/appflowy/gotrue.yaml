@@ -88,7 +88,7 @@ spec:
         - name: GOTRUE_DB_DRIVER
           value: postgres
         - name:  GOTRUE_SITE_URL
-          value: appflowy-flutter://
+          value: https://appflowy.ugard.mywire.org/gotrue
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
