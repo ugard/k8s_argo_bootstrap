@@ -95,6 +95,11 @@ spec:
             secretKeyRef:
               name: appflowy
               key: APPFLOWY_MAILER_SMTP_PASSWORD
+        - name: GOTRUE_SMTP_ADMIN_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: appflowy
+              key: APPFLOWY_MAILER_SMTP_EMAIL
         - name: GOTRUE_JWT_EXP
           value: "7200"
         - name: DATABASE_URL
