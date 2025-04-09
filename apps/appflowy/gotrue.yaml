@@ -55,6 +55,26 @@ spec:
             secretKeyRef:
               name: appflowy
               key: GOTRUE_JWT_SECRET
+        - name: GOTRUE_EXTERNAL_GOOGLE_ENABLED
+          valueFrom:
+            secretKeyRef:
+              name: appflowy
+              key: GOTRUE_EXTERNAL_GOOGLE_ENABLED
+        - name: GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: appflowy
+              key: GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID
+        - name: GOTRUE_EXTERNAL_GOOGLE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: appflowy
+              key: GOTRUE_EXTERNAL_GOOGLE_SECRET
+        - name: GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI
+          valueFrom:
+            secretKeyRef:
+              name: appflowy
+              key: GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI         
         - name: GOTRUE_JWT_EXP
           value: "7200"
         - name: DATABASE_URL
