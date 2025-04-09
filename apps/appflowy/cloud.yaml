@@ -85,6 +85,8 @@ spec:
           value: redis://redis:6379
         - name: APPFLOWY_GOTRUE_BASE_URL
           value: http://gotrue:9999
+        - name: APPFLOWY_GOTRUE_EXT_URL
+          value: https://appflowy.ugard.mywire.org/gotrue
         - name: AI_SERVER_HOST
           value: ai
         - name:  AI_SERVER_PORT
@@ -97,6 +99,8 @@ spec:
 #       - APPFLOWY_S3_SECRET_KEY=${APPFLOWY_S3_SECRET_KEY}
         - name:  APPFLOWY_S3_BUCKET
           value: appflowy
+        - name:  APPFLOWY_WEB_URL
+          value: https://appflowy.ugard.mywire.org/
 #       - APPFLOWY_S3_REGION=${APPFLOWY_S3_REGION}
 ---
 
