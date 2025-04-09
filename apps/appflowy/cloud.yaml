@@ -99,6 +99,8 @@ spec:
 #       - APPFLOWY_S3_SECRET_KEY=${APPFLOWY_S3_SECRET_KEY}
         - name:  APPFLOWY_S3_BUCKET
           value: appflowy
+        - name:  RUST_LOG
+          value: debug
         - name:  APPFLOWY_WEB_URL
           value: https://appflowy.ugard.mywire.org/
 #       - APPFLOWY_S3_REGION=${APPFLOWY_S3_REGION}
