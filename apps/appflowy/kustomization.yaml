@@ -7,4 +7,5 @@ resources:
   - ai.yaml
   - gotrue.yaml
   - cloud.yaml
+  - web.yaml
   

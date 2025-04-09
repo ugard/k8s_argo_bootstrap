@@ -8,8 +8,8 @@ spec:
     app: appflowy-cloud
   type: ClusterIP
   ports:
-    - port: 9999
-      targetPort: 9999
+    - port: 8000
+      targetPort: 8000
       name: appflowy-cloud
       protocol: TCP
 ---
@@ -33,7 +33,7 @@ spec:
       - name: appflowy-cloud
         image: appflowyinc/appflowy_cloud:latest
         ports:
-        - containerPort: 9999
+        - containerPort: 8000
         env:
         - name: POSTGRES_USER
           valueFrom:

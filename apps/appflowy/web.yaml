@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-frontend
+  namespace: appflowy
+spec:
+  selector:
+    app: admin-frontend
+  type: ClusterIP
+  ports:
+    - port: 9999
+      targetPort: 9999
+      name: admin-frontend
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-frontend
+  namespace: appflowy
+spec:
+  selector:
+    matchLabels:
+      app: admin-frontend
+      namespace: appflowy
+  template:
+    metadata:
+      labels:
+        app: admin-frontend
+        namespace: appflowy
+    spec:
+      containers:
+      - name: admin-frontend
+        image: appflowyinc/admin_frontend:latest
+        ports:
+        - containerPort: 9999
+        env:
+        - name: ADMIN_FRONTEND_REDIS_URL
+          value: redis://redis:6379
+        - name: ADMIN_FRONTEND_GOTRUE_URL
+          value: http://gotrue:9999
+        - name: ADMIN_FRONTEND_APPFLOWY_CLOUD_URL
+          value: http://appflowy-cloud:8000
+        - name: ADMIN_FRONTEND_PATH_PREFIX
+          value: ""
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appflowy-web
+  namespace: appflowy
+spec:
+  selector:
+    app: appflowy-web
+  type: ClusterIP
+  ports:
+    - port: 9999
+      targetPort: 9999
+      name: appflowy-web
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appflowy-web
+  namespace: appflowy
+spec:
+  selector:
+    matchLabels:
+      app: appflowy-web
+      namespace: appflowy
+  template:
+    metadata:
+      labels:
+        app: appflowy-web
+        namespace: appflowy
+    spec:
+      containers:
+      - name: appflowy-web
+        image: appflowyinc/appflowy_web:latest
+        ports:
+        - containerPort: 9999
+        env:
+        - name: AF_BASE_URL
+          value: https://appflowy.ugard.mywire.org/
+        - name: AF_GOTRUE_URL
+          value: http://gotrue:9999
