@@ -102,7 +102,7 @@ spec:
         - name:  RUST_LOG
           value: debug
         - name:  APPFLOWY_WEB_URL
-          value: https://appflowy.ugard.mywire.org/
+          value: https://web.appflowy.ugard.mywire.org/
 #       - APPFLOWY_S3_REGION=${APPFLOWY_S3_REGION}
 ---
 apiVersion: networking.k8s.io/v1
@@ -112,6 +112,7 @@ metadata:
   namespace: appflowy
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt"
+    traefik.ingress.kubernetes.io/router.middlewares: appflowy-webcors@kubernetescrd
 spec:
   rules:
   - host: appflowy.ugard.mywire.org

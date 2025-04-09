@@ -113,7 +113,7 @@ spec:
         - name: GOTRUE_DB_DRIVER
           value: postgres
         - name:  GOTRUE_SITE_URL
-          value: https://appflowy.ugard.mywire.org/gotrue
+          value: appflowy-flutter://
         - name: GOTRUE_MAILER_AUTOCONFIRM
           value: "true"
 ---
@@ -124,7 +124,7 @@ metadata:
   namespace: appflowy
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt"
-    # traefik.ingress.kubernetes.io/router.middlewares: appflowy-gotrue-stripprefix@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: appflowy-gotrue-stripprefix@kubernetescrd,appflowy-webcors@kubernetescrd
 spec:
   rules:
   - host: appflowy.ugard.mywire.org
