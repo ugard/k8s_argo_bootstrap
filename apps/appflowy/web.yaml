@@ -121,6 +121,7 @@ metadata:
   namespace: appflowy
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt"
+    traefik.ingress.kubernetes.io/router.middlewares: appflowy-web-cors@kubernetescrd
 spec:
   rules:
   - host: web.appflowy.ugard.mywire.org
@@ -137,3 +138,21 @@ spec:
   - hosts:
     - web.appflowy.ugard.mywire.org
     secretName: tls-web-appflowy-ingress-http
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: web-cors
+spec:
+  headers:
+    accessControlAllowMethods:
+      - "GET"
+      - "OPTIONS"
+      - "PUT"
+    accessControlAllowHeaders:
+      - "*"
+    accessControlAllowOriginList:
+      - "https://appflowy.ugard.mywire.org"
+      - "https://web.appflowy.ugard.mywire.org"
+    accessControlMaxAge: 100
+    addVaryHeader: true
