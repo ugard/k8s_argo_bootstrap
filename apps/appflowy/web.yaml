@@ -55,6 +55,7 @@ metadata:
   namespace: appflowy
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt"
+    traefik.ingress.kubernetes.io/router.middlewares: appflowy-web-cors@kubernetescrd
 spec:
   rules:
   - host: admin.appflowy.ugard.mywire.org
