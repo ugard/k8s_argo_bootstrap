@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: manyfold
+  namespace: manyfold
+spec:
+  selector:
+    matchLabels:
+      app: manyfold
+      namespace: manyfold
+  template:
+    metadata:
+      labels:
+        app: manyfold
+        namespace: manyfold
+    spec:
+      containers:
+      - name: manyfold
+        image: ghcr.io/manyfold3d/manyfold:latest
+        envFrom:
+         - secretRef:
+            name: manyfold
+            optional: false
+        volumeMounts:
+          - name: model-data
+            mountPath: /conf
+        env:
+        - name: TZ
+          value: "Europe/Warsaw"
+        - name: DATABASE_ADAPTER
+          value: "postgresql"
+        - name: DATABASE_HOST
+          value: postgres.postgres
+        - name: DATABASE_PORT
+          value: "5432"
+        - name: "REDIS_URL"
+          value: "redis://redis:6379/1"
+      volumes:
+        - name: model-data
+          persistentVolumeClaim:
+            claimName: manyfold-data-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: manyfold
+spec:
+  selector:
+    matchLabels:
+      app: redis
+      namespace: manyfold
+  template:
+    metadata:
+      labels:
+        app: redis
+        namespace: manyfold
+    spec:
+      containers:
+      - name: redis
+        image: docker.io/library/redis:7
+        resources:
+          limits:
+            memory: "1Gi"
+        ports:
+        - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: manyfold
+  namespace: manyfold
+spec:
+  selector:
+    app: manyfold
+  ports:
+  - port: 3214
+    targetPort: 3214
+    name: web
+    protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: manyfold
+  namespace: manyfold
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: manyfold.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: manyfold
+              port:
+                number: 3214
+  tls:
+  - hosts:
+    - manyfold.ugard.mywire.org
+    secretName: tls-manyfold-ingress-http
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: manyfold-data-pvc
+  namespace: manyfold
+  labels:
+    "backup-this-pvc": "true"
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10G
+  storageClassName: rook-ceph-block
+---
