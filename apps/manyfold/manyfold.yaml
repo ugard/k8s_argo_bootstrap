@@ -23,7 +23,7 @@ spec:
             optional: false
         volumeMounts:
           - name: model-data
-            mountPath: /conf
+            mountPath: /models
         env:
         - name: TZ
           value: "Europe/Warsaw"
