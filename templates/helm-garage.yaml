@@ -10,7 +10,7 @@ spec:
   project: default
   sources:
   - chart: garage
-    repoURL: http://gitea.gitea/api/packages/lkrzyzak/helm 
+    repoURL: http://gitea-web.gitea/api/packages/lkrzyzak/helm 
     targetRevision: 0.7.0
     helm:
       release-name: garage 
