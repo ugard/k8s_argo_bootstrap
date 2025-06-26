@@ -73,17 +73,21 @@ spec:
     app: garage
   ports:
     - protocol: TCP
+      name: s3
       port: 3900
       targetPort: 3900
     - protocol: TCP
+      name: rpc
       port: 3901
       targetPort: 3901
     - protocol: TCP
       port: 3902
       targetPort: 3902
+      name: web
     - protocol: TCP
       port: 3903
       targetPort: 3903
+      name: admin
   type: LoadBalancer
 ---
 apiVersion: networking.k8s.io/v1
