@@ -37,7 +37,7 @@ spec:
           claimName: garage-meta
       - name: garage-config
         secret:
-          name: garage-config
+          secretName: garage-config
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
