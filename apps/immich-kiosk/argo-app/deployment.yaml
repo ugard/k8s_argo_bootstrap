@@ -1,0 +1,142 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-kiosk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: immich-kiosk
+  template:
+    metadata:
+      labels:
+        app: immich-kiosk
+    spec:
+      containers:
+      - name: immich-kiosk
+        image: ghcr.io/damongolding/immich-kiosk:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: LANG
+          value: "en_GB"
+        - name: TZ
+          value: "Europe/London"
+        - name: immich_api_key
+          valueFrom:
+            secretKeyRef:
+              name: immich-credentials
+              key: immich_api_key
+        - name: immich_url
+          valueFrom:
+            secretKeyRef:
+              name: immich-credentials
+              key: immich_url
+        - name: show_time
+          value: "true"
+        - name: time_format
+          value: "24"
+        - name: show_date
+          value: "true"
+        - name: date_format
+          value: "YYYY/MM/DD"
+        - name: clock_source
+          value: "client"
+        - name: refresh
+          value: "60"
+        - name: disable_screensaver
+          value: "false"
+        - name: optimize_images
+          value: "false"
+        - name: use_gpu
+          value: "true"
+        - name: show_archived
+          value: "false"
+        - name: album_order
+          value: "random"
+        # - name: date
+        #   value: "YYYY-MM-DD_to_YYYY-MM-DD"
+        - name: memories
+          value: "true"
+        - name: experimental_album_video
+          value: "false"
+        - name: disable_ui
+          value: "false"
+        - name: frameless
+          value: "false"
+        - name: hide_cursor
+          value: "false"
+        - name: font_size
+          value: "100"
+        - name: background_blur
+          value: "true"
+        - name: background_blur_amount
+          value: "10"
+        - name: theme
+          value: "fade"
+        - name: layout
+          value: "single"
+        - name: sleep_icon
+          value: "true"
+        - name: transition
+          value: "none"
+        - name: fade_transition_duration
+          value: "1"
+        - name: cross_fade_transition_duration
+          value: "1"
+        - name: show_progress
+          value: "false"
+        - name: image_fit
+          value: "contain"
+        - name: image_effect
+          value: "none"
+        - name: image_effect_amount
+          value: "120"
+        - name: use_original_image
+          value: "false"
+        - name: show_owner
+          value: "false"
+        - name: show_album_name
+          value: "false"
+        - name: show_person_name
+          value: "false"
+        - name: show_person_age
+          value: "false"
+        - name: show_image_time
+          value: "false"
+        - name: image_time_format
+          value: "24"
+        - name: show_image_date
+          value: "false"
+        - name: image_date_format
+          value: "YYYY-MM-DD"
+        - name: show_image_description
+          value: "false"
+        - name: show_image_exif
+          value: "false"
+        - name: show_image_location
+          value: "false"
+        - name: show_image_qr
+          value: "false"
+        - name: like_button_action
+          value: "favorite"
+        - name: hide_button_action
+          value: "tag"
+        - name: kiosk_port
+          value: "3000"
+        - name: kiosk_behind_proxy
+          value: "false"
+        - name: kiosk_watch_config
+          value: "false"
+        - name: kiosk_fetched_assets_size
+          value: "1000"
+        - name: kiosk_http_timeout
+          value: "20"
+        - name: kiosk_password
+          value: ""
+        - name: kiosk_cache
+          value: "true"
+        - name: kiosk_prefetch
+          value: "true"
+        - name: kiosk_asset_weighting
+          value: "true"
