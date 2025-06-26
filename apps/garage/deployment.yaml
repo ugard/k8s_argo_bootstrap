@@ -26,7 +26,8 @@ spec:
         - name: garage-meta
           mountPath: /var/lib/garage/meta
         - name: garage-config
-          mountPath: /etc
+          mountPath: /etc/garage.toml
+          subpath: garage.toml
       volumes:
       - name: garage-data
         persistentVolumeClaim:
