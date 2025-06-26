@@ -34,3 +34,39 @@ spec:
               key: immich_url
         - name: show_time
           value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  selector:
+    app: immich-kiosk
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: immich-kiosk
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: kiosk.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: web
+              port:
+                number: 3000
+  tls:
+  - hosts:
+    - kiosk.ugard.mywire.org
+    secretName: tls-kiosk-ingress-http
