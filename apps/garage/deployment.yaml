@@ -1,0 +1,144 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: garage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: garage
+  template:
+    metadata:
+      labels:
+        app: garage
+    spec:
+      containers:
+      - name: garage
+        image: dxflrs/garage:v2.0.0
+        ports:
+        - containerPort: 3900
+        - containerPort: 3901
+        - containerPort: 3902
+        - containerPort: 3903
+        volumeMounts:
+        - name: garage-data
+          mountPath: /var/lib/garage/data
+        - name: garage-meta
+          mountPath: /var/lib/garage/meta
+        - name: garage-config
+          mountPath: /etc
+      volumes:
+      - name: garage-data
+        persistentVolumeClaim:
+          claimName: garage-data
+      - name: garage-meta
+        persistentVolumeClaim:
+          claimName: garage-meta
+      - name: garage-config
+        configMap:
+          name: garage-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: garage-meta
+  labels:
+    "backup-this-pvc": "true"
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10G
+  storageClassName: rook-ceph-block
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: garage-data
+spec:
+  storageClassName: openebs-zfspv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage
+spec:
+  selector:
+    app: garage
+  ports:
+    - protocol: TCP
+      port: 3900
+      targetPort: 3900
+    - protocol: TCP
+      port: 3901
+      targetPort: 3901
+    - protocol: TCP
+      port: 3902
+      targetPort: 3902
+    - protocol: TCP
+      port: 3903
+      targetPort: 3903
+  type: LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: garage
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: garage.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: web
+              port:
+                number: 3900
+  tls:
+  - hosts:
+    - garage.ugard.mywire.org
+    secretName: tls-garage-ingress-http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: garage-config
+data:
+  garage.toml: |
+    metadata_dir = "/var/lib/garage/meta"
+    data_dir = "/var/lib/garage/data"
+    db_engine = "sqlite"
+
+    replication_factor = 1
+
+    rpc_bind_addr = "[::]:3901"
+    rpc_public_addr = "127.0.0.1:3901"
+    rpc_secret = "$(openssl rand -hex 32)"
+
+    [s3_api]
+    s3_region = "garage"
+    api_bind_addr = "[::]:3900"
+    root_domain = ".s3.garage.localhost"
+
+    [s3_web]
+    bind_addr = "[::]:3902"
+    root_domain = ".web.garage.localhost"
+    index = "index.html"
+
+    [k2v_api]
+    api_bind_addr = "[::]:3904"
+
+    [admin]
+    api_bind_addr = "[::]:3903"
+    admin_token = "$(openssl rand -base64 32)"
+    metrics_token = "$(openssl rand -base64 32)"

@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: garage
+  namespace: argocd
+spec:
+  destination:
+    namespace: garage
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  source:
+    path: apps/garage
+    repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
