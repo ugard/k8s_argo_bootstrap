@@ -34,6 +34,16 @@ spec:
               key: immich_url
         - name: show_time
           value: "true"
+        - name: KIOSK_SHOW_TIME
+          value: "true"
+        - name: KIOSK_SHOW_DATE
+          value: "true"
+        - name: KIOSK_MEMORIES
+          value: "true"
+        - name: KIOSK_SHOW_IMAGE_TIME
+          value: "true"
+        - name: KIOSK_SHOW_IMAGE_DATE
+          value: "true"
 ---
 apiVersion: v1
 kind: Service
