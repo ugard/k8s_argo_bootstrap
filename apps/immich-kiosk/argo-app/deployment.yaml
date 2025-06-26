@@ -22,12 +22,12 @@ spec:
           value: "pl_PL"
         - name: TZ
           value: "Europe/Warsaw"
-        - name: IMMICH_API_KEY
+        - name: KIOSK_IMMICH_API_KEY
           valueFrom:
             secretKeyRef:
               name: immich-credentials
               key: immich_api_key
-        - name: IMMICH_URL
+        - name: KIOSK_IMMICH_URL
           valueFrom:
             secretKeyRef:
               name: immich-credentials
