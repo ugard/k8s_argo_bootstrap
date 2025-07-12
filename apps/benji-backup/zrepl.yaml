@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zrepl-sink
+  namespace: backup-system
+data:
+  zrepl.yaml: |
+    jobs:
+    - name: sink
+      type: sink
+      serve:
+          type: tls
+          listen: ":8888"
+          ca: "/etc/zrepl/prod.crt"
+          cert: "/etc/zrepl/backups.crt"
+          key: "/etc/zrepl/backups.key"
+          client_cns:
+          - "garage"
+      root_fs: "wdc/zrepl/garage"
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: zrepl-sink
+  namespace: backup-system
+spec:
+  selector:
+    matchLabels:
+      app: zrepl
+  template:
+    metadata:
+      labels:
+        app: zrepl
+    spec:
+      nodeSelector:
+        openebs.io/nodeid: talos-95t-m8m
+      containers:
+        - name: zrepl
+          image: ghcr.io/skaronator/zrepl-dl:latest
+          volumeMounts:
+            - name: config
+              mountPath: /etc/zrepl/zrepl.yaml
+              subPath: zrepl.yaml
+          securityContext:
+            privileged: true
+      volumes:
+        - name: config
+          configMap:
+            name: zrepl-sink

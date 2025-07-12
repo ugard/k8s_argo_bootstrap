@@ -7,4 +7,5 @@ resources:
   - benji.yaml
   - push-gateway.yaml
   - cron-jobs.yaml
+  - zrepl.yaml
   
