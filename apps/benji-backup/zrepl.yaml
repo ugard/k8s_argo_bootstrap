@@ -109,6 +109,48 @@ spec:
           secret:
             secretName: zrepl-backup
 ---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: zrepl-garage-push
+  namespace: backup-system
+spec:
+  selector:
+    matchLabels:
+      app: zrepl-garage-push
+  template:
+    metadata:
+      labels:
+        app: zrepl-garage-push
+    spec:
+      nodeSelector:
+        openebs.io/nodeid: talos-jly-e8b
+      containers:
+        - name: zrepl
+          image: registry.ugard.mywire.org/zrepl:latest
+          volumeMounts:
+            - name: config
+              mountPath: /etc/zrepl/zrepl.yaml
+              subPath: zrepl.yaml
+            - name: zrepl-backup
+              mountPath: /etc/zrepl/backups
+              readOnly: true
+            - name: zrepl-prod
+              mountPath: /etc/zrepl/prod
+              readOnly: true
+          securityContext:
+            privileged: true
+      volumes:
+        - name: config
+          configMap:
+            name: zrepl-garage-push
+        - name: zrepl-prod
+          secret:
+            secretName: zrepl-prod
+        - name: zrepl-backup
+          secret:
+            secretName: zrepl-backup
+---
 apiVersion: bitnami.com/v1alpha1
 kind: SealedSecret
 metadata:
