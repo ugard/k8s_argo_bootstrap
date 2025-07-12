@@ -41,12 +41,30 @@ spec:
             - name: config
               mountPath: /etc/zrepl/zrepl.yaml
               subPath: zrepl.yaml
+            - name: zrepl-backup
+              mountPath: /etc/zrepl/backups.crt
+              subPath: tls.crt
+              readOnly: true
+            - name: zrepl-backup
+              mountPath: /etc/zrepl/backups.key
+              subPath: tls.key
+              readOnly: true
+            - name: zrepl-prod
+              mountPath: /etc/zrepl/prod.crt
+              subPath: prod.crt
+              readOnly: true
           securityContext:
             privileged: true
       volumes:
         - name: config
           configMap:
             name: zrepl-sink
+        - name: zrepl-prod
+          secret:
+            secretName: zrepl-prod
+        - name: zrepl-backup
+          secret:
+            secretName: zrepl-backup
 ---
 apiVersion: bitnami.com/v1alpha1
 kind: SealedSecret
