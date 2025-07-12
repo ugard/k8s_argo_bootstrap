@@ -11,9 +11,9 @@ data:
         serve:
           type: tls
           listen: ":8888"
-          ca: "/etc/zrepl/prod.crt"
-          cert: "/etc/zrepl/backups.crt"
-          key: "/etc/zrepl/backups.key"
+          ca: "/etc/zrepl/prod/tls.crt"
+          cert: "/etc/zrepl/backups/tls.crt"
+          key: "/etc/zrepl/backups/tls.key"
           client_cns:
             - "garage"
         root_fs: "wdc/zrepl/garage"
@@ -42,16 +42,10 @@ spec:
               mountPath: /etc/zrepl/zrepl.yaml
               subPath: zrepl.yaml
             - name: zrepl-backup
-              mountPath: /etc/zrepl/backups.crt
-              subPath: tls.crt
-              readOnly: true
-            - name: zrepl-backup
-              mountPath: /etc/zrepl/backups.key
-              subPath: tls.key
+              mountPath: /etc/zrepl/backups
               readOnly: true
             - name: zrepl-prod
-              mountPath: /etc/zrepl/prod.crt
-              subPath: prod.crt
+              mountPath: /etc/zrepl/prod
               readOnly: true
           securityContext:
             privileged: true
