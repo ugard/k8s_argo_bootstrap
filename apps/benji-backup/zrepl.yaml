@@ -33,7 +33,7 @@ data:
         address: "zrepl-sink:8888"
         ca: "/etc/zrepl/prod/tls.crt"
         cert: "/etc/zrepl/backups/tls.crt"
-        key: "/etc/zrepl/backups/tls.key"kub
+        key: "/etc/zrepl/backups/tls.key"
         server_cn: "backups"
       filesystems: {
         "wdc/talos/pvc-027fb013-5710-4057-bd08-1d4865684077<": true
