@@ -15,8 +15,57 @@ data:
           cert: "/etc/zrepl/backups/tls.crt"
           key: "/etc/zrepl/backups/tls.key"
           client_cns:
-            - "garage"
+            - "prod"
         root_fs: "wdc/zrepl/garage"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zrepl-garage-push
+  namespace: backup-system
+data:
+  zrepl.yaml: |
+    jobs:
+    - name: prod_to_backups
+      type: push
+      connect:
+        type: tls
+        address: "zrepl-sink:8888"
+        ca: "/etc/zrepl/prod/tls.crt"
+        cert: "/etc/zrepl/backups/tls.crt"
+        key: "/etc/zrepl/backups/tls.key"kub
+        server_cn: "backups"
+      filesystems: {
+        "wdc/talos/pvc-027fb013-5710-4057-bd08-1d4865684077<": true
+      }
+      snapshotting:
+        type: periodic
+        prefix: zrepl_
+        interval: 10m
+      pruning:
+        keep_sender:
+        - type: not_replicated
+        - type: last_n
+          count: 10
+        keep_receiver:
+        - type: grid
+          grid: 1x1h(keep=all) | 24x1h | 30x1d | 6x30d
+          regex: "^zrepl_"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zrepl-sink
+  namespace: backup-system
+spec:
+  selector:
+    app: zrepl
+  ports:
+  - protocol: TCP
+    port: 8888
+    targetPort: 8888
+    name: zrepl
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: DaemonSet
