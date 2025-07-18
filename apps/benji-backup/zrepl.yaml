@@ -16,6 +16,9 @@ data:
           key: "/etc/zrepl/backups/tls.key"
           client_cns:
             - "prod"
+        recv:
+          placeholder:
+            encryption: off
         root_fs: "wdc/zrepl/garage"
 ---
 apiVersion: v1
