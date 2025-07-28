@@ -21,6 +21,7 @@ spec:
       release-name: rook-ceph-cluster
       valuesObject:
         clusterName: rook-ceph
+        operatorNamespace: rook-ceph2
         cephClusterSpec:
           cephVersion:
             image: quay.io/ceph/ceph:v18.2.2
