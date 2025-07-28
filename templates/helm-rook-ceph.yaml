@@ -95,3 +95,10 @@ spec:
             useAllNodes: false
           upgradeOSDRequiresHealthyPGs: false
           waitTimeoutForHealthyOSDInMinutes: 10
+        cephBlockPools:
+          - name: ceph-blockpool
+            storageClass:
+              name: rook-ceph-block
+              isDefault: true
+              reclaimPolicy: Retain
+              
