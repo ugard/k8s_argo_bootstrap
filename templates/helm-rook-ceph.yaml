@@ -14,7 +14,80 @@ spec:
     targetRevision: v1.15.5
     helm:
       release-name: rook-ceph
-      # valuesObject:
-      #   service:
-      #     type: ClusterIP
-       
+  - chart: rook-ceph-cluster
+    repoURL: https://charts.rook.io/release
+    targetRevision: v1.15.5
+    helm:
+      release-name: rook-ceph-cluster
+      valuesObject:
+        spec:
+          cephVersion:
+            image: quay.io/ceph/ceph:v18.2.2
+          cleanupPolicy:
+            sanitizeDisks:
+              dataSource: zero
+              iteration: 1
+              method: quick
+          crashCollector: {}
+          csi:
+            cephfs: {}
+            readAffinity:
+              enabled: false
+          dashboard:
+            enabled: true
+            ssl: true
+          dataDirHostPath: /var/lib/rook
+          disruptionManagement:
+            managePodBudgets: true
+            osdMaintenanceTimeout: 30
+          external: {}
+          healthCheck:
+            daemonHealth:
+              mon:
+                interval: 45s
+              osd:
+                interval: 1m0s
+              status:
+                interval: 1m0s
+            livenessProbe:
+              mgr: {}
+              mon: {}
+              osd: {}
+          logCollector:
+            enabled: true
+            maxLogSize: 500M
+            periodicity: daily
+          mgr:
+            count: 2
+          mon:
+            count: 3
+          monitoring: {}
+          network:
+            connections:
+              compression: {}
+              encryption: {}
+            multiClusterService: {}
+          priorityClassNames:
+            mgr: system-cluster-critical
+            mon: system-node-critical
+            osd: system-node-critical
+          security:
+            keyRotation:
+              enabled: false
+            kms: {}
+          storage:
+            flappingRestartIntervalHours: 0
+            nodes:
+            - devices:
+              - name: /dev/disk/by-id/usb-JMicron_Tech_DD564198838C4-0:0
+              name: talos-95t-m8m
+            - devices:
+              - name: /dev/disk/by-id/usb-Realtek_RTL9210B-CG_012345678932-0:0
+              name: talos-jly-e8b
+            - devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6P7NF0T303215D
+              name: talos-k1y-dkc
+            store: {}
+            useAllDevices: false
+          upgradeOSDRequiresHealthyPGs: false
+          waitTimeoutForHealthyOSDInMinutes: 10
