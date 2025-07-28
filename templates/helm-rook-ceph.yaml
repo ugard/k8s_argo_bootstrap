@@ -172,7 +172,7 @@ spec:
               statusCheck:
                 mirror: {}
         cephObjectStores:
-          - name: ceph-bucket
+          - name: ceph-objectstore
             storageClass:
               enabled: true
               name: rook-ceph-bucket
