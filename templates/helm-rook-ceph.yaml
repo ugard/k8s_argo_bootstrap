@@ -123,6 +123,54 @@ spec:
                 size: 3
               statusCheck:
                 mirror: {}
+        cephFileSystems:
+          - name: ceph-filesystem
+            storageClass:
+              enabled: true
+              name: rook-ceph-filesystem
+              isDefault: false
+              reclaimPolicy: Retain
+              parameters:
+                clusterID: rook-ceph2
+                csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
+                csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph2
+                csi.storage.k8s.io/fstype: ext4
+                csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+                csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph2
+                csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+                csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph2
+                fsName: ceph-filesystem
+                pool: ceph-filesystem-data0
+            spec:
+              dataPools:
+              - failureDomain: host
+                name: data0
+                replicated:
+                  size: 3
+              metadataPool:
+                application: ""
+                erasureCoded:
+                  codingChunks: 0
+                  dataChunks: 0
+                mirroring: {}
+                quotas: {}
+                replicated:
+                  size: 3
+                statusCheck:
+                  mirror: {}
+              metadataServer:
+                activeCount: 1
+                activeStandby: true
+                placement: {}
+                priorityClassName: system-cluster-critical
+                resources:
+                  limits:
+                    memory: 4Gi
+                  requests:
+                    cpu: 1000m
+                    memory: 4Gi
+              statusCheck:
+                mirror: {}
         cephObjectStores:
           - name: ceph-bucket
             storageClass:
