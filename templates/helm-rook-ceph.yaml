@@ -20,6 +20,7 @@ spec:
     helm:
       release-name: rook-ceph-cluster
       valuesObject:
+        clusterName: rook-ceph
         spec:
           cephVersion:
             image: quay.io/ceph/ceph:v18.2.2
