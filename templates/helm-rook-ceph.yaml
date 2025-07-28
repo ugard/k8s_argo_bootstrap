@@ -73,6 +73,7 @@ spec:
             mgr: system-cluster-critical
             mon: system-node-critical
             osd: system-node-critical
+          resources: {}
           security:
             keyRotation:
               enabled: false
@@ -91,5 +92,6 @@ spec:
               name: talos-k1y-dkc
             store: {}
             useAllDevices: false
+            useAllNodes: false
           upgradeOSDRequiresHealthyPGs: false
           waitTimeoutForHealthyOSDInMinutes: 10
