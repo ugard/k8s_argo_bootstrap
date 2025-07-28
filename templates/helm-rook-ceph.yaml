@@ -101,4 +101,16 @@ spec:
               name: rook-ceph-block
               isDefault: true
               reclaimPolicy: Retain
-              
+            spec:
+              application: ""
+              erasureCoded:
+                codingChunks: 0
+                dataChunks: 0
+              failureDomain: host
+              mirroring: {}
+              quotas: {}
+              replicated:
+                size: 3
+              statusCheck:
+                mirror: {}
+
