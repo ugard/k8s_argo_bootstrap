@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rook-ceph
+  namespace: argocd
+spec:
+  destination:
+    namespace: rook-ceph2
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  sources:
+  - chart: rook-ceph
+    repoURL: https://charts.rook.io/release
+    targetRevision: v1.15.5
+    helm:
+      release-name: rook-ceph
+      # valuesObject:
+      #   service:
+      #     type: ClusterIP
+       
