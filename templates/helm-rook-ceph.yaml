@@ -98,6 +98,7 @@ spec:
         cephBlockPools:
           - name: ceph-blockpool
             storageClass:
+              enabled: true
               name: rook-ceph-block
               isDefault: true
               reclaimPolicy: Retain
@@ -113,4 +114,56 @@ spec:
                 size: 3
               statusCheck:
                 mirror: {}
+        cephObjectStores:
+          - name: ceph-bucket
+            storageClass:
+              enabled: true
+              name: rook-ceph-bucket
+              isDefault: false
+              reclaimPolicy: Retain
+            spec:
+              auth: {}
+              dataPool:
+                application: ""
+                erasureCoded:
+                  codingChunks: 1
+                  dataChunks: 2
+                failureDomain: host
+                mirroring: {}
+                quotas: {}
+                replicated:
+                  size: 0
+                statusCheck:
+                  mirror: {}
+              gateway:
+                instances: 1
+                placement: {}
+                port: 80
+                priorityClassName: system-cluster-critical
+                resources:
+                  limits:
+                    memory: 2Gi
+                  requests:
+                    cpu: 1000m
+                    memory: 1Gi
+              healthCheck: {}
+              metadataPool:
+                application: ""
+                erasureCoded:
+                  codingChunks: 0
+                  dataChunks: 0
+                failureDomain: host
+                mirroring: {}
+                quotas: {}
+                replicated:
+                  size: 3
+                statusCheck:
+                  mirror: {}
+              preservePoolsOnDelete: true
+              protocols:
+                swift: null
+              sharedPools:
+                preserveRadosNamespaceDataOnDelete: false
+              zone:
+                name: ""
 
