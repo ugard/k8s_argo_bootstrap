@@ -70,9 +70,9 @@ spec:
               name: velero-s3-secret
               key: scaleway
             config:
-              region: waw
+              region: pl-waw
               s3ForcePathStyle: true
-              s3Url: https://lkrzyzak-velero-backup.s3.pl-waw.scw.cloud
+              s3Url: https://s3.pl-waw.scw.cloud
             annotations: {}
 
           # Parameters for the VolumeSnapshotLocation(s). Configure multiple by adding other element(s) to the volumeSnapshotLocation slice.
