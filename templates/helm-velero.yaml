@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: velero
+  namespace: argocd
+spec:
+  destination:
+    namespace: velero
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  sources:
+  - chart: velero
+    repoURL: https://vmware-tanzu.github.io/helm-charts
+    targetRevision: 10.0.10
+    helm:
+      release-name: velero
+      valuesObject:
+        namespace:
+          labels:
+            pod-security.kubernetes.io/enforce: privileged
+        metrics:
+          enabled: false
