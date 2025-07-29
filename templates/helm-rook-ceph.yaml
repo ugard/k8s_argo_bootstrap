@@ -258,7 +258,7 @@ spec:
                     memory: 2Gi
                   requests:
                     cpu: 100m
-                    memory: 512Gi
+                    memory: 512Mi
               healthCheck: {}
               metadataPool:
                 application: ""
