@@ -17,6 +17,7 @@ spec:
       valuesObject:
         namespace:
           labels:
-            pod-security.kubernetes.io/enforce: privileged
+            - key: pod-security.kubernetes.io/enforce
+              value: privileged
         metrics:
           enabled: false
