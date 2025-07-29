@@ -23,8 +23,8 @@ spec:
         clusterName: rook-ceph
         operatorNamespace: rook-ceph2
         cephClusterSpec:
-          cephVersion:
-            image: quay.io/ceph/ceph:v18.2.2
+          # cephVersion:
+          #   image: quay.io/ceph/ceph:v18.2.2
           cleanupPolicy:
             sanitizeDisks:
               dataSource: zero
