@@ -15,9 +15,5 @@ spec:
     helm:
       release-name: velero
       valuesObject:
-        namespace:
-          labels:
-          - key: pod-security.kubernetes.io/enforce
-            value: privileged
         metrics:
           enabled: false
