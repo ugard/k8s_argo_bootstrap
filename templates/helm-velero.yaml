@@ -17,7 +17,6 @@ spec:
       valuesObject:
         metrics:
           enabled: false
-        features: EnableCSI
         initContainers:
           - name: velero-plugin-for-aws
             image: velero/velero-plugin-for-aws:v1.12.1
@@ -30,6 +29,7 @@ spec:
         ## and additional server settings.
         ##
         configuration:
+          features: EnableCSI
           # Parameters for the BackupStorageLocation(s). Configure multiple by adding other element(s) to the backupStorageLocation slice.
           # See https://velero.io/docs/v1.6/api-types/backupstoragelocation/
           backupStorageLocation:
