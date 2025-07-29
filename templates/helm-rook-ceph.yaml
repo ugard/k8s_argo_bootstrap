@@ -181,7 +181,8 @@ spec:
           isDefault: false
           deletionPolicy: Delete
           annotations: {}
-          labels: {}
+          labels:
+            velero.io/csi-volumesnapshot-class: "true"
           # see https://rook.io/docs/rook/latest/ceph-csi-snapshot.html#rbd-snapshots for available configuration
           parameters:
             clusterID: rook-ceph2 # namespace:cluster
