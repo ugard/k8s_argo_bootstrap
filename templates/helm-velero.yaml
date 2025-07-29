@@ -61,20 +61,18 @@ spec:
               region: garage
               s3ForcePathStyle: true
               s3Url: http://garage.garage:3900
-            #  kmsKeyId:
-            #  resourceGroup:
-            #  The ID of the subscription containing the storage account, if different from the cluster’s subscription. (Azure only)
-            #  subscriptionId:
-            #  storageAccount:
-            #  publicUrl:
-            #  Name of the GCP service account to use for this backup storage location. Specify the
-            #  service account here if you want to use workload identity instead of providing the key file.(GCP only)
-            #  serviceAccount:
-            #  Option to skip certificate validation or not if insecureSkipTLSVerify is set to be true, the client side should set the
-            #  flag. For Velero client Command like velero backup describe, velero backup logs needs to add the flag --insecure-skip-tls-verify
-            #  insecureSkipTLSVerify:
-
-            # annotations allows adding arbitrary annotations to this BackupStorageLocation resource. Optional.
+          - name: scaleway
+            provider: "aws"
+            bucket: "lkrzyzak-velero-backup"
+            default: false
+            accessMode: ReadWrite
+            credential:
+              name: velero-s3-secret
+              key: scaleway
+            config:
+              region: waw
+              s3ForcePathStyle: true
+              s3Url: https://lkrzyzak-velero-backup.s3.pl-waw.scw.cloud
             annotations: {}
 
           # Parameters for the VolumeSnapshotLocation(s). Configure multiple by adding other element(s) to the volumeSnapshotLocation slice.
