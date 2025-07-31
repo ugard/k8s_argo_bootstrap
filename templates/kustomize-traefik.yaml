@@ -11,11 +11,12 @@ spec:
   sources:
   - chart: traefik
     repoURL: https://traefik.github.io/charts
-    targetRevision: 35.0.0
+    targetRevision: 37.0.0
     helm:
       release-name: traefik
-      valueFiles:
-      - $values/apps/traefik/values.yaml
-  - repoURL: {{ .Values.spec.source.repoURL }}
-    targetRevision: {{ .Values.spec.source.targetRevision }}
-    ref: values
+      valuesObject:
+        service:
+        annotations:
+          tailscale.com/expose: "true"
+        spec:
+          loadBalancerIP: 192.168.10.253
