@@ -45,19 +45,19 @@ spec:
           additional:
             - kube-system
             - garage
-        prometheusSpec:
-          serviceMonitorSelectorNilUsesHelmValues: false
-          serviceMonitorSelector: {}
-          serviceMonitorNamespaceSelector:
-            matchLabels:
-              prometheus: scrape
-          logLevel: debug
-          storageSpec:
-            volumeClaimTemplate:
-              spec:
-                storageClassName: rook-ceph-block
-                accessModes: ["ReadWriteOnce"]
-                resources:
-                  requests:
-                    storage: 10Gi
-                selector: {}
+          prometheusSpec:
+            serviceMonitorSelectorNilUsesHelmValues: false
+            serviceMonitorSelector: {}
+            serviceMonitorNamespaceSelector:
+              matchLabels:
+                prometheus: scrape
+            logLevel: debug
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: rook-ceph-block
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
+                  selector: {}
