@@ -45,6 +45,7 @@ spec:
             additional:
               - kube-system
               - garage
+        prometheus:
           prometheusSpec:
             serviceMonitorSelectorNilUsesHelmValues: false
             serviceMonitorSelector: {}
