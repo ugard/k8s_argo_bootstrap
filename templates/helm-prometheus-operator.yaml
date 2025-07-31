@@ -47,6 +47,7 @@ spec:
             - garage
         prometheusSpec:
           serviceMonitorSelectorNilUsesHelmValues: false
+          serviceMonitorSelector: {}
           serviceMonitorNamespaceSelector:
             matchLabels:
               prometheus: scrape
