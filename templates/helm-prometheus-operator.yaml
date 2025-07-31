@@ -41,10 +41,10 @@ spec:
           enabled: false
         prometheusOperator:
           namespaces:
-          releaseNamespace: true
-          additional:
-            - kube-system
-            - garage
+            releaseNamespace: true
+            additional:
+              - kube-system
+              - garage
           prometheusSpec:
             serviceMonitorSelectorNilUsesHelmValues: false
             serviceMonitorSelector: {}
