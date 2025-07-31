@@ -96,6 +96,7 @@ spec:
             additional:
             - kube-system
             - garage
+            - velero
         prometheus:
           prometheusSpec:
             serviceMonitorSelectorNilUsesHelmValues: false
