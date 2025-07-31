@@ -53,7 +53,7 @@ spec:
             ## TLS configuration for grafana Ingress
             ## Secret must be manually created in the namespace
             ##
-            tls: []
+            tls:
               - secretName: grafana-general-tls
                 hosts:
                 - grafana.ugard.mywire.org
