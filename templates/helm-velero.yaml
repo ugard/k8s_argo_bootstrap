@@ -68,7 +68,7 @@ spec:
             config:
               region: garage
               s3ForcePathStyle: true
-              s3Url: http://garage.garage:3900
+              s3Url: http://192.168.10.5:3900
           - name: scaleway
             provider: "aws"
             bucket: "lkrzyzak-velero-backup"
