@@ -40,18 +40,15 @@ spec:
         nodeExporter:
           enabled: false
         prometheusOperator:
+          logLevel: debug
           namespaces:
             releaseNamespace: true
             additional:
-              - kube-system
-              - garage
+            - kube-system
+            - garage
         prometheus:
           prometheusSpec:
             serviceMonitorSelectorNilUsesHelmValues: false
-            serviceMonitorSelector: {}
-            serviceMonitorNamespaceSelector:
-              matchLabels:
-                prometheus: scrape
             logLevel: debug
             storageSpec:
               volumeClaimTemplate:
