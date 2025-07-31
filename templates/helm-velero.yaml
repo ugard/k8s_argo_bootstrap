@@ -34,9 +34,10 @@ spec:
         ## Parameters for the `default` BackupStorageLocation and VolumeSnapshotLocation,
         ## and additional server settings.
         ##
+        deployNodeAgent: true
         configuration:
           features: EnableCSI
-          deployNodeAgent: true
+          
           # Parameters for the BackupStorageLocation(s). Configure multiple by adding other element(s) to the backupStorageLocation slice.
           # See https://velero.io/docs/v1.6/api-types/backupstoragelocation/
           backupStorageLocation:
