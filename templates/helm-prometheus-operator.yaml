@@ -39,3 +39,14 @@ spec:
           enabled: false
         nodeExporter:
           enabled: false
+        prometheusOperator:
+          namespaces:
+          releaseNamespace: true
+          additional:
+            - kube-system
+            - garage
+        prometheusSpec:
+          serviceMonitorSelectorNilUsesHelmValues: false
+          serviceMonitorNamespaceSelector:
+            matchLabels:
+              prometheus: scrape

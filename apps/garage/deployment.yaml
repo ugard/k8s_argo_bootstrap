@@ -91,32 +91,6 @@ spec:
       name: admin
   type: LoadBalancer
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: garage-internal
-spec:
-  selector:
-    app: garage
-  ports:
-    - protocol: TCP
-      name: s3
-      port: 3900
-      targetPort: 3900
-    - protocol: TCP
-      name: rpc
-      port: 3901
-      targetPort: 3901
-    - protocol: TCP
-      port: 3902
-      targetPort: 3902
-      name: web
-    - protocol: TCP
-      port: 3903
-      targetPort: 3903
-      name: admin
-  type: ClusterIP
----
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -139,3 +113,15 @@ spec:
   - hosts:
     - garage.ugard.mywire.org
     secretName: tls-garage-ingress-http
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: garage
+  namespace: garage
+spec:
+  endpoints:
+  - port: admin
+  selector:
+    matchLabels:
+      app: garage
