@@ -123,5 +123,5 @@ spec:
   endpoints:
   - port: admin
   selector:
-    matchLabels:
+    matchNames:
       app: garage
