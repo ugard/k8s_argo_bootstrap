@@ -14,6 +14,12 @@ spec:
     targetRevision: v1.17.6
     helm:
       release-name: rook-ceph
+      valuesObject:
+        serviceMonitor:
+          enabled: true
+          interval: 1m
+        monitoring:
+          enabled: true
   - chart: rook-ceph-cluster
     repoURL: https://charts.rook.io/release
     targetRevision: v1.17.6
@@ -63,7 +69,9 @@ spec:
             count: 2
           mon:
             count: 3
-          monitoring: {}
+          monitoring:
+            enabled: true
+            createPrometheusRules: true
           network:
             connections:
               compression: {}
