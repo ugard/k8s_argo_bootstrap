@@ -11,7 +11,7 @@ spec:
   sources:
   - chart: openebs
     repoURL: https://openebs.github.io/charts
-    targetRevision: 3.0.6
+    targetRevision: 3.10.0
     helm:
       release-name: openebs
       valuesObject:
