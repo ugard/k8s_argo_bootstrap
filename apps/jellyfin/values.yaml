@@ -14,8 +14,10 @@ ingress:
       hosts:
         - jellyfin.ugard.mywire.org
 service:
-  type: ClusterIP
+  type: LoadBalancer
   port: 8096
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.10.251
 volumes:
 - name: rclone-config
   secret:
