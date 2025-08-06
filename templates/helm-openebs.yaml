@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: openebs
+  name: openebs-helm
   namespace: argocd
 spec:
   destination:
@@ -11,10 +11,21 @@ spec:
   sources:
   - chart: openebs
     repoURL: https://openebs.github.io/openebs
-    targetRevision: 2.3.0
+    targetRevision: 4.3.2
     helm:
       release-name: openebs
       valuesObject:
+        engines:
+          local:
+            lvm:
+              enabled: false
+            zfs:
+              enabled: true
+          replicated:
+            mayastor:
+              enabled: false
+        loki:
+          enabled: false
         serviceMonitor:
           enabled: true
         
