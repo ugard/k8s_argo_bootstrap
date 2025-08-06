@@ -1,6 +1,6 @@
 env:
   # REDIS_HOSTNAME: 'broker.paperless'
-  # DB_HOSTNAME: "postgres.postgres"
+  DB_HOSTNAME: "postgres"
   DB_USERNAME: "immich"
   DB_DATABASE_NAME: "immich"
   # -- You should provide your own secret outside of this helm-chart and use `postgresql.global.postgresql.auth.existingSecret` to provide credentials to the postgresql instance
@@ -24,9 +24,9 @@ immich:
   # ref: https://immich.app/docs/install/config-file/
   #
   configuration: {}
-useDeprecatedPostgresChart: true
+useDeprecatedPostgresChart: false
 postgresql:
-  enabled: true
+  enabled: false
   image:
     repository: tensorchord/pgvecto-rs
     tag: pg14-v0.2.0

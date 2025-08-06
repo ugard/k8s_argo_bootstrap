@@ -39,13 +39,13 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: postgres
-                  key: POSTGRES_USER
+                  name: immich
+                  key: PG_USERNAME
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres
-                  key: POSTGRES_PASSWORD
+                  name: immich
+                  key: postgres-password
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           ports:
