@@ -1,3 +1,5 @@
+image:
+  tag: 10.10.7
 ingress:
   enabled: true
   annotations:
