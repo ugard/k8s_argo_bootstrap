@@ -33,6 +33,8 @@ spec:
           enabled: false
         snapshotOperator:
           enabled: false
+        localpv:
+          enabled: false
         zfs-localpv:
           enabled: true
           zfsNode:
