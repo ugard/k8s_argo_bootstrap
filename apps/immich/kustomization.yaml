@@ -5,3 +5,4 @@ resources:
   - immich.pvc.yaml
   # - migrate.yaml
   - sealed_secret.yaml
+  - postgres.yaml

@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: immich
+spec:
+  selector:
+    app: postgres
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: pgsql
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: immich
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  serviceName: postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: tensorchord/vchord-postgres:pg17-v0.4.3
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: POSTGRES_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+              name: pgsql
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: vchord-data-ceph
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vchord-data-ceph
+  namespace: immich
+  labels:
+    "backup-this-pvc": "true"
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8G
+  storageClassName: rook-ceph-block
