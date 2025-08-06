@@ -16,21 +16,6 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: immich-postgres-pvc
-  namespace: immich
-  labels:
-    "backup-this-pvc": "true"
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 8G
-  storageClassName: rook-ceph-block
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
   name: immich-redis-pvc
   namespace: immich
 spec:
