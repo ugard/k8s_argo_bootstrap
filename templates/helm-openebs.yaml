@@ -33,6 +33,8 @@ spec:
           enabled: false
         zfs-localpv:
           enabled: true
+          zfsNode:
+            encrKeysDir: "/var/openebs/keys"
         engines:
           local:
             lvm:
