@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: bytestash
+  name: bytestash
+  namespace: bytestash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bytestash
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bytestash
+    spec:
+      containers:
+        - name: bytestash
+          image: "ghcr.io/jordan-dalby/bytestash:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          volumeMounts:
+            - name: storage-volume
+              mountPath: "/data"
+      volumes:
+        - name: storage-volume
+          persistentVolumeClaim:
+            claimName: data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: bytestash
+  name: bytestash
+  namespace: bytestash
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: 5000
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: bytestash
+    app.kubernetes.io/instance: bytestash
+---
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: rook-ceph-block
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bytestash
+  namespace: bytestash
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: bytestash.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: web
+              port:
+                number: 5000
+  tls:
+  - hosts:
+    - bytestash.ugard.mywire.org
+    secretName: tls-bytestash-ingress-http
