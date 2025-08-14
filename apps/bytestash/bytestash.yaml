@@ -83,7 +83,7 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: web
+              name: bytestash
               port:
                 number: 5000
   tls:
