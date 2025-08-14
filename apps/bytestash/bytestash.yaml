@@ -18,7 +18,12 @@ spec:
       containers:
         - name: bytestash
           image: "ghcr.io/jordan-dalby/bytestash:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: IfNotPresent 
+          env:
+            - name: JWT_SECRET
+              value: "1234"
+            - name: DISABLE_ACCOUNTS
+              value: "true"
           ports:
             - name: http
               containerPort: 5000
