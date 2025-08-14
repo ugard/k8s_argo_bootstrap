@@ -52,8 +52,6 @@ spec:
       name: http
   selector:
     app.kubernetes.io/name: bytestash
-    app.kubernetes.io/instance: bytestash
----
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
