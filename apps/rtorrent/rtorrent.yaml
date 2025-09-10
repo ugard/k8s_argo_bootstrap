@@ -59,13 +59,13 @@ spec:
         - /media
         restartPolicy: Always
       containers:
-      - name: rtorrent
-        image: ghcr.io/crazy-max/rtorrent-rutorrent:latest
+      - name: rqbit
+        image: docker.io/ikatson/rqbit:latest
         volumeMounts:
         - name: config-data
-          mountPath: /data
+          mountPath: /home/rqbit/db
         - name: media-zfs
-          mountPath: /downloads
+          mountPath: /home/rqbit/downloads
       volumes:
       - name: config-data
         persistentVolumeClaim:
@@ -83,8 +83,8 @@ spec:
   selector:
     app: rtorrent
   ports:
-  - port: 8080
-    targetPort: 8080
+  - port: 3030
+    targetPort: 3030
     name: web
     protocol: TCP
   - port: 8888
@@ -110,7 +110,7 @@ spec:
             service:
               name: rtorrent
               port:
-                number: 8080
+                number: 3030
   tls:
   - hosts:
     - rtorrent.ugard.mywire.org
