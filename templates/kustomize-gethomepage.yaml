@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gethomepage
+  namespace: argocd
+spec:
+  destination:
+    namespace: gethomepage
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  source:
+    path: apps/gethomepage
+    repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
