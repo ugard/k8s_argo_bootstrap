@@ -1,14 +1,15 @@
-env:
-  # REDIS_HOSTNAME: 'broker.paperless'
-  DB_HOSTNAME: "postgres"
-  DB_USERNAME: "immich"
-  DB_DATABASE_NAME: "immich"
-  # -- You should provide your own secret outside of this helm-chart and use `postgresql.global.postgresql.auth.existingSecret` to provide credentials to the postgresql instance
-  # DB_PASSWORD: ""
-  # IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
-
-image:
-  tag: v1.137.3
+controllers:
+  main:
+    containers:
+      main:
+        image:
+          tag: v2.0.1
+        env:
+          # REDIS_HOSTNAME: '{{ printf "%s-valkey" .Release.Name }}'
+          # IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
+          DB_HOSTNAME: "postgres"
+          DB_USERNAME: "immich"
+          DB_DATABASE_NAME: "immich"
 
 immich:
   metrics:
@@ -24,54 +25,31 @@ immich:
   # ref: https://immich.app/docs/install/config-file/
   #
   configuration: {}
-useDeprecatedPostgresChart: false
-postgresql:
-  enabled: false
-  image:
-    repository: tensorchord/pgvecto-rs
-    tag: pg14-v0.2.0
-  global:
-    postgresql:
-      auth:
-        existingSecret: immich
-        username: immich
-        database: immich
-  
-  primary:
-    persistence:
-      existingClaim: "immich-postgres-pvc"
-    nodeSelector:
-      kubernetes.io/arch: "amd64"
-    initdb:
-      scripts:
-        create-extensions.sql: |
-          CREATE EXTENSION cube;
-          CREATE EXTENSION earthdistance;
-          CREATE EXTENSION vectors;
-    resources:
-      requests:
-        cpu: 200m
-        memory: 256Mi
-      limits:
-        cpu: 1
-        memory: 1Gi
 
-redis:
+valkey:
   enabled: true
-  architecture: standalone
-  auth:
-    enabled: false
-  master:
-    persistence:
-      existingClaim: "immich-redis-pvc"
-
+  controllers:
+    main:
+      containers:
+        main:
+          image:
+            repository: docker.io/valkey/valkey
+            tag: 8.0-alpine
+            pullPolicy: IfNotPresent
+  persistence:
+    existingClaim: "immich-redis-pvc"
+    
 # Immich components
 
 server:
   enabled: true
-  image:
-    repository: ghcr.io/immich-app/immich-server
-    pullPolicy: IfNotPresent
+  controllers:
+    main:
+      containers:
+        main:
+          image:
+            repository: ghcr.io/immich-app/immich-server
+            pullPolicy: IfNotPresent
   nodeSelector:
     kubernetes.io/arch: "amd64"
   ingress:
@@ -98,11 +76,15 @@ server:
         failureThreshold: 90
 machine-learning:
   enabled: true
-  image:
-    repository: ghcr.io/immich-app/immich-machine-learning
-    pullPolicy: IfNotPresent
-  env:
-    TRANSFORMERS_CACHE: /cache
+  controllers:
+    main:
+      containers:
+        main:
+          image:
+            repository: ghcr.io/immich-app/immich-machine-learning
+            pullPolicy: IfNotPresent
+          env:
+            TRANSFORMERS_CACHE: /cache
   probes:
     liveness:
       spec:
