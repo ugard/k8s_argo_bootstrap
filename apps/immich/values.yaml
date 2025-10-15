@@ -37,7 +37,13 @@ valkey:
             tag: 8.0-alpine
             pullPolicy: IfNotPresent
   persistence:
-    existingClaim: "immich-redis-pvc"
+    data:
+      enabled: true
+      size: 1Gi
+      # Optional: Set this to pvc to keep job queues persistent
+      type: emptyDir
+      accessMode: ReadWriteOnce
+      # storageClass: your-class
     
 # Immich components
 
