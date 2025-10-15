@@ -56,6 +56,22 @@ server:
           image:
             repository: ghcr.io/immich-app/immich-server
             pullPolicy: IfNotPresent
+          env:
+            DB_USERNAME:
+              valueFrom:
+                secretKeyRef:
+                  name: immich
+                  key: PG_USERNAME
+            DB_PASSWORD:
+              valueFrom:
+                secretKeyRef:
+                  name: immich
+                  key: password
+            DB_DATABASE_NAME:
+              valueFrom:
+                secretKeyRef:
+                  name: immich
+                  key: PG_DB_NAME
   nodeSelector:
     kubernetes.io/arch: "amd64"
   ingress:
