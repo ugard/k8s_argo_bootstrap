@@ -42,3 +42,5 @@ spec:
                 config.yml:
                   service:
                     enableregistration: false
+        postgresql:
+          enabled: false
