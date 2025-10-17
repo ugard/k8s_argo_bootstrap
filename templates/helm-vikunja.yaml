@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vikunja
+  namespace: argocd
+spec:
+  destination:
+    namespace: vikunja
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  sources:
+  - repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
+    path: apps/vikunja
+  - chart: vikunja
+    repoURL: oci://ghcr.io/go-vikunja/helm-chart/vikunja
+    targetRevision: 1.0.0
+    helm:
+      release-name: vikunja
+      valuesObject:
+        vikunja:
+          ingress:
+            main:
+              enabled: true
+              annotations:
+                cert-manager.io/cluster-issuer: "letsencrypt"
+              hosts:
+                - host: vikunja.ugard.mywire.org
+                  paths:
+                    - path: /
+              tls:
+                - hosts:
+                  - vikunja.ugard.mywire.org
+                  secretName: tls-vikunja-ingress-http
+          envFrom:
+          - secretRef:
+            name: vikunja
+          configMaps:
+            api-config:
+              enabled: true
+              data:
+                config.yml:
+                  service:
+                    enableregistration: false
