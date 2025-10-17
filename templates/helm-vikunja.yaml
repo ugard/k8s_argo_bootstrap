@@ -39,11 +39,15 @@ spec:
             api-config:
               enabled: true
               data:
-                config.yml:
+                config.yml:|
                   service:
                     enableregistration: false
         postgresql:
           enabled: false
+            global:
+              postgresql:
+                auth:
+                  database: vikunja
           primary:
             networkPolicy:
               enabled: false
