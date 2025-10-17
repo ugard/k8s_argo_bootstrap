@@ -33,7 +33,7 @@ spec:
                   - vikunja.ugard.mywire.org
                   secretName: tls-vikunja-ingress-http
           envFrom:
-            - secretRef:
+          - secretRef:
               name: vikunja
           configMaps:
             api-config:
