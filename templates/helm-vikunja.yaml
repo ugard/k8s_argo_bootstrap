@@ -12,9 +12,9 @@ spec:
   - repoURL: {{ .Values.spec.source.repoURL }}
     targetRevision: {{ .Values.spec.source.targetRevision }}
     path: apps/vikunja
-  - chart: vikunja
-    repoURL: oci://ghcr.io/go-vikunja/helm-chart/vikunja
+  - repoURL: oci://ghcr.io/go-vikunja/helm-chart/vikunja
     targetRevision: 1.0.0
+    path: .
     helm:
       release-name: vikunja
       valuesObject:
