@@ -35,13 +35,6 @@ spec:
           envFrom:
           - secretRef:
               name: vikunja
-          configMaps:
-            api-config:
-              enabled: true
-              data:
-                config.yml:
-                  service:
-                    enableregistration: false
         postgresql:
           enabled: false
           global:
