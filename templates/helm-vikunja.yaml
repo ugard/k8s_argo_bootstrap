@@ -33,8 +33,8 @@ spec:
                   - vikunja.ugard.mywire.org
                   secretName: tls-vikunja-ingress-http
           envFrom:
-          - secretRef:
-            name: vikunja
+            - secretRef:
+              name: vikunja
           configMaps:
             api-config:
               enabled: true
@@ -42,4 +42,17 @@ spec:
                 config.yml:
                   service:
                     enableregistration: false
+        postgresql:
+          enabled: false
+          primary:
+            networkPolicy:
+              enabled: false
+          auth:
+            username: vikunja
+            database: vikunja
+            password: vikunja
+          service:
+            ports:
+              postgresql: 5432
+
 
