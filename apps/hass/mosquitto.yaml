@@ -38,10 +38,21 @@ spec:
         - mountPath: /mosquitto/config/mosquitto.conf
           subPath: mosquitto.conf
           name: config
+        - mountPath: /config-hass
+          name: config-hass
+        - mountPath: /config-hass-new
+          name: config-hass-ceph
+
       volumes:
       - name: config
         configMap:
-          name: mosquitto-config  
+          name: mosquitto-config
+      - name: config-hass
+        persistentVolumeClaim:
+          claimName: home-assistant-pvc
+      - name: config-hass-ceph
+        persistentVolumeClaim:
+          claimName: hass-ceph-pvc
 ---
 apiVersion: v1
 kind: ConfigMap

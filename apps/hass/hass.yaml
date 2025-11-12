@@ -98,3 +98,16 @@ spec:
     requests:
       storage: 9Gi 
   storageClassName: openebs-zfspv
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hass-ceph-pvc
+  namespace: hass
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 9Gi 
+  storageClassName: rook-ceph-block
