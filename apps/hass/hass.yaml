@@ -49,7 +49,7 @@ spec:
       volumes:
       - name: config
         persistentVolumeClaim:
-          claimName: hass-ceph-pvc
+          claimName: home-assistant-pvc
       - name: configmap-file
         configMap:
           name: home-assistant-configmap
