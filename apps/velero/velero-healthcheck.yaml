@@ -135,45 +135,6 @@ data:
             print("Backup check failed")
             sys.exit(1)
 
-    if __name__ == "__main__":
-        main()
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: velero-healthcheck-garage-meta
-  namespace: velero
-spec:
-  schedule: "0 * * * *" # Every hour
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          serviceAccountName: velero-healthcheck
-          containers:
-            - name: velero-healthcheck
-              image: python:3-slim
-              command: ["/bin/bash", "-c"]
-              args:
-                - |
-                  apt-get update && apt-get install -y curl && \
-                  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
-                  chmod +x kubectl && \
-                  mv kubectl /usr/local/bin/ && \
-                  python /scripts/velero-healthcheck.py --schedule garage-meta --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/b2a8aa84-740c-42a3-8d2c-dc4879f8ebc3"
-              volumeMounts:
-                - name: script
-                  mountPath: /scripts
-          volumes:
-            - name: script
-              configMap:
-                name: velero-healthcheck-script
-          restartPolicy: OnFailure
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: velero-healthcheck-immich
   namespace: velero
 spec:
   schedule: "0 * * * *" # Every hour

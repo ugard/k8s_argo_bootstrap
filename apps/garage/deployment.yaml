@@ -55,8 +55,6 @@ spec:
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
-metadata:
-  name: garage-data
 spec:
   storageClassName: openebs-zfspv
   accessModes:
@@ -64,6 +62,10 @@ spec:
   resources:
     requests:
       storage: 1500Gi
+metadata:
+  name: garage-data
+  labels:
+    backup-strategy: zfs-local
 ---
 apiVersion: v1
 kind: Service

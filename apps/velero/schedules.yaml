@@ -1,0 +1,37 @@
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: garage-meta-ceph
+  namespace: velero
+spec:
+  schedule: "0 3 * * *"
+  template:
+    includedNamespaces:
+      - garage
+    includedResources:
+      - persistentvolumeclaims
+    labelSelector:
+      matchLabels:
+        backup-this-pvc: "true"
+    snapshotMoveData: true
+    storageLocation: scaleway
+    ttl: 720h0m0s
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: garage-data-zfs
+  namespace: velero
+spec:
+  schedule: "0 3 * * *"
+  template:
+    includedNamespaces:
+      - garage
+    includedResources:
+      - persistentvolumeclaims
+    labelSelector:
+      matchLabels:
+        backup-strategy: zfs-local
+    snapshotMoveData: false
+    storageLocation: scaleway
+    ttl: 720h0m0s
