@@ -8,4 +8,4 @@ resources:
   - push-gateway.yaml
   - cron-jobs.yaml
   - zrepl.yaml
-  
+  - zrepl-healthcheck.yaml  

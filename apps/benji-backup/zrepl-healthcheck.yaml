@@ -1,0 +1,186 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: zrepl-healthcheck
+  namespace: backup-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: zrepl-healthcheck
+  namespace: backup-system
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: zrepl-healthcheck
+  namespace: backup-system
+subjects:
+  - kind: ServiceAccount
+    name: zrepl-healthcheck
+    namespace: backup-system
+roleRef:
+  kind: Role
+  name: zrepl-healthcheck
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zrepl-healthcheck-script
+  namespace: backup-system
+data:
+  zrepl-healthcheck.py: |
+    import json
+    import sys
+    import subprocess
+    import datetime
+    import urllib.request
+    import os
+
+    # Configuration
+    ZREPL_POD_SELECTOR = "app=zrepl-garage-push"
+    ZREPL_NAMESPACE = "backup-system"
+    ZREPL_CONFIG_PATH = "/etc/zrepl/zrepl.yaml"
+    HC_PING_URL = os.environ.get("HC_PING_URL")
+    MAX_AGE_SECONDS = 3600 * 2  # 2 hours
+
+    def get_zrepl_pod():
+        cmd = ["kubectl", "get", "pods", "-n", ZREPL_NAMESPACE, "-l", ZREPL_POD_SELECTOR, "-o", "jsonpath={.items[0].metadata.name}"]
+        try:
+            result = subprocess.check_output(cmd).decode("utf-8").strip()
+            return result
+        except subprocess.CalledProcessError as e:
+            print(f"Error getting zrepl pod: {e}")
+            sys.exit(1)
+
+    def get_zrepl_status(pod_name):
+        cmd = ["kubectl", "exec", "-n", ZREPL_NAMESPACE, pod_name, "--", "zrepl", "status", "--mode", "raw", "--config", ZREPL_CONFIG_PATH]
+        try:
+            result = subprocess.check_output(cmd).decode("utf-8")
+            return json.loads(result)
+        except subprocess.CalledProcessError as e:
+            print(f"Error getting zrepl status: {e}")
+            sys.exit(1)
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON: {e}")
+            sys.exit(1)
+
+    def check_replication(status):
+        jobs = status.get("Jobs", {})
+        job = jobs.get("prod_to_backups", {})
+        
+        # The job status is nested under the type ("push")
+        push_status = job.get("push", {})
+        if not push_status:
+            print("Job 'prod_to_backups' (push) not found")
+            return False
+
+        replication = push_status.get("Replication", {})
+        attempts = replication.get("Attempts", [])
+        
+        if not attempts:
+            print("No replication attempts found")
+            return False
+
+        # Get the last attempt
+        last_attempt = attempts[-1]
+        
+        state = last_attempt.get("State")
+        if state != "done":
+            print(f"Last attempt state is '{state}', not 'done'")
+            return False
+
+        last_run_time_str = last_attempt.get("FinishAt")
+        if not last_run_time_str:
+            print("No finish time found for last attempt")
+            return False
+
+        # Parse timestamp (RFC3339)
+        if last_run_time_str.endswith('Z'):
+            last_run_time_str = last_run_time_str[:-1] + '+00:00'
+        
+        try:
+            last_run_time = datetime.datetime.fromisoformat(last_run_time_str)
+        except ValueError as e:
+            print(f"Error parsing timestamp {last_run_time_str}: {e}")
+            return False
+
+        now = datetime.datetime.now(datetime.timezone.utc)
+        age = (now - last_run_time).total_seconds()
+        
+        print(f"Last successful run: {last_run_time} (Age: {age} seconds)")
+        
+        if age > MAX_AGE_SECONDS:
+            print(f"Replication is too old (> {MAX_AGE_SECONDS} seconds)")
+            return False
+            
+        return True
+
+    def ping_healthchecks():
+        if not HC_PING_URL:
+            print("HC_PING_URL not set")
+            return
+
+        try:
+            urllib.request.urlopen(HC_PING_URL, timeout=10)
+            print("Pinged Healthchecks.io successfully")
+        except Exception as e:
+            print(f"Error pinging Healthchecks.io: {e}")
+
+    def main():
+        pod_name = get_zrepl_pod()
+        print(f"Found zrepl pod: {pod_name}")
+        
+        status = get_zrepl_status(pod_name)
+        
+        if check_replication(status):
+            ping_healthchecks()
+        else:
+            print("Replication check failed")
+            sys.exit(1)
+
+    if __name__ == "__main__":
+        main()
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: zrepl-healthcheck
+  namespace: backup-system
+spec:
+  schedule: "0 * * * *" # Every hour
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: zrepl-healthcheck
+          containers:
+            - name: zrepl-healthcheck
+              image: python:3-slim
+              command: ["/bin/bash", "-c"]
+              args:
+                - |
+                  apt-get update && apt-get install -y curl && \
+                  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+                  chmod +x kubectl && \
+                  mv kubectl /usr/local/bin/ && \
+                  python /scripts/zrepl-healthcheck.py
+              env:
+                - name: HC_PING_URL
+                  value: "http://healthchecks.healthchecks.svc.cluster.local/ping/a5f49456-96db-4998-ae3c-accaa3dbf783"
+              volumeMounts:
+                - name: script
+                  mountPath: /scripts
+          volumes:
+            - name: script
+              configMap:
+                name: zrepl-healthcheck-script
+          restartPolicy: OnFailure
