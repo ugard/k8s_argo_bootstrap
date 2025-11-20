@@ -23,6 +23,8 @@ spec:
             - containerPort: 8000
               name: http
           env:
+            - name: DB
+              value: "postgres"
             - name: DB_HOST
               value: "postgres.postgres.svc.cluster.local"
             - name: DB_PORT
