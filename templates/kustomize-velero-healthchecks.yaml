@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: velero-healthchecks
+  namespace: argocd
+spec:
+  destination:
+    namespace: velero
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  source:
+    path: apps/velero
+    repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
