@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: healthchecks
+  namespace: argocd
+spec:
+  destination:
+    namespace: healthchecks
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  source:
+    path: apps/healthchecks
+    repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}

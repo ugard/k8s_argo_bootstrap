@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: healthchecks
+  namespace: healthchecks
+  labels:
+    app: healthchecks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: healthchecks
+  template:
+    metadata:
+      labels:
+        app: healthchecks
+    spec:
+      containers:
+        - name: healthchecks
+          image: healthchecks/healthchecks:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: DB_HOST
+              value: "postgres.postgres.svc.cluster.local"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "healthchecks"
+            - name: DB_USER
+              value: "healthchecks"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: healthchecks-db
+                  key: DB_PASSWORD
+            - name: SITE_ROOT
+              value: "https://hc.ugard.mywire.org"
+            - name: SITE_NAME
+              value: "My Healthchecks"
+            - name: DEBUG
+              value: "False"
+            - name: ALLOWED_HOSTS
+              value: "*"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
