@@ -28,11 +28,7 @@ spec:
     metadata:
       labels:
         app: postgres
-      annotations:
-        pre.hook.backup.velero.io/command: '["/bin/bash", "-c", "PGPASSWORD=$POSTGRES_PASSWORD pg_dumpall -U $POSTGRES_USER > /var/lib/postgresql/data/dump.sql"]'
-        pre.hook.backup.velero.io/on-error: Fail
-        post.hook.backup.velero.io/command: '["/bin/bash", "-c", "rm /var/lib/postgresql/data/dump.sql"]'
-        post.hook.backup.velero.io/on-error: Continue
+
     spec:
       containers:
         - name: postgres

@@ -52,6 +52,34 @@ spec:
     labelSelector:
       matchLabels:
         app: postgres
+    hooks:
+      resources:
+        - name: postgres-dump
+          includedNamespaces:
+          - postgres
+          includedResources:
+          - pods
+          labelSelector:
+            matchLabels:
+              app: postgres
+          pre:
+            - exec:
+                container: postgres
+                command:
+                - /bin/bash
+                - -c
+                - "PGPASSWORD=$POSTGRES_PASSWORD pg_dumpall -U $POSTGRES_USER > /var/lib/postgresql/data/dump.sql"
+                onError: Fail
+                timeout: 10m
+          post:
+            - exec:
+                container: postgres
+                command:
+                - /bin/bash
+                - -c
+                - "rm /var/lib/postgresql/data/dump.sql"
+                onError: Continue
+                timeout: 1m
     snapshotMoveData: true
     storageLocation: garage
     ttl: 720h0m0s
