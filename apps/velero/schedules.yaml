@@ -46,9 +46,6 @@ spec:
   template:
     includedNamespaces:
       - postgres
-    labelSelector:
-      matchLabels:
-        app: postgres
     hooks:
       resources:
         - name: postgres-dump
