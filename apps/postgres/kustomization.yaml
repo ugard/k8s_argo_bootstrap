@@ -6,4 +6,3 @@ resources:
 - postgres.pvc.yaml
 - postgres.sealed_secret.yaml
 - postgres.yaml
-- migrate.yaml

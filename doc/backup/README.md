@@ -122,15 +122,18 @@ Postgres is backed up using Velero with a pre-backup hook to perform a logical d
 *   **Target**: `postgres` namespace (PVCs + Pods)
 *   **Storage**: Garage Object Storage
 *   **Mechanism**:
-    1.  **Pre-hook**: `pg_dumpall` to PVC.
-    2.  **Backup**: CSI Snapshot + Data Mover (`snapshotMoveData: true`) to Garage.
+    1.  **Pre-hook**: `pg_dumpall` to `/backups/dump.sql` (Ephemeral Volume).
+    2.  **Backup**:
+        *   **Metadata**: Kubernetes resources.
+        *   **Data**: File System Backup (Restic/Kopia) of `/backups` volume.
+        *   **Excluded**: Full PVC snapshots are disabled.
     3.  **Post-hook**: Delete dump file.
 
 ```mermaid
 graph LR
     subgraph Cluster
         Pod[Postgres Pod]
-        PVC[Postgres PVC]
+        Ephemeral[Ephemeral Volume (/backups)]
         Velero[Velero Controller]
     end
     subgraph Garage
@@ -138,8 +141,8 @@ graph LR
     end
 
     Velero -- 1. Trigger Hook --> Pod
-    Pod -- pg_dumpall --> PVC
-    Velero -- 2. Snapshot & Move --> PVC
-    PVC -- Data --> S3
+    Pod -- pg_dumpall --> Ephemeral
+    Velero -- 2. FS Backup --> Ephemeral
+    Ephemeral -- Data --> S3
     Velero -- 3. Cleanup Hook --> Pod
 ```

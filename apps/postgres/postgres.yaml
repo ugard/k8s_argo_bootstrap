@@ -28,6 +28,8 @@ spec:
     metadata:
       labels:
         app: postgres
+      annotations:
+        backup.velero.io/backup-volumes: backup-scratch
 
     spec:
       containers:
@@ -36,6 +38,8 @@ spec:
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
+            - name: backup-scratch
+              mountPath: /backups
           env:
             - name: POSTGRES_USER
               valueFrom:
@@ -56,3 +60,5 @@ spec:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-data-ceph
+        - name: backup-scratch
+          emptyDir: {}

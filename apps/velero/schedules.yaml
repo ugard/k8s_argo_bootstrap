@@ -68,7 +68,7 @@ spec:
                 command:
                 - /bin/bash
                 - -c
-                - "PGPASSWORD=$POSTGRES_PASSWORD pg_dumpall -U $POSTGRES_USER > /var/lib/postgresql/data/dump.sql"
+                - "PGPASSWORD=$POSTGRES_PASSWORD pg_dumpall -U $POSTGRES_USER > /backups/dump.sql"
                 onError: Fail
                 timeout: 10m
           post:
@@ -77,9 +77,10 @@ spec:
                 command:
                 - /bin/bash
                 - -c
-                - "rm /var/lib/postgresql/data/dump.sql"
+                - "rm /backups/dump.sql"
                 onError: Continue
                 timeout: 1m
-    snapshotMoveData: true
+    snapshotMoveData: false
+    snapshotVolumes: false
     storageLocation: garage
     ttl: 720h0m0s
