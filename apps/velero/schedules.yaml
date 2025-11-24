@@ -46,6 +46,8 @@ spec:
   template:
     includedNamespaces:
       - postgres
+    excludedResources:
+      - persistentvolumes
     hooks:
       resources:
         - name: postgres-dump
