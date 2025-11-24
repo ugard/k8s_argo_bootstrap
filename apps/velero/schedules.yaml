@@ -46,9 +46,9 @@ spec:
   template:
     includedNamespaces:
       - postgres
-    includedResources:
-      - persistentvolumeclaims
-      - pods
+    resourceModifier:
+      kind: ConfigMap
+      name: velero-resource-modifiers
     labelSelector:
       matchLabels:
         app: postgres

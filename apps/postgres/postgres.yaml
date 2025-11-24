@@ -30,6 +30,9 @@ spec:
         app: postgres
       annotations:
         backup.velero.io/backup-volumes: backup-scratch
+        post.hook.restore.velero.io/container: postgres
+        post.hook.restore.velero.io/command: '["/bin/bash", "-c", "if [ -f /backups/dump.sql ]; then PGPASSWORD=$POSTGRES_PASSWORD psql -U $POSTGRES_USER -d postgres < /backups/dump.sql; fi"]'
+        post.hook.restore.velero.io/on-error: Fail
 
     spec:
       containers:
