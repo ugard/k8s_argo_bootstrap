@@ -46,9 +46,6 @@ spec:
   template:
     includedNamespaces:
       - postgres
-    resourceModifier:
-      kind: ConfigMap
-      name: velero-resource-modifiers
     labelSelector:
       matchLabels:
         app: postgres
