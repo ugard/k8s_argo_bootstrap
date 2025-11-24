@@ -197,7 +197,8 @@ spec:
                   chmod +x kubectl && \
                   mv kubectl /usr/local/bin/ && \
                   python /scripts/velero-healthcheck.py --schedule immich --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/95fecc61-7345-4b37-902d-3f8d28072aa8" && \
-                  python /scripts/velero-healthcheck.py --schedule garage-meta-ceph --schedule garage-data-zfs --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/b2a8aa84-740c-42a3-8d2c-dc4879f8ebc3"
+                  python /scripts/velero-healthcheck.py --schedule garage-meta-ceph --schedule garage-data-zfs --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/b2a8aa84-740c-42a3-8d2c-dc4879f8ebc3" && \
+                  python /scripts/velero-healthcheck.py --schedule postgres-backup --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/0fab098b-990b-4de5-b317-5e66a62054c2"
               volumeMounts:
                 - name: script
                   mountPath: /scripts

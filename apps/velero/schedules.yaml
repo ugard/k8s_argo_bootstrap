@@ -35,3 +35,23 @@ spec:
     snapshotMoveData: false
     storageLocation: scaleway
     ttl: 720h0m0s
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: postgres-backup
+  namespace: velero
+spec:
+  schedule: "0 4 * * *"
+  template:
+    includedNamespaces:
+      - postgres
+    includedResources:
+      - persistentvolumeclaims
+      - pods
+    labelSelector:
+      matchLabels:
+        app: postgres
+    snapshotMoveData: true
+    storageLocation: garage
+    ttl: 720h0m0s

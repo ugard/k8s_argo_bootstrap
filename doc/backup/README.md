@@ -110,3 +110,36 @@ graph LR
     Push -- TLS Stream --> Sink
     Sink -- Writes --> TargetFS
 ```
+
+
+## 4. Postgres Backup Flow
+
+Postgres is backed up using Velero with a pre-backup hook to perform a logical dump.
+
+### 4.1 Postgres Logical Backup
+*   **Schedule Name**: `postgres-backup`
+*   **Frequency**: Daily at 04:00
+*   **Target**: `postgres` namespace (PVCs + Pods)
+*   **Storage**: Garage Object Storage
+*   **Mechanism**:
+    1.  **Pre-hook**: `pg_dumpall` to PVC.
+    2.  **Backup**: CSI Snapshot + Data Mover (`snapshotMoveData: true`) to Garage.
+    3.  **Post-hook**: Delete dump file.
+
+```mermaid
+graph LR
+    subgraph Cluster
+        Pod[Postgres Pod]
+        PVC[Postgres PVC]
+        Velero[Velero Controller]
+    end
+    subgraph Garage
+        S3[Object Storage]
+    end
+
+    Velero -- 1. Trigger Hook --> Pod
+    Pod -- pg_dumpall --> PVC
+    Velero -- 2. Snapshot & Move --> PVC
+    PVC -- Data --> S3
+    Velero -- 3. Cleanup Hook --> Pod
+```
