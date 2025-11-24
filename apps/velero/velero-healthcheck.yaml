@@ -63,16 +63,27 @@ data:
                 return None
             return items[-1] # Last item is the newest due to sort
         except subprocess.CalledProcessError as e:
-            print(f"Error getting backups: {e}")
+            print(f"Error getting backups for {schedule_name}: {e}")
             sys.exit(1)
         except json.JSONDecodeError as e:
-            print(f"Error decoding JSON: {e}")
+            print(f"Error decoding JSON for {schedule_name}: {e}")
             sys.exit(1)
 
-    def check_backup_status(backup):
+    def parse_timestamp(timestamp_str):
+        if not timestamp_str:
+            return None
+        if timestamp_str.endswith('Z'):
+            timestamp_str = timestamp_str[:-1] + '+00:00'
+        try:
+            return datetime.datetime.fromisoformat(timestamp_str)
+        except ValueError as e:
+            print(f"Error parsing timestamp {timestamp_str}: {e}")
+            return None
+
+    def check_backup_status(backup, schedule_name):
         if not backup:
-            print("No backups found for schedule")
-            return False
+            print(f"No backups found for schedule {schedule_name}")
+            return False, 0
 
         metadata = backup.get("metadata", {})
         name = metadata.get("name")
@@ -80,24 +91,20 @@ data:
         
         status = backup.get("status", {})
         phase = status.get("phase")
+        start_timestamp_str = status.get("startTimestamp")
+        completion_timestamp_str = status.get("completionTimestamp")
         
-        print(f"Checking backup: {name}")
+        print(f"Checking backup: {name} (Schedule: {schedule_name})")
         print(f"Phase: {phase}")
         print(f"Created: {creation_timestamp_str}")
 
         if phase != "Completed":
             print(f"Backup phase is '{phase}', not 'Completed'")
-            return False
+            return False, 0
 
-        # Parse timestamp (RFC3339)
-        if creation_timestamp_str.endswith('Z'):
-            creation_timestamp_str = creation_timestamp_str[:-1] + '+00:00'
-        
-        try:
-            creation_time = datetime.datetime.fromisoformat(creation_timestamp_str)
-        except ValueError as e:
-            print(f"Error parsing timestamp {creation_timestamp_str}: {e}")
-            return False
+        creation_time = parse_timestamp(creation_timestamp_str)
+        if not creation_time:
+            return False, 0
 
         now = datetime.datetime.now(datetime.timezone.utc)
         age = (now - creation_time).total_seconds()
@@ -106,35 +113,71 @@ data:
         
         if age > MAX_AGE_SECONDS:
             print(f"Backup is too old (> {MAX_AGE_SECONDS} seconds)")
-            return False
+            return False, 0
             
-        return True
+        # Calculate duration
+        duration = 0
+        start_time = parse_timestamp(start_timestamp_str)
+        completion_time = parse_timestamp(completion_timestamp_str)
+        
+        if start_time and completion_time:
+            duration = (completion_time - start_time).total_seconds()
+            print(f"Backup duration: {duration} seconds")
+        else:
+            print("Could not calculate duration (missing start or completion time)")
 
-    def ping_healthchecks(url):
+        return True, duration
+
+    def ping_healthchecks(url, duration=None):
         if not url:
             print("Healthcheck URL not provided")
             return
 
         try:
-            urllib.request.urlopen(url, timeout=10)
-            print("Pinged Healthchecks.io successfully")
+            data = None
+            if duration is not None:
+                # Send duration in seconds as a simple integer in the body? 
+                # Or form-encoded? Healthchecks.io accepts raw body for duration if it's just a number?
+                # Actually, standard is usually just a ping, but for metrics:
+                # "You can send the duration of the job execution to Healthchecks.io by including it in the request body."
+                # "The duration should be a number (integer or float) representing seconds."
+                data = str(duration).encode('utf-8')
+                
+            req = urllib.request.Request(url, data=data)
+            urllib.request.urlopen(req, timeout=10)
+            print(f"Pinged Healthchecks.io successfully (Duration: {duration})")
         except Exception as e:
             print(f"Error pinging Healthchecks.io: {e}")
 
     def main():
         parser = argparse.ArgumentParser(description='Check Velero backup status')
-        parser.add_argument('--schedule', required=True, help='Velero schedule name')
+        parser.add_argument('--schedule', action='append', required=True, help='Velero schedule name (can be specified multiple times)')
         parser.add_argument('--hc-url', required=True, help='Healthchecks.io ping URL')
         args = parser.parse_args()
 
-        backup = get_latest_backup(args.schedule)
-        
-        if check_backup_status(backup):
-            ping_healthchecks(args.hc_url)
+        all_success = True
+        total_duration = 0
+
+        for schedule in args.schedule:
+            backup = get_latest_backup(schedule)
+            success, duration = check_backup_status(backup, schedule)
+            if not success:
+                all_success = False
+            total_duration += duration
+
+        if all_success:
+            ping_healthchecks(args.hc_url, total_duration)
         else:
-            print("Backup check failed")
+            print("One or more backup checks failed")
             sys.exit(1)
 
+    if __name__ == "__main__":
+        main()
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: velero-healthcheck
   namespace: velero
 spec:
   schedule: "0 * * * *" # Every hour
@@ -153,7 +196,8 @@ spec:
                   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
                   chmod +x kubectl && \
                   mv kubectl /usr/local/bin/ && \
-                  python /scripts/velero-healthcheck.py --schedule immich --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/95fecc61-7345-4b37-902d-3f8d28072aa8"
+                  python /scripts/velero-healthcheck.py --schedule immich --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/95fecc61-7345-4b37-902d-3f8d28072aa8" && \
+                  python /scripts/velero-healthcheck.py --schedule garage-meta-ceph --schedule garage-data-zfs --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/b2a8aa84-740c-42a3-8d2c-dc4879f8ebc3"
               volumeMounts:
                 - name: script
                   mountPath: /scripts

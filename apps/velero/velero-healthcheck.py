@@ -1,0 +1,138 @@
+import json
+import sys
+import subprocess
+import datetime
+import urllib.request
+import os
+import argparse
+
+# Configuration
+VELERO_NAMESPACE = "velero"
+MAX_AGE_SECONDS = 3600 * 25  # 25 hours (daily backups + 1 hour buffer)
+
+def get_latest_backup(schedule_name):
+    # Get backups for the schedule, sorted by creation timestamp descending
+    cmd = [
+        "kubectl", "get", "backups", "-n", VELERO_NAMESPACE,
+        "-l", f"velero.io/schedule-name={schedule_name}",
+        "--sort-by=.metadata.creationTimestamp",
+        "-o", "json"
+    ]
+    try:
+        result = subprocess.check_output(cmd).decode("utf-8")
+        data = json.loads(result)
+        items = data.get("items", [])
+        if not items:
+            return None
+        return items[-1] # Last item is the newest due to sort
+    except subprocess.CalledProcessError as e:
+        print(f"Error getting backups for {schedule_name}: {e}")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON for {schedule_name}: {e}")
+        sys.exit(1)
+
+def parse_timestamp(timestamp_str):
+    if not timestamp_str:
+        return None
+    if timestamp_str.endswith('Z'):
+        timestamp_str = timestamp_str[:-1] + '+00:00'
+    try:
+        return datetime.datetime.fromisoformat(timestamp_str)
+    except ValueError as e:
+        print(f"Error parsing timestamp {timestamp_str}: {e}")
+        return None
+
+def check_backup_status(backup, schedule_name):
+    if not backup:
+        print(f"No backups found for schedule {schedule_name}")
+        return False, 0
+
+    metadata = backup.get("metadata", {})
+    name = metadata.get("name")
+    creation_timestamp_str = metadata.get("creationTimestamp")
+    
+    status = backup.get("status", {})
+    phase = status.get("phase")
+    start_timestamp_str = status.get("startTimestamp")
+    completion_timestamp_str = status.get("completionTimestamp")
+    
+    print(f"Checking backup: {name} (Schedule: {schedule_name})")
+    print(f"Phase: {phase}")
+    print(f"Created: {creation_timestamp_str}")
+
+    if phase != "Completed":
+        print(f"Backup phase is '{phase}', not 'Completed'")
+        return False, 0
+
+    creation_time = parse_timestamp(creation_timestamp_str)
+    if not creation_time:
+        return False, 0
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    age = (now - creation_time).total_seconds()
+    
+    print(f"Backup age: {age} seconds")
+    
+    if age > MAX_AGE_SECONDS:
+        print(f"Backup is too old (> {MAX_AGE_SECONDS} seconds)")
+        return False, 0
+        
+    # Calculate duration
+    duration = 0
+    start_time = parse_timestamp(start_timestamp_str)
+    completion_time = parse_timestamp(completion_timestamp_str)
+    
+    if start_time and completion_time:
+        duration = (completion_time - start_time).total_seconds()
+        print(f"Backup duration: {duration} seconds")
+    else:
+        print("Could not calculate duration (missing start or completion time)")
+
+    return True, duration
+
+def ping_healthchecks(url, duration=None):
+    if not url:
+        print("Healthcheck URL not provided")
+        return
+
+    try:
+        data = None
+        if duration is not None:
+            # Send duration in seconds as a simple integer in the body? 
+            # Or form-encoded? Healthchecks.io accepts raw body for duration if it's just a number?
+            # Actually, standard is usually just a ping, but for metrics:
+            # "You can send the duration of the job execution to Healthchecks.io by including it in the request body."
+            # "The duration should be a number (integer or float) representing seconds."
+            data = str(duration).encode('utf-8')
+            
+        req = urllib.request.Request(url, data=data)
+        urllib.request.urlopen(req, timeout=10)
+        print(f"Pinged Healthchecks.io successfully (Duration: {duration})")
+    except Exception as e:
+        print(f"Error pinging Healthchecks.io: {e}")
+
+def main():
+    parser = argparse.ArgumentParser(description='Check Velero backup status')
+    parser.add_argument('--schedule', action='append', required=True, help='Velero schedule name (can be specified multiple times)')
+    parser.add_argument('--hc-url', required=True, help='Healthchecks.io ping URL')
+    args = parser.parse_args()
+
+    all_success = True
+    total_duration = 0
+
+    for schedule in args.schedule:
+        backup = get_latest_backup(schedule)
+        success, duration = check_backup_status(backup, schedule)
+        if not success:
+            all_success = False
+        total_duration += duration
+
+    if all_success:
+        ping_healthchecks(args.hc_url, total_duration)
+    else:
+        print("One or more backup checks failed")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
