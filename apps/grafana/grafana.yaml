@@ -69,6 +69,9 @@ spec:
               subPath: dashboards.yaml
             - mountPath: /var/lib/grafana/dashboards
               name: grafana-dashboards
+            - mountPath: /etc/grafana/provisioning/datasources/datasources.yaml
+              name: grafana-datasources
+              subPath: datasources.yaml
       volumes:
         - name: grafana-pv
           emptyDir: 
@@ -78,6 +81,9 @@ spec:
         - name: grafana-dashboards
           configMap:
             name: grafana-dashboard-storage
+        - name: grafana-datasources
+          configMap:
+            name: grafana-datasources
 ---
 apiVersion: v1
 kind: Service
