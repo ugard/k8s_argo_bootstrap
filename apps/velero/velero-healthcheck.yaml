@@ -77,6 +77,71 @@ data:
         try:
             return datetime.datetime.fromisoformat(timestamp_str)
         except ValueError as e:
+            print(f"Error parsing timestamp {timestamp_str}: {e}")
+            return None
+
+    def check_backup_status(backup, schedule_name):
+        if not backup:
+            print(f"No backups found for schedule {schedule_name}")
+            return False, 0, 0
+
+        metadata = backup.get("metadata", {})
+        name = metadata.get("name")
+        creation_timestamp_str = metadata.get("creationTimestamp")
+        
+        status = backup.get("status", {})
+        phase = status.get("phase")
+        start_timestamp_str = status.get("startTimestamp")
+        completion_timestamp_str = status.get("completionTimestamp")
+        
+        print(f"Checking backup: {name} (Schedule: {schedule_name})")
+        print(f"Phase: {phase}")
+        print(f"Created: {creation_timestamp_str}")
+
+        if phase != "Completed":
+            print(f"Backup phase is '{phase}', not 'Completed'")
+            return False, 0, 0
+
+        creation_time = parse_timestamp(creation_timestamp_str)
+        if not creation_time:
+            return False, 0, 0
+
+        now = datetime.datetime.now(datetime.timezone.utc)
+        age = (now - creation_time).total_seconds()
+        
+        print(f"Backup age: {age} seconds")
+        
+        if age > MAX_AGE_SECONDS:
+            print(f"Backup is too old (> {MAX_AGE_SECONDS} seconds)")
+            return False, 0, 0
+            
+        # Calculate duration
+        duration = 0
+        start_time = parse_timestamp(start_timestamp_str)
+        completion_time = parse_timestamp(completion_timestamp_str)
+        
+        if start_time and completion_time:
+            duration = (completion_time - start_time).total_seconds()
+            print(f"Backup duration: {duration} seconds")
+        else:
+            print("Could not calculate duration (missing start or completion time)")
+
+        # Get size
+        size = 0
+        progress = status.get("progress", {})
+        if "totalBytes" in progress:
+            size = progress["totalBytes"]
+            print(f"Backup size: {size} bytes")
+        else:
+            print("Backup size not found in status.progress.totalBytes")
+
+        return True, duration, size
+
+    def ping_healthchecks(url, duration=None, size=None):
+        if not url:
+            print("Healthcheck URL not provided")
+            return
+
         try:
             data = None
             if duration is not None:
