@@ -80,3 +80,17 @@ spec:
     snapshotVolumes: false
     storageLocation: garage
     ttl: 720h0m0s
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: hoarder-backup
+  namespace: velero
+spec:
+  schedule: "0 5 * * *"
+  template:
+    includedNamespaces:
+      - hoarder
+    snapshotMoveData: true
+    storageLocation: garage
+    ttl: 720h0m0s

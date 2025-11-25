@@ -77,75 +77,21 @@ data:
         try:
             return datetime.datetime.fromisoformat(timestamp_str)
         except ValueError as e:
-            print(f"Error parsing timestamp {timestamp_str}: {e}")
-            return None
-
-    def check_backup_status(backup, schedule_name):
-        if not backup:
-            print(f"No backups found for schedule {schedule_name}")
-            return False, 0
-
-        metadata = backup.get("metadata", {})
-        name = metadata.get("name")
-        creation_timestamp_str = metadata.get("creationTimestamp")
-        
-        status = backup.get("status", {})
-        phase = status.get("phase")
-        start_timestamp_str = status.get("startTimestamp")
-        completion_timestamp_str = status.get("completionTimestamp")
-        
-        print(f"Checking backup: {name} (Schedule: {schedule_name})")
-        print(f"Phase: {phase}")
-        print(f"Created: {creation_timestamp_str}")
-
-        if phase != "Completed":
-            print(f"Backup phase is '{phase}', not 'Completed'")
-            return False, 0
-
-        creation_time = parse_timestamp(creation_timestamp_str)
-        if not creation_time:
-            return False, 0
-
-        now = datetime.datetime.now(datetime.timezone.utc)
-        age = (now - creation_time).total_seconds()
-        
-        print(f"Backup age: {age} seconds")
-        
-        if age > MAX_AGE_SECONDS:
-            print(f"Backup is too old (> {MAX_AGE_SECONDS} seconds)")
-            return False, 0
-            
-        # Calculate duration
-        duration = 0
-        start_time = parse_timestamp(start_timestamp_str)
-        completion_time = parse_timestamp(completion_timestamp_str)
-        
-        if start_time and completion_time:
-            duration = (completion_time - start_time).total_seconds()
-            print(f"Backup duration: {duration} seconds")
-        else:
-            print("Could not calculate duration (missing start or completion time)")
-
-        return True, duration
-
-    def ping_healthchecks(url, duration=None):
-        if not url:
-            print("Healthcheck URL not provided")
-            return
-
         try:
             data = None
             if duration is not None:
-                # Send duration in seconds as a simple integer in the body? 
-                # Or form-encoded? Healthchecks.io accepts raw body for duration if it's just a number?
-                # Actually, standard is usually just a ping, but for metrics:
-                # "You can send the duration of the job execution to Healthchecks.io by including it in the request body."
-                # "The duration should be a number (integer or float) representing seconds."
-                data = str(duration).encode('utf-8')
+                # Send duration and size as body (will be logged by HC)
+                # If we send just a number, it's duration. If we send text, it's a log.
+                # We prioritize showing both info.
+                log_content = f"Duration: {duration} seconds\n"
+                if size is not None:
+                    log_content += f"Size: {size} bytes\n"
+                
+                data = log_content.encode('utf-8')
                 
             req = urllib.request.Request(url, data=data)
             urllib.request.urlopen(req, timeout=10)
-            print(f"Pinged Healthchecks.io successfully (Duration: {duration})")
+            print(f"Pinged Healthchecks.io successfully (Duration: {duration}, Size: {size})")
         except Exception as e:
             print(f"Error pinging Healthchecks.io: {e}")
 
@@ -157,16 +103,18 @@ data:
 
         all_success = True
         total_duration = 0
+        total_size = 0
 
         for schedule in args.schedule:
             backup = get_latest_backup(schedule)
-            success, duration = check_backup_status(backup, schedule)
+            success, duration, size = check_backup_status(backup, schedule)
             if not success:
                 all_success = False
             total_duration += duration
+            total_size += size
 
         if all_success:
-            ping_healthchecks(args.hc_url, total_duration)
+            ping_healthchecks(args.hc_url, total_duration, total_size)
         else:
             print("One or more backup checks failed")
             sys.exit(1)
@@ -198,7 +146,8 @@ spec:
                   mv kubectl /usr/local/bin/ && \
                   python /scripts/velero-healthcheck.py --schedule immich --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/95fecc61-7345-4b37-902d-3f8d28072aa8" && \
                   python /scripts/velero-healthcheck.py --schedule garage-meta-ceph --schedule garage-data-zfs --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/b2a8aa84-740c-42a3-8d2c-dc4879f8ebc3" && \
-                  python /scripts/velero-healthcheck.py --schedule postgres-backup --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/0fab098b-990b-4de5-b317-5e66a62054c2"
+                  python /scripts/velero-healthcheck.py --schedule postgres-backup --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/0fab098b-990b-4de5-b317-5e66a62054c2" && \
+                  python /scripts/velero-healthcheck.py --schedule hoarder-backup --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/ad8a3d86-4794-4c74-8a71-7f8162f92f0d"
               volumeMounts:
                 - name: script
                   mountPath: /scripts
