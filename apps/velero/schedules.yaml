@@ -94,3 +94,73 @@ spec:
     snapshotMoveData: true
     storageLocation: garage
     ttl: 720h0m0s
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: gitea-backup
+  namespace: velero
+spec:
+  schedule: "0 5 * * *"
+  template:
+    includedNamespaces:
+      - gitea
+    snapshotMoveData: true
+    storageLocation: garage
+    ttl: 720h0m0s
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: manyfold-backup
+  namespace: velero
+spec:
+  schedule: "0 5 * * *"
+  template:
+    includedNamespaces:
+      - manyfold
+    snapshotMoveData: true
+    storageLocation: garage
+    ttl: 720h0m0s
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: paperless-backup
+  namespace: velero
+spec:
+  schedule: "0 5 * * *"
+  template:
+    includedNamespaces:
+      - paperless
+    snapshotMoveData: true
+    storageLocation: garage
+    ttl: 720h0m0s
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: vikunja-backup
+  namespace: velero
+spec:
+  schedule: "0 5 * * *"
+  template:
+    includedNamespaces:
+      - vikunja
+    snapshotMoveData: true
+    storageLocation: garage
+    ttl: 720h0m0s
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: vaultwarden-backup
+  namespace: velero
+spec:
+  schedule: "0 5 * * *"
+  template:
+    includedNamespaces:
+      - vaultwarden
+    snapshotMoveData: true
+    storageLocation: garage
+    ttl: 720h0m0s

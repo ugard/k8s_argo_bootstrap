@@ -212,7 +212,12 @@ spec:
                   python /scripts/velero-healthcheck.py --schedule immich --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/95fecc61-7345-4b37-902d-3f8d28072aa8" && \
                   python /scripts/velero-healthcheck.py --schedule garage-meta-ceph --schedule garage-data-zfs --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/b2a8aa84-740c-42a3-8d2c-dc4879f8ebc3" && \
                   python /scripts/velero-healthcheck.py --schedule postgres-backup --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/0fab098b-990b-4de5-b317-5e66a62054c2" && \
-                  python /scripts/velero-healthcheck.py --schedule hoarder-backup --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/ad8a3d86-4794-4c74-8a71-7f8162f92f0d"
+                  python /scripts/velero-healthcheck.py --schedule hoarder-backup --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/ad8a3d86-4794-4c74-8a71-7f8162f92f0d" && \
+                  python /scripts/velero-healthcheck.py --schedule gitea-backup --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/05d7580c-638f-4263-98ab-11561425580b" && \
+                  python /scripts/velero-healthcheck.py --schedule manyfold-backup --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/ad5f57a9-4b29-44c1-bf7e-0223ddd61648" && \
+                  python /scripts/velero-healthcheck.py --schedule paperless-backup --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/3895e0b8-97f6-4f08-b06e-3a1a883ca758" && \
+                  python /scripts/velero-healthcheck.py --schedule vikunja-backup --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/01d5b4ee-ea25-40aa-a2ca-368b8f4ceca5" && \
+                  python /scripts/velero-healthcheck.py --schedule vaultwarden-backup --hc-url "http://healthchecks.healthchecks.svc.cluster.local/ping/b0a65948-cb84-47f2-b2e1-7cf85b3db188"
               volumeMounts:
                 - name: script
                   mountPath: /scripts
