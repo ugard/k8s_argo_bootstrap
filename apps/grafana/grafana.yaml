@@ -71,7 +71,7 @@ spec:
               name: grafana-dashboards
       volumes:
         - name: grafana-pv
-          emptyDir
+          emptyDir: 
         - name: grafana-provisioning
           configMap:
             name: grafana-provisioning
