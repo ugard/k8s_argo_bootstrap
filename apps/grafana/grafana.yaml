@@ -64,10 +64,20 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/grafana
               name: grafana-pv
+            - mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
+              name: grafana-provisioning
+              subPath: dashboards.yaml
+            - mountPath: /var/lib/grafana/dashboards
+              name: grafana-dashboards
       volumes:
         - name: grafana-pv
-          persistentVolumeClaim:
-            claimName: grafana-pvc
+          emptyDir
+        - name: grafana-provisioning
+          configMap:
+            name: grafana-provisioning
+        - name: grafana-dashboards
+          configMap:
+            name: grafana-dashboard-storage
 ---
 apiVersion: v1
 kind: Service
