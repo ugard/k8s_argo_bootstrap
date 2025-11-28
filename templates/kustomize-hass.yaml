@@ -32,7 +32,7 @@ spec:
               channel: 24
               pan_id: 6754
               ext_pan_id: [94, 172, 147, 18, 71, 184, 45, 241]
-              network_key: "A3E48F25B6C10D79F2A18C0B44D65E9C"
+              network_key: [163, 228, 143, 37, 182, 193, 13, 121, 242, 161, 140, 11, 68, 214, 94, 156]
               transmit_power: 20
             frontend:
               enabled: true
@@ -47,7 +47,7 @@ spec:
               port: tcp://192.168.100.122:6638
             version: 4
             external_converters:
-              - TS0601_TZE200_6rdj8dzm.js
+              - "TS0601_TZE200_6rdj8dzm.js"
           additionalVolumes:
             - name: zigbee-converter
               configMap:
