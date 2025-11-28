@@ -30,9 +30,9 @@ spec:
           zigbee2mqtt:
             advanced:
               channel: 24
-              pan_id: 6754                       # 16‑bit PAN ID (decimal, avoid 0 and 65535)
-              ext_pan_id: [94, 172, 147, 18, 71, 184, 45, 241]   # 8 bytes (0–255)
-              network_key: "A3E48F25B6C10D79F2A18C0B44D65E9C"    # 16‑byte key as 32 hex chars
+              pan_id: 6754
+              ext_pan_id: [94, 172, 147, 18, 71, 184, 45, 241]
+              network_key: "A3E48F25B6C10D79F2A18C0B44D65E9C"
               transmit_power: 20
             frontend:
               enabled: true
@@ -48,11 +48,11 @@ spec:
             version: 4
             external_converters:
               - TS0601_TZE200_6rdj8dzm.js
-          extraVolumes:
+          additionalVolumes:
             - name: zigbee-converter
               configMap:
                 name: zigbee-converter-configmap
-          extraVolumeMounts:
+          additionalVolumeMounts:
             - name: zigbee-converter
               mountPath: /app/data/TS0601_TZE200_6rdj8dzm.js
               subPath: TS0601_TZE200_6rdj8dzm.js
