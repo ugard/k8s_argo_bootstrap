@@ -46,13 +46,11 @@ spec:
               baudrate: 115200
               port: tcp://192.168.100.122:6638
             version: 4
-            external_converters:
-              - "TS0601_TZE200_6rdj8dzm.js"
           additionalVolumes:
             - name: zigbee-converter
               configMap:
                 name: zigbee-converter-configmap
           additionalVolumeMounts:
             - name: zigbee-converter
-              mountPath: /app/data/TS0601_TZE200_6rdj8dzm.js
+              mountPath: /app/data/external_converters/TS0601_TZE200_6rdj8dzm.js
               subPath: TS0601_TZE200_6rdj8dzm.js
