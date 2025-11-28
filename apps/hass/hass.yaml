@@ -62,6 +62,25 @@ metadata:
 data:
   known_devices.yaml: |
   automations.yaml: |
+    - alias: "Initialize all TRV calibration on startup"
+      trigger:
+        - platform: homeassistant
+          event: start
+      action:
+        - delay:
+            seconds: 15
+        - repeat:
+            for_each: >
+              {{ states.number 
+                 | selectattr('entity_id', 'search', '_local_temperature_calibration$')
+                 | map(attribute='entity_id') 
+                 | list }}
+            sequence:
+              - service: number.set_value
+                target:
+                  entity_id: "{{ repeat.item }}"
+                data:
+                  value: 0
   configuration.yaml: |-
     default_config:
     frontend:
@@ -71,6 +90,7 @@ data:
       use_x_forwarded_for: true
       trusted_proxies:
         - 10.0.0.0/8
+    
     mqtt:
      sensor:
      - name: "Thermostat room temperature"
