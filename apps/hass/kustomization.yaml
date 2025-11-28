@@ -7,4 +7,5 @@ resources:
   - mosquitto.yaml
   - otgw-test.yaml
   - otgw-ds.yaml
+  - zigbee-converter-configmap.yaml
   
