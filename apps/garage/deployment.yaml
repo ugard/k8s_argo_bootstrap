@@ -67,6 +67,20 @@ metadata:
   labels:
     backup-strategy: zfs-local
 ---
+kind: PersistentVolumeClaim
+apiVersion: v1
+spec:
+  storageClassName: openebs-zfspv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+metadata:
+  name: garage-meta-zfs
+  labels:
+    backup-strategy: zfs-local
+---
 apiVersion: v1
 kind: Service
 metadata:
