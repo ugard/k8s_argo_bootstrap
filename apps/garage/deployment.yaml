@@ -34,7 +34,7 @@ spec:
           claimName: garage-data
       - name: garage-meta
         persistentVolumeClaim:
-          claimName: garage-meta
+          claimName: garage-meta-zfs
       - name: garage-config
         secret:
           secretName: garage-config
