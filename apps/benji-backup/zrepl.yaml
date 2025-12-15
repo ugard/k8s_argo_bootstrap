@@ -39,7 +39,7 @@ data:
         key: "/etc/zrepl/prod/tls.key"
         server_cn: "backups"
       filesystems: {
-        "wdc/talos/pvc-027fb013-5710-4057-bd08-1d4865684077<": true
+        "wdc/talos/pvc-027fb013-5710-4057-bd08-1d4865684077<": true,
         "wdc/talos/pvc-3a23bee9-37f3-4053-acea-1c615e4f0a20<": true
       }
       snapshotting:
