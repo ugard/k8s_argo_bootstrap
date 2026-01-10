@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/dopingus/cert-manager-webhook-dynu
-    path: deploy/charts/dynu-webhook
+    path: deploy/dynu-webhook
     targetRevision: master
     helm:
       releaseName: cert-manager-dynu-webhook
