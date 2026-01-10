@@ -117,7 +117,7 @@ spec:
             receivers:
             - name: 'ntfy'
               webhook_configs:
-              - url: 'https://ntfy.sh/lTw2Yxq33ICYDPpX'
+              - url: 'http://alert-webhook.monitoring/webhook'
                 send_resolved: true
         prometheus:
           prometheusSpec:

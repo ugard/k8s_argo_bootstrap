@@ -1,0 +1,91 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: alert-webhook-build
+  namespace: argocd
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      serviceAccountName: argocd-server
+      containers:
+      - name: kaniko
+        image: gcr.io/kaniko-project/executor:debug
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          cat > /workspace/Dockerfile << 'EOF'
+          FROM alpine:3.19
+          RUN apk --no-cache add curl ca-certificates bash netcat-openbsd
+          COPY webhook.sh /webhook.sh
+          RUN chmod +x /webhook.sh
+          ENTRYPOINT ["/bin/bash", "/webhook.sh"]
+          EOF
+
+          cat > /workspace/webhook.sh << 'EOF'
+          #!/bin/bash
+          NTFY_URL="${NTFY_URL:-https://ntfy.sh/lTw2Yxq33ICYDPpX}"
+          NTFY_TOKEN="${NTFY_TOKEN:-}"
+
+          send_ntfy() {
+              local message="$1"
+              local title="$2"
+              local priority="$3"
+              local data="{\"message\": \"$message\"}"
+              [[ -n "$title" ]] && data="{\"message\": \"$message\", \"title\": \"$title\"}"
+              [[ -n "$priority" ]] && data="${data%,\}},\"priority\": \"$priority\"}"
+              local headers="Content-Type: application/json"
+              [[ -n "$NTFY_TOKEN" ]] && headers="$headers\nAuthorization: Bearer $NTFY_TOKEN"
+              curl -s -H "$headers" -d "$data" "$NTFY_URL" >/dev/null
+          }
+
+          format_alert() {
+              local alert="$1"
+              local severity=$(echo "$alert" | grep -o '"severity":"[^"]*"' | cut -d'"' -f4)
+              local name=$(echo "$alert" | grep -o '"alertname":"[^"]*"' | cut -d'"' -f4)
+              local summary=$(echo "$alert" | grep -o '"summary":"[^"]*"' | cut -d'"' -f4)
+              local namespace=$(echo "$alert" | grep -o '"namespace":"[^"]*"' | cut -d'"' -f4)
+              [[ -z "$namespace" ]] && namespace=$(echo "$alert" | grep -o '"exported_namespace":"[^"]*"' | cut -d'"' -f4)
+              [[ -z "$namespace" ]] && namespace="unknown"
+              local instance=$(echo "$alert" | grep -o '"instance":"[^"]*"' | cut -d'"' -f4)
+              [[ -z "$instance" ]] && instance=$(echo "$alert" | grep -o '"pod":"[^"]*"' | cut -d'"' -f4)
+              [[ -z "$instance" ]] && instance="unknown"
+
+              case "$severity" in
+                  critical) emoji="🔴" ;;
+                  warning)  emoji="🟡" ;;
+                  info)     emoji="🔵" ;;
+                  *)        emoji="⚪" ;;
+              esac
+              echo "${emoji} *${name}*"
+              echo "📝 ${summary}"
+              echo "📍 ${namespace} | ${instance}"
+          }
+
+          webhook_handler() {
+              local data=$(cat)
+              local status=$(echo "$data" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+              local alert_name=$(echo "$data" | grep -o '"alertname":"[^"]*"' | head -1 | cut -d'"' -f4)
+              local title priority
+              [[ "$status" == "firing" ]] && title="Alert: ${alert_name}" priority="high" || title="Resolved: ${alert_name}" priority="default"
+              local alert_count=$(echo "$data" | grep -o '"status":"firing"' | wc -l)
+              [[ $alert_count -eq 0 && "$status" != "firing" ]] && alert_count=$(echo "$data" | grep -o '"status":"resolved"' | wc -l)
+              local messages=()
+              for ((i=0; i<alert_count; i++)); do
+                  local alert=$(echo "$data" | grep -o '{[^}]*"status":"[^"]*"[^}]*}' | head -n $((i+1)) | tail -n1)
+                  [[ -n "$alert" ]] && messages+= "$(format_alert "$alert")"
+              done
+              [[ ${#messages[@]} -eq 0 ]] && messages+= "$(format_alert "$data")"
+              local message=$(IFS=$'\n'; echo "${messages[*]}")
+              send_ntfy "$message" "$title" "$priority"
+          }
+
+          echo "Starting alert-webhook on :5000"
+          while true; do nc -l -p 5000 -q 1 | webhook_handler; done
+          EOF
+
+          chmod +x /workspace/webhook.sh
+          /kaniko/executor --context=/workspace --destination=registry.ugard.mywire.org/alert-webhook:v0.1.0
+        workingDir: /workspace
+      restartPolicy: Never
