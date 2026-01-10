@@ -101,22 +101,24 @@ spec:
             - cert-manager2
         alertmanager:
           extraSecretMounts:
-          - name: pagerduty-secret
-            secretName: pagerduty-service-key
-            mountPath: /etc/alertmanager/secrets
+          - name: ntfy-secret
+            secretName: ntfy-alert-topic
+            mountPath: /etc/alertmanager/ntfy
+            readOnly: true
           config:
             global:
               resolve_timeout: 5m
             route:
-              receiver: 'pagerduty'
+              receiver: 'ntfy'
               routes:
               - match:
                   severity: critical
-                receiver: 'pagerduty'
+                receiver: 'ntfy'
             receivers:
-            - name: 'pagerduty'
-              pagerduty_configs:
-              - routing_key_file: /etc/alertmanager/secrets/service_key
+            - name: 'ntfy'
+              webhook_configs:
+              - url: 'https://ntfy.sh/lTw2Yxq33ICYDPpX'
+                send_resolved: true
         prometheus:
           prometheusSpec:
             serviceMonitorSelectorNilUsesHelmValues: false
