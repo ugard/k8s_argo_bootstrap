@@ -120,6 +120,9 @@ spec:
         prometheus:
           prometheusSpec:
             serviceMonitorSelectorNilUsesHelmValues: false
+            prometheusRulesSelector:
+              matchLabels:
+                prometheus: kube-prometheus-stack
             logLevel: debug
             storageSpec:
               volumeClaimTemplate:
