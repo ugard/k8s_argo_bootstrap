@@ -128,8 +128,10 @@ spec:
                labels:
                  severity: critical
                annotations:
-                 summary: "Certificate {{ $labels.name }} in {{ $labels.namespace }} has been unready for more than 10 minutes"
-                 description: "Certificate {{ $labels.name }} in {{ $labels.namespace }} is not ready since creation."
+                 summary: |
+                   Certificate {{ $labels.name }} in {{ $labels.namespace }} has been unready for more than 10 minutes
+                 description: |
+                   Certificate {{ $labels.name }} in {{ $labels.namespace }} is not ready since creation.
              - alert: CertificateExpiringSoon
                expr: certmanager_certificate_expiration_timestamp_seconds < time() + 604800
                for: 10m
