@@ -6,14 +6,11 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/dopingus/cert-manager-webhook-dynu
-    path: deploy/dynu-webhook
-    targetRevision: master
+    repoURL: {{ .Values.spec.source.repoURL }}
+    path: apps/cert-manager/dynu-webhook
+    targetRevision: {{ .Values.spec.source.targetRevision }}
     helm:
       releaseName: cert-manager-dynu-webhook
-      valuesObject:
-        groupName: com.github.dopingus.cert-manager-webhook-dynu
-        secretName: dynu-secret
   destination:
     server: {{ .Values.spec.destination.server }}
     namespace: cert-manager2
