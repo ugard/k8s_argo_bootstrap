@@ -5,6 +5,7 @@ metadata:
   namespace: monitoring
   labels:
     prometheus: kube-prometheus-stack
+    release: prometheus
 spec:
   groups:
   - name: cert-manager
