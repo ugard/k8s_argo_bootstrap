@@ -89,25 +89,100 @@ spec:
           enabled: false
         nodeExporter:
           enabled: false
-        prometheusOperator:
-          logLevel: debug
-          namespaces:
-            releaseNamespace: true
-            additional:
-            - kube-system
-            - garage
-            - rook-ceph2
-            - velero
-        prometheus:
-          prometheusSpec:
-            serviceMonitorSelectorNilUsesHelmValues: false
-            logLevel: debug
-            storageSpec:
-              volumeClaimTemplate:
-                spec:
-                  storageClassName: rook-ceph-block
-                  accessModes: ["ReadWriteOnce"]
-                  resources:
-                    requests:
-                      storage: 10Gi
+         prometheusOperator:
+           logLevel: debug
+           namespaces:
+             releaseNamespace: true
+             additional:
+             - kube-system
+             - garage
+             - rook-ceph2
+             - velero
+             - cert-manager2
+         alertmanager:
+           extraSecretMounts:
+           - name: pagerduty-secret
+             secretName: pagerduty-service-key
+             mountPath: /etc/alertmanager/secrets
+           config:
+             global:
+               resolve_timeout: 5m
+             route:
+               receiver: 'pagerduty'
+               routes:
+               - match:
+                   severity: critical
+                 receiver: 'pagerduty'
+             receivers:
+             - name: 'pagerduty'
+               pagerduty_configs:
+               - routing_key_file: /etc/alertmanager/secrets/service_key
+         additionalPrometheusRules:
+         - name: cert-manager-alerts
+           groups:
+           - name: cert-manager
+             rules:
+             - alert: CertificateNotReady
+               expr: certmanager_certificate_ready_status{status="False"} and (time() - certmanager_certificate_created_timestamp_seconds) > 600
+               for: 5m
+               labels:
+                 severity: critical
+               annotations:
+                 summary: "Certificate {{ $labels.name }} in {{ $labels.namespace }} has been unready for more than 10 minutes"
+                 description: "Certificate {{ $labels.name }} in {{ $labels.namespace }} is not ready since creation."
+             - alert: CertificateExpiringSoon
+               expr: certmanager_certificate_expiration_timestamp_seconds < time() + 604800
+               for: 10m
+               labels:
+                 severity: warning
+               annotations:
+                 summary: "Certificate {{ $labels.name }} in {{ $labels.namespace }} expires within 7 days"
+                 description: "Certificate {{ $labels.name }} in {{ $labels.namespace }} expires at {{ $value | humanizeTimestamp }}."
+         alertmanager:
+           config:
+             global:
+               resolve_timeout: 5m
+             route:
+               receiver: 'pagerduty'
+               routes:
+               - match:
+                   severity: critical
+                 receiver: 'pagerduty'
+             receivers:
+              - name: 'pagerduty'
+                pagerduty_configs:
+                - routing_key_file: /etc/alertmanager/secrets/service_key
+         additionalPrometheusRules:
+           - name: cert-manager-alerts
+             groups:
+             - name: cert-manager
+               rules:
+               - alert: CertificateNotReady
+                 expr: certmanager_certificate_ready_status{status="False"} and (time() - certmanager_certificate_created_timestamp_seconds) > 600
+                 for: 5m
+                 labels:
+                   severity: critical
+                 annotations:
+                   summary: "Certificate {{ $labels.name }} in {{ $labels.namespace }} has been unready for more than 10 minutes"
+                   description: "Certificate {{ $labels.name }} in {{ $labels.namespace }} is not ready since creation."
+               - alert: CertificateExpiringSoon
+                 expr: certmanager_certificate_expiration_timestamp_seconds < time() + 604800
+                 for: 10m
+                 labels:
+                   severity: warning
+                 annotations:
+                   summary: "Certificate {{ $labels.name }} in {{ $labels.namespace }} expires within 7 days"
+                   description: "Certificate {{ $labels.name }} in {{ $labels.namespace }} expires at {{ $value | humanizeTimestamp }}."
+         prometheus:
+           prometheusSpec:
+             serviceMonitorSelectorNilUsesHelmValues: false
+             logLevel: debug
+             storageSpec:
+               volumeClaimTemplate:
+                 spec:
+                   storageClassName: rook-ceph-block
+                   accessModes: ["ReadWriteOnce"]
+                   resources:
+                     requests:
+                       storage: 10Gi
                   
