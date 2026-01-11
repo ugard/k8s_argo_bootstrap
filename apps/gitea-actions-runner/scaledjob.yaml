@@ -15,6 +15,16 @@ spec:
       spec:
         serviceAccountName: gitea-actions-runner
         containers:
+        - name: dind
+          image: docker:latest
+          command:
+            - dockerd
+            - --host=unix:///var/run/docker.sock
+          securityContext:
+            privileged: true
+          volumeMounts:
+          - name: docker-state
+            mountPath: /var/run
         - name: runner
           image: gitea/act_runner:latest
           args:
@@ -33,8 +43,8 @@ spec:
           - name: config
             mountPath: /config.yaml
             subPath: config.yaml
-          - name: docker-socket
-            mountPath: /var/run/docker.sock
+          - name: docker-state
+            mountPath: /var/run
           resources:
             requests:
               cpu: 100m
@@ -46,9 +56,8 @@ spec:
         - name: config
           configMap:
             name: gitea-actions-runner
-        - name: docker-socket
-          hostPath:
-            path: /var/run/docker.sock
+        - name: docker-state
+          emptyDir: {}
         restartPolicy: Never
   pollingInterval: 30
   successfulJobsHistoryLimit: 10
