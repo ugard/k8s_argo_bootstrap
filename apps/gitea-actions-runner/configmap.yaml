@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitea-actions-runner
+  namespace: gitea
+data:
+  CONFIG_YAML: |
+    log.level: info
+    host:
+      unix_socket_name: /root/.docker/run/docker.sock
+    runner:
+      capacity: 1
+      labels:
+        - ubuntu-latest
+        - self-hosted
+        - linux
+        - global
+
+
