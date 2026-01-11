@@ -11,81 +11,451 @@ spec:
       serviceAccountName: argocd-server
       containers:
       - name: kaniko
-        image: gcr.io/kaniko-project/executor:debug
-        command: ["/bin/sh", "-c"]
+        image: gcr.io/kaniko-project/executor:latest
+        command: ["/kaniko/executor"]
         args:
-        - |
-          cat > /workspace/Dockerfile << 'EOF'
-          FROM alpine:3.19
-          RUN apk --no-cache add curl ca-certificates bash netcat-openbsd
-          COPY webhook.sh /webhook.sh
-          RUN chmod +x /webhook.sh
-          ENTRYPOINT ["/bin/bash", "/webhook.sh"]
-          EOF
-
-          cat > /workspace/webhook.sh << 'EOF'
-          #!/bin/bash
-          NTFY_URL="${NTFY_URL:-https://ntfy.sh/lTw2Yxq33ICYDPpX}"
-          NTFY_TOKEN="${NTFY_TOKEN:-}"
-
-          send_ntfy() {
-              local message="$1"
-              local title="$2"
-              local priority="$3"
-              local data="{\"message\": \"$message\"}"
-              [[ -n "$title" ]] && data="{\"message\": \"$message\", \"title\": \"$title\"}"
-              [[ -n "$priority" ]] && data="${data%,\}},\"priority\": \"$priority\"}"
-              local headers="Content-Type: application/json"
-              [[ -n "$NTFY_TOKEN" ]] && headers="$headers\nAuthorization: Bearer $NTFY_TOKEN"
-              curl -s -H "$headers" -d "$data" "$NTFY_URL" >/dev/null
-          }
-
-          format_alert() {
-              local alert="$1"
-              local severity=$(echo "$alert" | grep -o '"severity":"[^"]*"' | cut -d'"' -f4)
-              local name=$(echo "$alert" | grep -o '"alertname":"[^"]*"' | cut -d'"' -f4)
-              local summary=$(echo "$alert" | grep -o '"summary":"[^"]*"' | cut -d'"' -f4)
-              local namespace=$(echo "$alert" | grep -o '"namespace":"[^"]*"' | cut -d'"' -f4)
-              [[ -z "$namespace" ]] && namespace=$(echo "$alert" | grep -o '"exported_namespace":"[^"]*"' | cut -d'"' -f4)
-              [[ -z "$namespace" ]] && namespace="unknown"
-              local instance=$(echo "$alert" | grep -o '"instance":"[^"]*"' | cut -d'"' -f4)
-              [[ -z "$instance" ]] && instance=$(echo "$alert" | grep -o '"pod":"[^"]*"' | cut -d'"' -f4)
-              [[ -z "$instance" ]] && instance="unknown"
-
-              case "$severity" in
-                  critical) emoji="🔴" ;;
-                  warning)  emoji="🟡" ;;
-                  info)     emoji="🔵" ;;
-                  *)        emoji="⚪" ;;
-              esac
-              echo "${emoji} *${name}*"
-              echo "📝 ${summary}"
-              echo "📍 ${namespace} | ${instance}"
-          }
-
-          webhook_handler() {
-              local data=$(cat)
-              local status=$(echo "$data" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
-              local alert_name=$(echo "$data" | grep -o '"alertname":"[^"]*"' | head -1 | cut -d'"' -f4)
-              local title priority
-              [[ "$status" == "firing" ]] && title="Alert: ${alert_name}" priority="high" || title="Resolved: ${alert_name}" priority="default"
-              local alert_count=$(echo "$data" | grep -o '"status":"firing"' | wc -l)
-              [[ $alert_count -eq 0 && "$status" != "firing" ]] && alert_count=$(echo "$data" | grep -o '"status":"resolved"' | wc -l)
-              local messages=()
-              for ((i=0; i<alert_count; i++)); do
-                  local alert=$(echo "$data" | grep -o '{[^}]*"status":"[^"]*"[^}]*}' | head -n $((i+1)) | tail -n1)
-                  [[ -n "$alert" ]] && messages+= "$(format_alert "$alert")"
-              done
-              [[ ${#messages[@]} -eq 0 ]] && messages+= "$(format_alert "$data")"
-              local message=$(IFS=$'\n'; echo "${messages[*]}")
-              send_ntfy "$message" "$title" "$priority"
-          }
-
-          echo "Starting alert-webhook on :5000"
-          while true; do nc -l -p 5000 -q 1 | webhook_handler; done
-          EOF
-
-          chmod +x /workspace/webhook.sh
-          /kaniko/executor --context=/workspace --destination=registry.ugard.mywire.org/alert-webhook:v0.1.0
+        - --context
+        - /workspace
+        - --destination
+        - registry.ugard.mywire.org/alert-webhook:v0.3.0
         workingDir: /workspace
+        volumeMounts:
+        - name: source
+          mountPath: /workspace-src
       restartPolicy: Never
+      volumes:
+      - name: source
+        configMap:
+          name: alert-webhook-source
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alert-webhook-source
+  namespace: argocd
+data:
+  main.go: |
+    package main
+
+    import (
+      "encoding/json"
+      "fmt"
+      "log"
+      "net/http"
+      "os"
+      "strings"
+      "time"
+    )
+
+    type Alert struct {
+      Status       string            `json:"status"`
+      Labels       map[string]string `json:"labels"`
+      Annotations  map[string]string `json:"annotations"`
+      StartsAt     time.Time         `json:"startsAt"`
+      EndsAt       time.Time         `json:"endsAt"`
+    }
+
+    type AlertData struct {
+      Status      string            `json:"status"`
+      Alerts      []Alert           `json:"alerts"`
+      GroupLabels map[string]string `json:"groupLabels"`
+    }
+
+    var (
+      ntfyURL   = getEnv("NTFY_URL", "https://ntfy.sh/lTw2Yxq33ICYDPpX")
+      ntfyToken = getEnv("NTFY_TOKEN", "")
+      httpClient = &http.Client{Timeout: 10 * time.Second}
+    )
+
+    func getEnv(key, defaultValue string) string {
+      if v := os.Getenv(key); v != "" {
+        return v
+      }
+      return defaultValue
+    }
+
+    type AlertFormatter struct{}
+
+    func NewAlertFormatter() *AlertFormatter {
+      return &AlertFormatter{}
+    }
+
+    func (f *AlertFormatter) Format(alert *Alert) string {
+      emoji := "⚪"
+      switch strings.ToLower(alert.Labels["severity"]) {
+      case "critical":
+        emoji = "🔴"
+      case "warning":
+        emoji = "🟡"
+      case "info":
+        emoji = "🔵"
+      }
+
+      name := alert.Labels["alertname"]
+      if name == "" {
+        name = "Unknown"
+      }
+
+      summary := alert.Annotations["summary"]
+      if summary == "" {
+        summary = "No description"
+      }
+
+      namespace := alert.Labels["namespace"]
+      if namespace == "" {
+        namespace = alert.Labels["exported_namespace"]
+      }
+      if namespace == "" {
+        namespace = "unknown"
+      }
+
+      instance := alert.Labels["instance"]
+      if instance == "" {
+        instance = alert.Labels["pod"]
+      }
+      if instance == "" {
+        instance = "unknown"
+      }
+
+      return fmt.Sprintf("%s %s: %s (%s/%s)", emoji, name, summary, namespace, instance)
+    }
+
+    type NtfySenderInterface interface {
+      Send(message, title, priority string) error
+    }
+
+    type NtfySender struct {
+      url   string
+      token string
+    }
+
+    func NewNtfySender(url, token string) *NtfySender {
+      return &NtfySender{url: url, token: token}
+    }
+
+    func (s *NtfySender) Send(message, title, priority string) error {
+      payload := map[string]string{
+        "message":  message,
+        "title":    title,
+        "priority": priority,
+      }
+
+      body, err := json.Marshal(payload)
+      if err != nil {
+        return fmt.Errorf("failed to marshal JSON: %w", err)
+      }
+
+      req, err := http.NewRequest("POST", s.url, strings.NewReader(string(body)))
+      if err != nil {
+        return fmt.Errorf("failed to create request: %w", err)
+      }
+
+      req.Header.Set("Content-Type", "application/json")
+      if s.token != "" {
+        req.Header.Set("Authorization", "Bearer "+s.token)
+      }
+
+      resp, err := httpClient.Do(req)
+      if err != nil {
+        return fmt.Errorf("failed to send request: %w", err)
+      }
+      defer resp.Body.Close()
+
+      if resp.StatusCode >= 400 {
+        return fmt.Errorf("ntfy returned status %d", resp.StatusCode)
+      }
+
+      return nil
+    }
+
+    type WebhookHandler struct {
+      formatter *AlertFormatter
+      sender    NtfySenderInterface
+    }
+
+    func NewWebhookHandler(formatter *AlertFormatter, sender NtfySenderInterface) *WebhookHandler {
+      return &WebhookHandler{
+        formatter: formatter,
+        sender:    sender,
+      }
+    }
+
+    func (h *WebhookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+      if r.Method != http.MethodPost {
+        http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+        return
+      }
+
+      if r.URL.Path != "/webhook" {
+        http.Error(w, "not found", http.StatusNotFound)
+        return
+      }
+
+      var data AlertData
+      if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+        http.Error(w, "invalid JSON", http.StatusBadRequest)
+        return
+      }
+
+      if len(data.Alerts) == 0 {
+        w.WriteHeader(http.StatusOK)
+        return
+      }
+
+      status := data.Status
+      alertName := data.GroupLabels["alertname"]
+      if alertName == "" && len(data.Alerts) > 0 {
+        alertName = data.Alerts[0].Labels["alertname"]
+      }
+
+      var title, priority string
+      if status == "firing" {
+        title = fmt.Sprintf("Alert: %s", alertName)
+        priority = "high"
+      } else {
+        title = fmt.Sprintf("Resolved: %s", alertName)
+        priority = "default"
+      }
+
+      var messages []string
+      for _, alert := range data.Alerts {
+        messages = append(messages, h.formatter.Format(&alert))
+      }
+
+      message := strings.Join(messages, "\n")
+
+      if err := h.sender.Send(message, title, priority); err != nil {
+        log.Printf("failed to send ntfy: %v", err)
+        http.Error(w, "failed to send", http.StatusInternalServerError)
+        return
+      }
+
+      w.WriteHeader(http.StatusOK)
+    }
+
+    func main() {
+      formatter := NewAlertFormatter()
+      sender := NewNtfySender(ntfyURL, ntfyToken)
+      handler := NewWebhookHandler(formatter, sender)
+
+      mux := http.NewServeMux()
+      mux.Handle("/webhook", handler)
+
+      log.Printf("Starting alert-webhook on :5000")
+      if err := http.ListenAndServe(":5000", mux); err != nil {
+        log.Fatal(err)
+      }
+    }
+  main_test.go: |
+    package main
+
+    import (
+      "net/http"
+      "net/http/httptest"
+      "strings"
+      "testing"
+    )
+
+    func TestAlertFormatter_Format(t *testing.T) {
+      formatter := NewAlertFormatter()
+
+      tests := []struct {
+        name     string
+        alert    Alert
+        expected string
+      }{
+        {
+          name: "critical alert",
+          alert: Alert{
+            Labels: map[string]string{
+              "alertname": "NodeDown",
+              "severity":  "critical",
+              "namespace": "monitoring",
+              "instance":  "node-01",
+            },
+            Annotations: map[string]string{
+              "summary": "Node is down",
+            },
+          },
+          expected: "🔴 NodeDown: Node is down (monitoring/node-01)",
+        },
+        {
+          name: "warning alert",
+          alert: Alert{
+            Labels: map[string]string{
+              "alertname": "HighCPU",
+              "severity":  "warning",
+              "namespace": "production",
+              "instance":  "app-server",
+            },
+            Annotations: map[string]string{
+              "summary": "CPU usage above 80%",
+            },
+          },
+          expected: "🟡 HighCPU: CPU usage above 80% (production/app-server)",
+        },
+        {
+          name: "info alert",
+          alert: Alert{
+            Labels: map[string]string{
+              "alertname": "ConfigChanged",
+              "severity":  "info",
+            },
+            Annotations: map[string]string{
+              "summary": "Configuration was updated",
+            },
+          },
+          expected: "🔵 ConfigChanged: Configuration was updated (unknown/unknown)",
+        },
+      }
+
+      for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+          result := formatter.Format(&tt.alert)
+          if result != tt.expected {
+            t.Errorf("Format() = %q, want %q", result, tt.expected)
+          }
+        })
+      }
+    }
+
+    func TestWebhookHandler_ServeHTTP(t *testing.T) {
+      formatter := NewAlertFormatter()
+      sender := &MockNtfySender{}
+      handler := NewWebhookHandler(formatter, sender)
+
+      tests := []struct {
+        name           string
+        method         string
+        path           string
+        body           string
+        expectedStatus int
+        sendCalled     bool
+        expectedTitle  string
+      }{
+        {
+          name:           "POST to /webhook with firing alert",
+          method:         http.MethodPost,
+          path:           "/webhook",
+          body:           `{"status":"firing","alerts":[{"status":"firing","labels":{"alertname":"TestAlert","severity":"warning","namespace":"test"},"annotations":{"summary":"Test"}}],"groupLabels":{"alertname":"TestAlert"}}`,
+          expectedStatus: http.StatusOK,
+          sendCalled:     true,
+          expectedTitle:  "Alert: TestAlert",
+        },
+        {
+          name:           "POST to /webhook with resolved alert",
+          method:         http.MethodPost,
+          path:           "/webhook",
+          body:           `{"status":"resolved","alerts":[{"status":"resolved","labels":{"alertname":"TestAlert","severity":"warning"},"annotations":{"summary":"Test"}}],"groupLabels":{"alertname":"TestAlert"}}`,
+          expectedStatus: http.StatusOK,
+          sendCalled:     true,
+          expectedTitle:  "Resolved: TestAlert",
+        },
+        {
+          name:           "GET method not allowed",
+          method:         http.MethodGet,
+          path:           "/webhook",
+          body:           "",
+          expectedStatus: http.StatusMethodNotAllowed,
+          sendCalled:     false,
+        },
+        {
+          name:           "wrong path returns 404",
+          method:         http.MethodPost,
+          path:           "/other",
+          body:           "{}",
+          expectedStatus: http.StatusNotFound,
+          sendCalled:     false,
+        },
+        {
+          name:           "invalid JSON",
+          method:         http.MethodPost,
+          path:           "/webhook",
+          body:           "invalid",
+          expectedStatus: http.StatusBadRequest,
+          sendCalled:     false,
+        },
+        {
+          name:           "empty alerts",
+          method:         http.MethodPost,
+          path:           "/webhook",
+          body:           `{"status":"firing","alerts":[]}`,
+          expectedStatus: http.StatusOK,
+          sendCalled:     false,
+        },
+      }
+
+      for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+          sender.reset()
+
+          req := httptest.NewRequest(tt.method, tt.path, strings.NewReader(tt.body))
+          req.Header.Set("Content-Type", "application/json")
+          w := httptest.NewRecorder()
+
+          handler.ServeHTTP(w, req)
+
+          if w.Code != tt.expectedStatus {
+            t.Errorf("ServeHTTP() status = %d, want %d", w.Code, tt.expectedStatus)
+          }
+
+          if tt.sendCalled != sender.called {
+            t.Errorf("Send() called = %v, want %v", sender.called, tt.sendCalled)
+          }
+
+          if tt.sendCalled && tt.expectedTitle != "" && sender.lastTitle != tt.expectedTitle {
+            t.Errorf("Send() title = %q, want %q", sender.lastTitle, tt.expectedTitle)
+          }
+        })
+      }
+    }
+
+    type MockNtfySender struct {
+      called    bool
+      lastTitle string
+      lastMsg   string
+    }
+
+    func (m *MockNtfySender) reset() {
+      m.called = false
+      m.lastTitle = ""
+      m.lastMsg = ""
+    }
+
+    func (m *MockNtfySender) Send(message, title, priority string) error {
+      m.called = true
+      m.lastTitle = title
+      m.lastMsg = message
+      return nil
+    }
+
+    func TestNtfySender_Send(t *testing.T) {
+      server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        if r.Header.Get("Content-Type") != "application/json" {
+          t.Errorf("Content-Type = %q, want %q", r.Header.Get("Content-Type"), "application/json")
+        }
+        w.WriteHeader(http.StatusOK)
+      }))
+      defer server.Close()
+
+      sender := NewNtfySender(server.URL, "test-token")
+
+      err := sender.Send("test message", "test title", "high")
+      if err != nil {
+        t.Errorf("Send() error = %v", err)
+      }
+    }
+
+    func TestNtfySender_SendWithError(t *testing.T) {
+      server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.WriteHeader(http.StatusBadRequest)
+      }))
+      defer server.Close()
+
+      sender := NewNtfySender(server.URL, "")
+
+      err := sender.Send("test message", "test title", "high")
+      if err == nil {
+        t.Error("Send() expected error, got nil")
+      }
+    }
