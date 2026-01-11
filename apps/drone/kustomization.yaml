@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - rbac.yaml
   - configmap.yaml
-  - secret.yaml
+  - sealed-secret.yaml
   - deployment.yaml
   - ingress.yaml
 namespace: drone
