@@ -6,8 +6,6 @@ metadata:
 data:
   CONFIG_YAML: |
     log.level: info
-    host:
-      unix_socket_name: /root/.docker/run/docker.sock
     runner:
       capacity: 1
       labels:
@@ -15,5 +13,6 @@ data:
         - self-hosted
         - linux
         - global
+      executor: shell
 
 
