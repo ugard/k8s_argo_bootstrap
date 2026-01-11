@@ -17,16 +17,6 @@ spec:
     spec:
       serviceAccountName: gitea-actions-runner
       containers:
-      - name: dind
-        image: docker:latest
-        command:
-          - dockerd
-          - --host=unix:///var/run/docker.sock
-        securityContext:
-          privileged: true
-        volumeMounts:
-        - name: docker-state
-          mountPath: /var/run
       - name: runner
         image: gitea/act_runner:latest
         args:
@@ -41,12 +31,14 @@ spec:
             secretKeyRef:
               name: gitea-actions-runner
               key: GITEA_RUNNER_REGISTRATION_TOKEN
+        - name: DOCKER_BUILDKIT
+          value: "0"
         volumeMounts:
         - name: config
           mountPath: /config.yaml
           subPath: config.yaml
-        - name: docker-state
-          mountPath: /var/run
+        - name: kaniko-cache
+          mountPath: /kaniko/.docker
         resources:
           requests:
             cpu: 100m
@@ -58,5 +50,5 @@ spec:
       - name: config
         configMap:
           name: gitea-actions-runner
-      - name: docker-state
+      - name: kaniko-cache
         emptyDir: {}
