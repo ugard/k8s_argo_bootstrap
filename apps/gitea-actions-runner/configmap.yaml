@@ -4,7 +4,7 @@ metadata:
   name: gitea-actions-runner
   namespace: gitea
 data:
-  CONFIG_YAML: |
+  config.yaml: |
     log.level: info
     runner:
       capacity: 1
