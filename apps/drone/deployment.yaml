@@ -34,7 +34,7 @@ spec:
       serviceAccountName: drone
       containers:
       - name: drone
-        image: drone/drone:2
+        image: drone/drone:latest
         ports:
         - containerPort: 80
           name: http
