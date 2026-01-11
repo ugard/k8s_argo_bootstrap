@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: drone-runner
+  namespace: drone
+data:
+  DRONE_RPC_HOST: "drone"
+  DRONE_RPC_PROTO: "http"
+  DRONE_LOG_LEVEL: "info"
+  DRONE_KUBERNETES_ENABLED: "true"
+  DRONE_KUBERNETES_NAMESPACE: "drone-runner"
+  DRONE_KUBERNETES_PRIVILEGED: "false"
+  DRONE_KUBERNETES_VOLUME_SIZE_LIMIT: "1Gi"

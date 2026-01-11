@@ -1,0 +1,19 @@
+{
+  "kind": "SealedSecret",
+  "apiVersion": "bitnami.com/v1alpha1",
+  "metadata": {
+    "name": "drone",
+    "namespace": "drone"
+  },
+  "spec": {
+    "template": {
+      "metadata": {
+        "name": "drone",
+        "namespace": "drone"
+      }
+    },
+    "encryptedData": {
+      "DRONE_RPC_SECRET": "AgC3bLNbpsPOd4cstHYMBpNprZQlHqTmaoEswm8YU8VErZGQAhhfA0719Vam4gYOvXwOT/J3PaH4iNRi66Kpm1eCugoLFBnmZBc0++kx418evVUTq1h1mL3PhjP61ZayflMAW9sRz2f95Ldqixyb0VyZub9oJ+4+uzT4MWGAb55cgyBpMlM8uq8Zrl91lGRtjydjPpUmvJGS1DlCWc3XtJNQUaevl1hHDk9sRcG5vAUdbTdQRNHQn63QOyO1xHrGQvmPw9MdIsioRQxP8ULDxr53R3u5AzrUrW93BDb5z7FxJXmAo2d4mbTLrt4jXguv1T03ta6pcmeXtDbjj6zIgoIGA+Cbpo+WOl0+dtExpXFiGuQx4/U8yTcliXp9pWT7uQ7ew/ewcakPqpt6bI0kBvpCeDFoM2B2+ThpUnC+rWcUX/RBHbQiW9A0twJX5rcSiuxhD2aC7nMXSHFM0n5mBpxRnzL41hyIHpNhlW0qP9yRYNutAuerGeTx92D9KdlXNRBM+9+36btMq9CPfrBiow04HAr/k5FTMNED4t/p/w15hx+x9ZzaIX268qBK2VIaMVAAzw8LBPD2B/13g7W4H3bfAm7Ang/IkxdLARLjoS4/6uJrBoJtiHTWaOPjGLIazXU4W0GBtA0gl+fG+u8HqeiwI6zcCrPCvwDKMvax6ZSDG188hW96WFsW66AjWLo6Gu9HdhEasT3q6qX0MhALdcKQRKgIR4K7DVQiPODpg7cCrg=="
+    }
+  }
+}

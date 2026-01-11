@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: drone
+  namespace: drone
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: drone.ugard.mywire.org
+    http:
+      paths:
+      - path: "/"
+        pathType: Prefix
+        backend:
+          service:
+            name: drone
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - drone.ugard.mywire.org
+    secretName: tls-drone-ingress-http

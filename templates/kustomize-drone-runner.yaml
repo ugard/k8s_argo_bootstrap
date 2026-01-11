@@ -1,15 +1,15 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: keda
+  name: kustomize-drone-runner
   namespace: argocd
 spec:
   destination:
-    namespace: keda
+    namespace: drone
     server: {{ .Values.spec.destination.server }}
   project: default
   source:
-    path: apps/keda
+    path: apps/drone-runner
     repoURL: {{ .Values.spec.source.repoURL }}
     targetRevision: {{ .Values.spec.source.targetRevision }}
   syncPolicy:
