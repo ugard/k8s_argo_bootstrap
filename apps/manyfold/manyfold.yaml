@@ -148,10 +148,10 @@ metadata:
   name: manyfold
   namespace: manyfold
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: manyfold.ugard.mywire.org
+  - host: manyfold.ugard.win
     http:
       paths:
         - path: "/"
@@ -163,8 +163,8 @@ spec:
                 number: 3214
   tls:
   - hosts:
-    - manyfold.ugard.mywire.org
-    secretName: tls-manyfold-ingress-http
+    - manyfold.ugard.win
+    secretName: tls-manyfold-http
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
