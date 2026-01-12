@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflared
+  namespace: argocd
+spec:
+  destination:
+    namespace: cloudflared
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  sources:
+  - chart: cloudflared
+    repoURL: https://community-charts.github.io/helm-charts
+    targetRevision: 2.2.4
+    helm:
+      releaseName: cloudflared
+      valuesFrom:
+      - secretKeyRef:
+          name: cloudflared-tunnel-creds
+          namespace: cloudflared
+      valuesObject:
+        replicaCount: 1
+        tunnelConfig:
+          name: "manyfold-tunnel"
+          logLevel: "info"
+        ingress:
+          - hostname: manyfold.ugard.win
+            service: http://manyfold.manyfold.svc.cluster.local:3214
+          - service: http_status:404
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "128Mi"
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
