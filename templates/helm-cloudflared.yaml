@@ -19,7 +19,8 @@ spec:
           name: cloudflared-tunnel-creds
           namespace: cloudflared
       valuesObject:
-        replicaCount: 1
+        replica:
+          count: 1
         tunnelConfig:
           name: "manyfold-tunnel"
           logLevel: "info"
