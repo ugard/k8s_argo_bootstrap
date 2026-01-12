@@ -1,3 +1,4 @@
+---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -16,3 +17,20 @@ spec:
             secretName: dynu-secret
           groupName: com.github.dopingus.cert-manager-webhook-dynu
           solverName: dynu
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-cloudflare
+spec:
+  acme:
+    email: lkrzyzak@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-cloudflare-secret
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+    - dns01:
+        cloudflare:
+          apiTokenSecretRef:
+            name: cloudflare-secret
+            key: api-token
