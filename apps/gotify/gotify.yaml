@@ -1,0 +1,105 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gotify-pvc
+  namespace: gotify
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: gotify
+  name: gotify
+  namespace: gotify
+spec:
+  selector:
+    matchLabels:
+      app: gotify
+  template:
+    metadata:
+      labels:
+        app: gotify
+    spec:
+      containers:
+        - name: gotify
+          image: gotify/server:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http-gotify
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 2
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 80
+            timeoutSeconds: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /app/data
+              name: gotify-data
+      volumes:
+        - name: gotify-data
+          persistentVolumeClaim:
+            claimName: gotify-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gotify
+  namespace: gotify
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: http-gotify
+  selector:
+    app: gotify
+  sessionAffinity: None
+  # type: LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gotify
+  namespace: gotify
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  rules:
+  - host: gotify.ugard.mywire.org
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: gotify
+              port:
+                number: 80
+  tls:
+  - hosts:
+    - gotify.ugard.mywire.org
+    secretName: tls-gotify-ingress-http
