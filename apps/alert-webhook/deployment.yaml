@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: webhook
-        image: registry.ugard.mywire.org/alert-webhook:v0.1.0
+        image: registry.ugard.mywire.org/alert-webhook:3592b75ed4f8763cc614ef4213b67702464d1f8f
         ports:
         - containerPort: 5000
         env:
