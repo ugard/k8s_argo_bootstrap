@@ -54,11 +54,11 @@ metadata:
   name: admin-frontend
   namespace: appflowy
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
     traefik.ingress.kubernetes.io/router.middlewares: appflowy-webcors@kubernetescrd
-spec:
+  spec:
   rules:
-  - host: admin.appflowy.ugard.mywire.org
+  - host: admin.appflowy.ugard.win
     http:
       paths:
         - path: "/"
@@ -70,7 +70,7 @@ spec:
                 number: 80
   tls:
   - hosts:
-    - admin.appflowy.ugard.mywire.org
+    - admin.appflowy.ugard.win
     secretName: tls-admin-appflowy-ingress-http
 ---
 apiVersion: v1
@@ -111,9 +111,9 @@ spec:
         - containerPort: 80
         env:
         - name: AF_BASE_URL
-          value: https://appflowy.ugard.mywire.org/
+          value: https://appflowy.ugard.win/
         - name: AF_GOTRUE_URL
-          value: https://appflowy.ugard.mywire.org/gotrue
+          value: https://appflowy.ugard.win/gotrue
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -121,11 +121,11 @@ metadata:
   name: appflowy-web
   namespace: appflowy
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
     traefik.ingress.kubernetes.io/router.middlewares: appflowy-webcors@kubernetescrd
-spec:
+  spec:
   rules:
-  - host: web.appflowy.ugard.mywire.org
+  - host: web.appflowy.ugard.win
     http:
       paths:
         - path: "/"
@@ -137,7 +137,7 @@ spec:
                 number: 80
   tls:
   - hosts:
-    - web.appflowy.ugard.mywire.org
+    - web.appflowy.ugard.win
     secretName: tls-web-appflowy-ingress-http
 ---
 apiVersion: traefik.io/v1alpha1
@@ -153,7 +153,7 @@ spec:
     accessControlAllowHeaders:
       - "*"
     accessControlAllowOriginList:
-      - "https://appflowy.ugard.mywire.org"
-      - "https://web.appflowy.ugard.mywire.org"
+      - "https://appflowy.ugard.win"
+      - "https://web.appflowy.ugard.win"
     accessControlMaxAge: 100
     addVaryHeader: true

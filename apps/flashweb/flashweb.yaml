@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: flashweb
-        image: registry.ugard.mywire.org/flashweb:1
+        image: registry.ugard.win/flashweb:1
         ports:
         - containerPort: 9876
           name: http
@@ -42,10 +42,10 @@ metadata:
   name: flashweb
   namespace: flashweb
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: flashweb.ugard.mywire.org
+  - host: flashweb.ugard.win
     http:
       paths:
         - path: "/"
@@ -57,5 +57,5 @@ spec:
                 number: 9876
   tls:
   - hosts:
-    - flashweb.ugard.mywire.org
+    - flashweb.ugard.win
     secretName: tls-flashweb-ingress-http

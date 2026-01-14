@@ -86,10 +86,10 @@ metadata:
   name: gotify
   namespace: gotify
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: gotify.ugard.mywire.org
+  - host: gotify.ugard.win
     http:
       paths:
         - path: "/"
@@ -101,5 +101,5 @@ spec:
                 number: 80
   tls:
   - hosts:
-    - gotify.ugard.mywire.org
+    - gotify.ugard.win
     secretName: tls-gotify-ingress-http

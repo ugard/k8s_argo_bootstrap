@@ -121,7 +121,7 @@ spec:
         - name: PAPERLESS_AUTO_LOGIN_USERNAME
           value: "admin"
         - name: PAPERLESS_URL
-          value: https://paperless.ugard.mywire.org
+          value: https://paperless.ugard.win
         - name: PAPERLESS_TIME_ZONE
           value: Europe/Warsaw
         - name: PAPERLESS_DBHOST

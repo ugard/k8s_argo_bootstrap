@@ -45,10 +45,10 @@ metadata:
   name: prowlarr
   namespace: rtorrent
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: prowlarr.ugard.mywire.org
+  - host: prowlarr.ugard.win
     http:
       paths:
         - path: "/"
@@ -60,7 +60,7 @@ spec:
                 number: 9696
   tls:
   - hosts:
-    - prowlarr.ugard.mywire.org
+    - prowlarr.ugard.win
     secretName: tls-prowlarr-ingress-http
 ---
 apiVersion: v1

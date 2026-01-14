@@ -89,7 +89,7 @@ spec:
         openebs.io/nodeid: talos-95t-m8m
       containers:
         - name: zrepl
-          image: registry.ugard.mywire.org/zrepl:latest
+          image: registry.ugard.win/zrepl:latest
           volumeMounts:
             - name: config
               mountPath: /etc/zrepl/zrepl.yaml
@@ -131,7 +131,7 @@ spec:
         openebs.io/nodeid: talos-jly-e8b
       containers:
         - name: zrepl
-          image: registry.ugard.mywire.org/zrepl:latest
+          image: registry.ugard.win/zrepl:latest
           volumeMounts:
             - name: config
               mountPath: /etc/zrepl/zrepl.yaml

@@ -103,10 +103,10 @@ metadata:
   name: otgw
   namespace: hass
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: otgw.ugard.mywire.org
+  - host: otgw.ugard.win
     http:
       paths:
         - path: "/"
@@ -118,5 +118,5 @@ spec:
                 number: 8080
   tls:
   - hosts:
-    - otgw.ugard.mywire.org
+    - otgw.ugard.win
     secretName: tls-otgw-ingress-http

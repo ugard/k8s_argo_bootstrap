@@ -79,10 +79,10 @@ metadata:
   name: syncthing
   namespace: syncthing
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: syncthing.ugard.mywire.org
+  - host: syncthing.ugard.win
     http:
       paths:
         - path: "/"
@@ -94,5 +94,5 @@ spec:
                 number: 8384
   tls:
   - hosts:
-    - syncthing.ugard.mywire.org
+    - syncthing.ugard.win
     secretName: tls-syncthing-ingress-http

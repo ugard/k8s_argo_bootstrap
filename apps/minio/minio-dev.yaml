@@ -61,10 +61,10 @@ metadata:
   name: minio
   namespace: minio
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: minio.ugard.mywire.org
+  - host: minio.ugard.win
     http:
       paths:
         - path: "/"
@@ -76,5 +76,5 @@ spec:
                 number: 80
   tls:
   - hosts:
-    - minio.ugard.mywire.org
+    - minio.ugard.win
     secretName: tls-minio-ingress-http

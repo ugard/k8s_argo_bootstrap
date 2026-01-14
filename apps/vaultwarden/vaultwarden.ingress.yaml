@@ -4,10 +4,10 @@ metadata:
   name: vaultwarden
   namespace: vaultwarden
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: vault.ugard.mywire.org
+  - host: vault.ugard.win
     http:
       paths:
         - path: "/"
@@ -19,5 +19,5 @@ spec:
                 number: 80
   tls:
   - hosts:
-    - vault.ugard.mywire.org
+    - vault.ugard.win
     secretName: tls-vault-ingress-http

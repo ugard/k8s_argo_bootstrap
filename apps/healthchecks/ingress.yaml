@@ -4,10 +4,10 @@ metadata:
   name: healthchecks
   namespace: healthchecks
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: hc.ugard.mywire.org
+  - host: hc.ugard.win
     http:
       paths:
         - path: "/"
@@ -19,5 +19,5 @@ spec:
                 number: 80
   tls:
   - hosts:
-    - hc.ugard.mywire.org
+    - hc.ugard.win
     secretName: tls-healthchecks-ingress-http

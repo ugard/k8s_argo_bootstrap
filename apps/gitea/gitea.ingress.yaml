@@ -4,10 +4,10 @@ metadata:
   name: gitea-web
   namespace: gitea
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: gitea.ugard.mywire.org
+  - host: gitea.ugard.win
     http:
       paths:
         - path: "/"
@@ -19,5 +19,5 @@ spec:
                 number: 80
   tls:
   - hosts:
-    - gitea.ugard.mywire.org
+    - gitea.ugard.win
     secretName: tls-gitea-ingress-http

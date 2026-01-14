@@ -86,7 +86,7 @@ spec:
         - name: APPFLOWY_GOTRUE_BASE_URL
           value: http://gotrue:9999
         - name: APPFLOWY_GOTRUE_EXT_URL
-          value: https://appflowy.ugard.mywire.org/gotrue
+          value: https://appflowy.ugard.win/gotrue
         - name: AI_SERVER_HOST
           value: ai
         - name:  AI_SERVER_PORT
@@ -102,7 +102,7 @@ spec:
         - name:  RUST_LOG
           value: debug
         - name:  APPFLOWY_WEB_URL
-          value: https://web.appflowy.ugard.mywire.org/
+          value: https://web.appflowy.ugard.win/
 #       - APPFLOWY_S3_REGION=${APPFLOWY_S3_REGION}
 ---
 apiVersion: networking.k8s.io/v1
@@ -111,11 +111,11 @@ metadata:
   name: appflowy-cloud
   namespace: appflowy
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
     traefik.ingress.kubernetes.io/router.middlewares: appflowy-webcors@kubernetescrd
 spec:
   rules:
-  - host: appflowy.ugard.mywire.org
+  - host: appflowy.ugard.win
     http:
       paths:
         - path: "/"
@@ -127,7 +127,7 @@ spec:
                 number: 8000
   tls:
   - hosts:
-    - appflowy.ugard.mywire.org
+    - appflowy.ugard.win
     secretName: tls-appflowy-ingress-http
 
 # appflowy_cloud:

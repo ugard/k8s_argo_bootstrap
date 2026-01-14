@@ -67,10 +67,10 @@ metadata:
   name: hoarder
   namespace: hoarder
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: hoarder.ugard.mywire.org
+  - host: hoarder.ugard.win
     http:
       paths:
         - path: "/"
@@ -82,5 +82,5 @@ spec:
                 number: 3000
   tls:
   - hosts:
-    - hoarder.ugard.mywire.org
+    - hoarder.ugard.win
     secretName: tls-hoarder-ingress-http

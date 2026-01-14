@@ -98,10 +98,10 @@ metadata:
   name: rtorrent
   namespace: rtorrent
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: rtorrent.ugard.mywire.org
+  - host: rtorrent.ugard.win
     http:
       paths:
         - path: "/"
@@ -113,5 +113,5 @@ spec:
                 number: 3030
   tls:
   - hosts:
-    - rtorrent.ugard.mywire.org
+    - rtorrent.ugard.win
     secretName: tls-rtorrent-ingress-http

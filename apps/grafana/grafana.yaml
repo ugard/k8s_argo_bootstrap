@@ -106,10 +106,10 @@ metadata:
   name: grafana
   namespace: grafana
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: grafana.ugard.mywire.org
+  - host: grafana.ugard.win
     http:
       paths:
         - path: "/"
@@ -121,5 +121,5 @@ spec:
                 number: 3000
   tls:
   - hosts:
-    - grafana.ugard.mywire.org
+    - grafana.ugard.win
     secretName: tls-grafana-ingress-http

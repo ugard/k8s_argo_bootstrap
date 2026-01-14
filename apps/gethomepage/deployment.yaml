@@ -3,10 +3,10 @@ kind: Ingress
 metadata:
   name: homepage
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: home.ugard.mywire.org
+  - host: home.ugard.win
     http:
       paths:
         - path: "/"
@@ -18,7 +18,7 @@ spec:
                 number: 3000
   tls:
   - hosts:
-    - home.ugard.mywire.org
+    - home.ugard.win
     secretName: tls-home-ingress-http
 ---
 apiVersion: v1
@@ -213,7 +213,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
-              value: home.ugard.mywire.org # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+              value: home.ugard.win # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
           ports:
             - name: http
               containerPort: 3000

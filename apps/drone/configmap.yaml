@@ -4,8 +4,8 @@ metadata:
   name: drone
   namespace: drone
 data:
-  DRONE_GITEA_SERVER: "https://gitea.ugard.mywire.org"
-  DRONE_SERVER_HOST: "drone.ugard.mywire.org"
+  DRONE_GITEA_SERVER: "https://gitea.ugard.win"
+  DRONE_SERVER_HOST: "drone.ugard.win"
   DRONE_SERVER_PROTO: "https"
   DRONE_TLS_AUTOCERT: "false"
   DRONE_DATABASE_DRIVER: "postgres"

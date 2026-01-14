@@ -3,16 +3,16 @@ image:
 ingress:
   enabled: true
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
   hosts:
-    - host: jellyfin.ugard.mywire.org
+    - host: jellyfin.ugard.win
       paths:
         - path: /
           pathType: Prefix
   tls:
     - secretName: tls-jellyfin-ingress-http
       hosts:
-        - jellyfin.ugard.mywire.org
+        - jellyfin.ugard.win
 service:
   type: LoadBalancer
   port: 8096
@@ -26,7 +26,7 @@ volumes:
 jellyfin:
   env:
     - name: JELLYFIN_PublishedServerUrl
-      value: jellyfin.ugard.mywire.org
+      value: jellyfin.ugard.win
 persistence:
   media:
     # -- set to false to use emptyDir

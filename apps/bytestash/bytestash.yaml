@@ -71,10 +71,10 @@ metadata:
   name: bytestash
   namespace: bytestash
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: bytestash.ugard.mywire.org
+  - host: bytestash.ugard.win
     http:
       paths:
         - path: "/"
@@ -86,5 +86,5 @@ spec:
                 number: 5000
   tls:
   - hosts:
-    - bytestash.ugard.mywire.org
+    - bytestash.ugard.win
     secretName: tls-bytestash-ingress-http

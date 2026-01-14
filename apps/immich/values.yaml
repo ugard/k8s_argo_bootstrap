@@ -80,14 +80,14 @@ server:
       annotations:
         # proxy-body-size is set to 0 to remove the body limit on file uploads
         nginx.ingress.kubernetes.io/proxy-body-size: "0"
-        cert-manager.io/cluster-issuer: "letsencrypt"
+        cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
       hosts:
-        - host: immich.ugard.mywire.org
+        - host: immich.ugard.win
           paths:
             - path: "/"
       tls:
       - hosts:
-          - immich.ugard.mywire.org
+          - immich.ugard.win
         secretName: tls-immich-ingress-http
   probes:
     liveness:

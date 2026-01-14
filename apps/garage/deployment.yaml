@@ -112,10 +112,10 @@ kind: Ingress
 metadata:
   name: garage
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: garage.ugard.mywire.org
+  - host: garage.ugard.win
     http:
       paths:
         - path: "/"
@@ -127,7 +127,7 @@ spec:
                 number: 3900
   tls:
   - hosts:
-    - garage.ugard.mywire.org
+    - garage.ugard.win
     secretName: tls-garage-ingress-http
 ---
 apiVersion: monitoring.coreos.com/v1

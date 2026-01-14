@@ -4,10 +4,10 @@ metadata:
   name: lychee
   namespace: lychee
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: lychee.ugard.mywire.org
+  - host: lychee.ugard.win
     http:
       paths:
         - path: "/"
@@ -19,5 +19,5 @@ spec:
                 number: 80
   tls:
   - hosts:
-    - lychee.ugard.mywire.org
+    - lychee.ugard.win
     secretName: tls-lychee-ingress-http

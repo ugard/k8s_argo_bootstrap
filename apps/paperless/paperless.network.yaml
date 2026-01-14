@@ -54,10 +54,10 @@ metadata:
   name: paperless
   namespace: paperless
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: paperless.ugard.mywire.org
+  - host: paperless.ugard.win
     http:
       paths:
         - path: "/"
@@ -69,5 +69,5 @@ spec:
                 number: 8000
   tls:
   - hosts:
-    - paperless.ugard.mywire.org
+    - paperless.ugard.win
     secretName: tls-paperless-ingress-http

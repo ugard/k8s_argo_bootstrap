@@ -63,10 +63,10 @@ kind: Ingress
 metadata:
   name: immich-kiosk
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: kiosk.ugard.mywire.org
+  - host: kiosk.ugard.win
     http:
       paths:
         - path: "/"
@@ -78,5 +78,5 @@ spec:
                 number: 3000
   tls:
   - hosts:
-    - kiosk.ugard.mywire.org
+    - kiosk.ugard.win
     secretName: tls-kiosk-ingress-http

@@ -5,15 +5,15 @@ server:
 ingress:
   enabled: true
   annotations:
-      cert-manager.io/cluster-issuer: "letsencrypt"
+      cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
   hosts:
-  - host: nodered.ugard.mywire.org
+  - host: nodered.ugard.win
     paths:
     - path: /
       pathType: Prefix
   tls:
   - hosts:
-    - nodered.ugard.mywire.org
+    - nodered.ugard.win
     secretName: tls-nodered-ingress-http
     certificate:
       enabled: false

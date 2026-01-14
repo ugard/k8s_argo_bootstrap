@@ -31,7 +31,7 @@ spec:
             ## Annotations for Grafana Ingress
             ##
             annotations:
-              cert-manager.io/cluster-issuer: letsencrypt
+              cert-manager.io/cluster-issuer: letsencrypt-cloudflare
               # kubernetes.io/ingress.class: nginx
               # kubernetes.io/tls-acme: "true"
 
@@ -45,7 +45,7 @@ spec:
             # hosts:
             #   - grafana.domain.com
             hosts:
-              - prom.ugard.mywire.org
+              - prom.ugard.win
 
             ## Path for grafana ingress
             path: /
@@ -56,7 +56,7 @@ spec:
             tls:
               - secretName: prom-general-tls
                 hosts:
-                - prom.ugard.mywire.org
+                - prom.ugard.win
 
             # # To make Grafana persistent (Using Statefulset)
             # #

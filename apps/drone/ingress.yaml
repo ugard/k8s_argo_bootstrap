@@ -4,10 +4,10 @@ metadata:
   name: drone
   namespace: drone
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: drone.ugard.mywire.org
+  - host: drone.ugard.win
     http:
       paths:
       - path: "/"
@@ -19,5 +19,5 @@ spec:
               number: 80
   tls:
   - hosts:
-    - drone.ugard.mywire.org
+    - drone.ugard.win
     secretName: tls-drone-ingress-http

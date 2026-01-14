@@ -21,16 +21,16 @@ spec:
           enabled: "true"
           className: "kustomize-traefik"
           annotations:
-            cert-manager.io/cluster-issuer: "letsencrypt"
+            cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
           pathtype: Prefix
           hosts:
-          - host: registry.ugard.mywire.org
+          - host: registry.ugard.win
             paths:
             - path: /
           tls:
             - secretName: registry-ingress-tls
               hosts:
-                - registry.ugard.mywire.org
+                - registry.ugard.win
         persistence: "true"
         pvc:
           create: "true"

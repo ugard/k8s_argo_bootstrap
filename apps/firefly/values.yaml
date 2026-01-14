@@ -7,10 +7,10 @@ image:
 ingress:
   enabled: true
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
   hosts:
-  - firefly.ugard.mywire.org
+  - firefly.ugard.win
   tls:
   - hosts:
-    - firefly.ugard.mywire.org
+    - firefly.ugard.win
     secretName: tls-firefly-ingress-http

@@ -39,7 +39,7 @@ spec:
                   name: healthchecks-db
                   key: DB_PASSWORD
             - name: SITE_ROOT
-              value: "https://hc.ugard.mywire.org"
+              value: "https://hc.ugard.win"
             - name: SITE_NAME
               value: "My Healthchecks"
             - name: DEBUG

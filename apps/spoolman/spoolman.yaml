@@ -55,10 +55,10 @@ metadata:
   name: spoolman
   namespace: spoolman
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
 spec:
   rules:
-  - host: spoolman.ugard.mywire.org
+  - host: spoolman.ugard.win
     http:
       paths:
         - path: "/"
@@ -70,5 +70,5 @@ spec:
                 number: 7912
   tls:
   - hosts:
-    - spoolman.ugard.mywire.org
+    - spoolman.ugard.win
     secretName: tls-spoolman-ingress-http
