@@ -23,14 +23,14 @@ spec:
             main:
               enabled: true
               annotations:
-                cert-manager.io/cluster-issuer: "letsencrypt"
+                cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
               hosts:
-                - host: vikunja.ugard.mywire.org
+                - host: vikunja.ugard.win
                   paths:
                     - path: /
               tls:
                 - hosts:
-                  - vikunja.ugard.mywire.org
+                  - vikunja.ugard.win
                   secretName: tls-vikunja-ingress-http
           envFrom:
           - secretRef:
