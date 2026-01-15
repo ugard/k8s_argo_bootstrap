@@ -1,13 +1,7 @@
-image:
-  tag: latest
 env:
   DRONE_RPC_HOST: "drone"
   DRONE_RPC_PROTO: "http"
-  DRONE_LOG_LEVEL: "info"
-  DRONE_KUBERNETES_ENABLED: "true"
-  DRONE_KUBERNETES_NAMESPACE: "drone"
-  DRONE_KUBERNETES_PRIVILEGED: "false"
-  DRONE_KUBERNETES_VOLUME_SIZE_LIMIT: "1Gi"
+  DRONE_NAMESPACE_DEFAULT: "drone"
 resources:
   requests:
     cpu: 100m
