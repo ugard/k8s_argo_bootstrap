@@ -1,0 +1,28 @@
+image:
+  tag: latest
+env:
+  DRONE_GITEA_SERVER: "https://gitea.ugard.win"
+  DRONE_SERVER_HOST: "drone.ugard.win"
+  DRONE_SERVER_PROTO: "https"
+  DRONE_TLS_AUTOCERT: "false"
+  DRONE_DATABASE_DRIVER: "postgres"
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
+  hosts:
+    - host: drone.ugard.win
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: tls-drone-ingress-http
+      hosts:
+        - drone.ugard.win
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

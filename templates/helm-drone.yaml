@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: drone
+  namespace: argocd
+spec:
+  destination:
+    namespace: drone
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  sources:
+    - chart: drone
+      repoURL: https://charts.drone.io
+      targetRevision: 0.4.3
+      helm:
+        release-name: drone
+        valueFiles:
+          - $values/apps/drone/values.yaml
+    - chart: drone-runner-kube
+      repoURL: https://charts.drone.io
+      targetRevision: 0.4.3
+      helm:
+        release-name: drone-runner
+        valueFiles:
+          - $values/apps/drone/values-runner.yaml
+    - repoURL: {{ .Values.spec.source.repoURL }}
+      targetRevision: {{ .Values.spec.source.targetRevision }}
+      ref: values
+    - repoURL: {{ .Values.spec.source.repoURL }}
+      targetRevision: {{ .Values.spec.source.targetRevision }}
+      path: apps/drone
