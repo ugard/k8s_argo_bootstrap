@@ -4,6 +4,8 @@ env:
   DRONE_SERVER_PROTO: "https"
   DRONE_TLS_AUTOCERT: "false"
   DRONE_DATABASE_DRIVER: "postgres"
+extraSecretNamesForEnvFrom:
+  - drone
 ingress:
   enabled: true
   annotations:
