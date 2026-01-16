@@ -6,6 +6,9 @@ env:
   DRONE_DATABASE_DRIVER: "postgres"
 service:
   port: 80
+serviceAccount:
+  create: false
+  name: drone
 extraSecretNamesForEnvFrom:
   - drone
 ingress:
