@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: picoshare
+  namespace: picoshare
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: picoshare
+  template:
+    metadata:
+      labels:
+        app: picoshare
+    spec:
+      containers:
+      - name: picoshare
+        image: mtlynch/picoshare:latest
+        ports:
+        - containerPort: 4001
+          name: http
+        envFrom:
+        - secretRef:
+            name: picoshare-env
+        env:
+        - name: PS_BEHIND_PROXY
+          value: "true"
+        - name: PORT
+          value: "4001"
+        - name: PS_DB
+          value: /data/store.db
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 4001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 4001
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: picoshare-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: picoshare
+  namespace: picoshare
+spec:
+  ports:
+  - name: http
+    port: 4001
+    protocol: TCP
+    targetPort: 4001
+  selector:
+    app: picoshare
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: picoshare
+  namespace: picoshare
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
+spec:
+  rules:
+  - host: pico.ugard.win
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: picoshare
+              port:
+                number: 4001
+  tls:
+  - hosts:
+    - pico.ugard.win
+    secretName: tls-picoshare-ingress-http
