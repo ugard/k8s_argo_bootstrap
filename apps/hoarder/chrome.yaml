@@ -14,7 +14,10 @@ spec:
     spec:
       containers:
         - name: chrome
-          image: gcr.io/zenika-hub/alpine-chrome:130
+          image: gcr.io/zenika-hub/alpine-chrome:124
+          # Note: 124 is the latest available version. Version 130 doesn't exist.
+          # If browser is not needed, remove BROWSER_WEB_URL from hoarder.yaml
+          # to use plain HTTP requests instead (no screenshots/javascript execution)
           command:
             - chromium-browser
             - --headless
