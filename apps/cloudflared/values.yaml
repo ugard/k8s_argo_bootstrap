@@ -1,6 +1,23 @@
+replica:
+  count: 1
+tunnelConfig:
+  name: "manyfold-tunnel"
+  logLevel: "info"
+tunnelSecrets:
+  existingConfigJsonFileSecret:
+    name: cloudflared-config-json
+  existingPemFileSecret:
+    name: cloudflared-cert-pem
 ingress:
   - hostname: manyfold.ugard.win
     service: http://manyfold.manyfold.svc.cluster.local:3214
   - hostname: example.com
     service: http://traefik.kube-system.svc.cluster.local:80
   - service: http_status:404
+resources:
+  limits:
+    cpu: "200m"
+    memory: "128Mi"
+  requests:
+    cpu: "100m"
+    memory: "64Mi"
