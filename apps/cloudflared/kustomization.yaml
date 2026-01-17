@@ -4,4 +4,3 @@ resources:
   - sealed_secret_config.yaml
   - sealed_secret_cert.yaml
   - namespace.yaml
-  - values.yaml
