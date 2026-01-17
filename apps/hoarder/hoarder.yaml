@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: ghcr.io/hoarder-app/hoarder:0.21.0
+          image: ghcr.io/karakeep-app/karakeep:0.30.0
           ports:
             - containerPort: 3000
           env:
@@ -24,6 +24,10 @@ spec:
               value: http://chrome:9222
             - name: DATA_DIR
               value: /data
+            - name: DB_WAL_MODE
+              value: "true"
+            - name: LOG_LEVEL
+              value: "notice"
             # Add OPENAI_API_KEY to the ConfigMap if necessary
           volumeMounts:
             - mountPath: /data
