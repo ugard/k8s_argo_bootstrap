@@ -1,0 +1,6 @@
+ingress:
+  - hostname: manyfold.ugard.win
+    service: http://manyfold.manyfold.svc.cluster.local:3214
+  - hostname: example.com
+    service: http://traefik.kube-system.svc.cluster.local:80
+  - service: http_status:404
