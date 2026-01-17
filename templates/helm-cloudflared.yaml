@@ -14,8 +14,6 @@ spec:
     targetRevision: 2.2.4
     helm:
       releaseName: cloudflared
-      valueFiles:
-        - $values/apps/cloudflared/values.yaml
       valuesObject:
         replica:
           count: 1
@@ -27,6 +25,10 @@ spec:
             name: cloudflared-config-json
           existingPemFileSecret:
             name: cloudflared-cert-pem
+        ingress:
+          - hostname: manyfold.ugard.win
+            service: http://manyfold.manyfold.svc.cluster.local:3214
+          - service: http_status:404
         resources:
           limits:
             cpu: "200m"
