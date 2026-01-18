@@ -32,6 +32,8 @@ spec:
           value: "4000"
         - name: PORT_FRONTEND
           value: "3000"
+        - name: JWT_EXPIRES_IN
+          value: "7d"
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
