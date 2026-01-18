@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tika
+  namespace: openarchiver
+spec:
+  selector:
+    matchLabels:
+      app: tika
+      namespace: openarchiver
+  template:
+    metadata:
+      labels:
+        app: tika
+        namespace: openarchiver
+    spec:
+      containers:
+      - name: tika
+        image: apache/tika:3.2.2.0-full
+        resources:
+          limits:
+            memory: "2Gi"
+        ports:
+        - containerPort: 9998

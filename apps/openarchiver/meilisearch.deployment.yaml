@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meilisearch
+  namespace: openarchiver
+spec:
+  selector:
+    matchLabels:
+      app: meilisearch
+      namespace: openarchiver
+  template:
+    metadata:
+      labels:
+        app: meilisearch
+        namespace: openarchiver
+    spec:
+      containers:
+      - name: meilisearch
+        image: getmeili/meilisearch:v1.15
+        resources:
+          limits:
+            memory: "1Gi"
+        ports:
+        - containerPort: 7700
+        env:
+        - name: MEILI_MASTER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openarchiver
+              key: MEILI_MASTER_KEY
+        volumeMounts:
+        - name: meilidata
+          mountPath: /meili_data
+      volumes:
+      - name: meilidata
+        persistentVolumeClaim:
+          claimName: openarchiver-meilidata

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: valkey
+  namespace: openarchiver
+spec:
+  selector:
+    matchLabels:
+      app: valkey
+      namespace: openarchiver
+  template:
+    metadata:
+      labels:
+        app: valkey
+        namespace: openarchiver
+    spec:
+      containers:
+      - name: valkey
+        image: valkey/valkey:8-alpine
+        command:
+        - valkey-server
+        - --requirepass
+        - $(REDIS_PASSWORD)
+        resources:
+          limits:
+            memory: "512Mi"
+        ports:
+        - containerPort: 6379
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openarchiver
+              key: REDIS_PASSWORD
+        volumeMounts:
+        - name: valkeydata
+          mountPath: /data
+      volumes:
+      - name: valkeydata
+        persistentVolumeClaim:
+          claimName: openarchiver-valkey-data

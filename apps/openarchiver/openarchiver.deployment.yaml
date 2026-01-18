@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openarchiver
+  namespace: openarchiver
+spec:
+  selector:
+    matchLabels:
+      app: openarchiver
+      namespace: openarchiver
+  template:
+    metadata:
+      labels:
+        app: openarchiver
+        namespace: openarchiver
+    spec:
+      containers:
+      - name: openarchiver
+        image: logiclabshq/open-archiver:latest
+        resources:
+          limits:
+            memory: "1Gi"
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - secretRef:
+            name: openarchiver
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT_BACKEND
+          value: "4000"
+        - name: PORT_FRONTEND
+          value: "3000"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: openarchiver
+              key: DATABASE_URL
+        - name: REDIS_HOST
+          value: "valkey"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_TLS_ENABLED
+          value: "false"
+        - name: MEILI_HOST
+          value: "http://meilisearch:7700"
+        - name: MEILI_INDEXING_BATCH
+          value: "500"
+        - name: STORAGE_TYPE
+          value: "local"
+        - name: STORAGE_LOCAL_ROOT_PATH
+          value: "/var/data/openarchiver"
+        - name: TIKA_URL
+          value: "http://tika:9998"
+        - name: ENABLE_DELETION
+          value: "false"
+        - name: SYNC_FREQUENCY
+          value: "* * * * *"
+        - name: BODY_SIZE_LIMIT
+          value: "100M"
+        - name: RATE_LIMIT_WINDOW_MS
+          value: "60000"
+        - name: RATE_LIMIT_MAX_REQUESTS
+          value: "100"
+        volumeMounts:
+        - name: data
+          mountPath: /var/data/openarchiver
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: openarchiver-data

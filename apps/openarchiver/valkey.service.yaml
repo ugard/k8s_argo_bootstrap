@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: valkey
+  namespace: openarchiver
+spec:
+  selector:
+    app: valkey
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: 6379
+      name: redis
+      protocol: TCP

@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openarchiver
+  namespace: openarchiver
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
+spec:
+  rules:
+  - host: openarchiver.ugard.win
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: openarchiver
+              port:
+                number: 3000
+  tls:
+  - hosts:
+    - openarchiver.ugard.win
+    secretName: tls-openarchiver-http
