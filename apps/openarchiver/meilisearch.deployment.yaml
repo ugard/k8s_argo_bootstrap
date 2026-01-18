@@ -19,6 +19,8 @@ spec:
         image: getmeili/meilisearch:v1.15
         resources:
           limits:
+            memory: "2Gi"
+          requests:
             memory: "1Gi"
         ports:
         - containerPort: 7700
