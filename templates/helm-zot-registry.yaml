@@ -11,7 +11,7 @@ spec:
   sources:
   - chart: zot 
     repoURL: https://zotregistry.dev/helm-charts/
-    targetRevision: 2.1.12
+    targetRevision: 0.1.95
     helm:
       release-name: zot 
       valuesObject:
