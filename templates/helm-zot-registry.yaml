@@ -33,7 +33,8 @@ spec:
                 - registry.ugard.win
         persistence: "true"
         pvc:
-          create: "true"
+          create: "false"
+          name: "zot-registry-pvc"
         metrics:
           enabled: "true"
         startupProbe:
