@@ -31,9 +31,9 @@ spec:
             - secretName: registry-ingress-tls
               hosts:
                 - registry.ugard.win
-        persistence: "true"
+        persistence: true
         pvc:
-          create: "false"
+          create: false
           name: "zot-registry-pvc"
         metrics:
           enabled: "true"
