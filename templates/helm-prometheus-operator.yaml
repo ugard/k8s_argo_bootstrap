@@ -120,6 +120,19 @@ spec:
               - url: 'http://alert-webhook.monitoring/webhook'
                 send_resolved: true
         prometheus:
+          ingress:
+            enabled: true
+            ingressClassName: kustomize-traefik
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+            hosts:
+              - monitoring.ugard.win
+            paths:
+              - /
+            tls:
+              - secretName: prometheus-ingress-tls
+                hosts:
+                  - monitoring.ugard.win
           prometheusSpec:
             serviceMonitorSelectorNilUsesHelmValues: false
             prometheusRulesSelector:
