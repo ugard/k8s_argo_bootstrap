@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: obsidian
+  namespace: obsidian
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
+spec:
+  rules:
+  - host: notes.ugard.win
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: obsidian
+              port:
+                number: 3000
+  tls:
+  - hosts:
+    - notes.ugard.win
+    secretName: tls-notes-ingress-http
