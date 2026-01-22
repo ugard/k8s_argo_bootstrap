@@ -143,31 +143,31 @@ data:
             description: Metrics dashboard
             icon: grafana
   widgets.yaml: |
-    - healthchecks:
-        url: https://hc.ugard.win
-    - prometheus:
-        url: https://monitoring.ugard.win
-    - prometheusmetric:
-        url: https://monitoring.ugard.win
-        metrics:
-          - label: "Garage Free Space"
-            query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="garage-data"}'
-            format:
-              type: bytes
-          - label: "Jellyfin Free Space"
-            query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="media"}'
-            format:
-              type: bytes
-          - label: "rTorrent Free Space"
-            query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="media-zfs"}'
-            format:
-              type: bytes
-    - iframe:
-        name: "Photo Memories"
-        src: "https://kiosk.ugard.win?memories=true&past_memory_days=7&show_time=false&show_date=false&disable_ui=true"
-        classes: h-96 w-full
-        allowFullscreen: false
-        allowScrolling: no
+    - type: healthchecks
+      url: https://hc.ugard.win
+    - type: prometheus
+      url: https://monitoring.ugard.win
+    - type: prometheusmetric
+      url: https://monitoring.ugard.win
+      metrics:
+        - label: "Garage Free Space"
+          query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="garage-data"}'
+          format:
+            type: bytes
+        - label: "Jellyfin Free Space"
+          query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="media"}'
+          format:
+            type: bytes
+        - label: "rTorrent Free Space"
+          query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="media-zfs"}'
+          format:
+            type: bytes
+    - type: iframe
+      name: "Photo Memories"
+      src: "https://kiosk.ugard.win?memories=true&past_memory_days=7&show_time=false&show_date=false&disable_ui=true"
+      classes: h-96 w-full
+      allowFullscreen: false
+      allowScrolling: no
   docker.yaml: ""
 ---
 apiVersion: rbac.authorization.k8s.io/v1
