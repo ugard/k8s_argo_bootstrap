@@ -65,42 +65,109 @@ data:
             - abbr: GH
               href: https://github.com/
   services.yaml: |
-    - My First Group:
-        - My First Service:
-            href: http://localhost/
-            description: Homepage is awesome
+    - Development:
+        - ArgoCD:
+            href: http://192.168.10.1
+            description: GitOps continuous delivery
+            icon: argocd
+        - Gitea:
+            href: https://gitea.ugard.win
+            description: Git repository manager
+            icon: gitea
+        - Drone CI:
+            href: https://drone.ugard.win
+            description: Continuous integration
+            icon: drone
 
-    - My Second Group:
-        - My Second Service:
-            href: http://localhost/
-            description: Homepage is the best
+    - Media & Content:
+        - Immich:
+            href: https://immich.ugard.win
+            description: Photo management
+            icon: immich
+        - Photo Memories:
+            href: https://kiosk.ugard.win
+            description: Historical photo frame
+            icon: photos
+        - Jellyfin:
+            href: https://jellyfin.ugard.win
+            description: Media server
+            icon: jellyfin
+        - Obsidian:
+            href: https://notes.ugard.win
+            description: Note taking
+            icon: obsidian
+        - Paperless:
+            href: https://paperless.ugard.win
+            description: Document management
+            icon: paperless
+        - Manyfold:
+            href: https://manyfold.ugard.win
+            description: 3D model library
+            icon: manyfold
 
-    - My Third Group:
-        - My Third Service:
-            href: http://localhost/
-            description: Homepage is 😎
+    - Productivity:
+        - Vikunja:
+            href: https://vikunja.ugard.win
+            description: Task management
+            icon: vikunja
+        - Vaultwarden:
+            href: https://vault.ugard.win
+            description: Password manager
+            icon: vaultwarden
+        - PicoShare:
+            href: https://pico.ugard.win
+            description: File sharing
+            icon: picoshare
+
+    - Home Automation:
+        - Home Assistant:
+            href: https://hass.ugard.win
+            description: Smart home controller
+            icon: homeassistant
+        - AdGuard:
+            href: http://192.168.10.254
+            description: DNS ad blocker
+            icon: adguard
+
+    - Monitoring:
+        - Healthchecks:
+            href: https://hc.ugard.win
+            description: Cron job monitoring
+            icon: healthchecks
+        - Prometheus:
+            href: https://monitoring.ugard.win
+            description: Metrics monitoring
+            icon: prometheus
+        - Grafana:
+            href: https://grafana.ugard.win
+            description: Metrics dashboard
+            icon: grafana
   widgets.yaml: |
-    - kubernetes:
-        cluster:
-          show: true
-          cpu: true
-          memory: true
-          showLabel: true
-          label: "cluster"
-        nodes:
-          show: true
-          cpu: true
-          memory: true
-          showLabel: true
-    - resources:
-        backend: resources
-        expanded: true
-        cpu: true
-        memory: true
-        network: default
-    - search:
-        provider: duckduckgo
-        target: _blank
+    - healthchecks:
+        url: https://hc.ugard.win
+    - prometheus:
+        url: https://monitoring.ugard.win
+    - prometheusmetric:
+        url: https://monitoring.ugard.win
+        metrics:
+          - label: "Garage Free Space"
+            query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="garage-data"}'
+            format:
+              type: bytes
+          - label: "Jellyfin Free Space"
+            query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="media"}'
+            format:
+              type: bytes
+          - label: "rTorrent Free Space"
+            query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="media-zfs"}'
+            format:
+              type: bytes
+    - iframe:
+        name: "Photo Memories"
+        src: "https://kiosk.ugard.win?memories=true&past_memory_days=7&show_time=false&show_date=false&disable_ui=true"
+        classes: h-96 w-full
+        allowFullscreen: false
+        allowScrolling: no
   docker.yaml: ""
 ---
 apiVersion: rbac.authorization.k8s.io/v1
