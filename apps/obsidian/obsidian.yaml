@@ -29,9 +29,6 @@ spec:
       labels:
         app: obsidian
     spec:
-      securityContext:
-        seccompProfile:
-          type: Unconfined
       containers:
       - image: lscr.io/linuxserver/obsidian:latest
         name: obsidian
