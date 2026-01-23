@@ -231,7 +231,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: homepage
-    namespace: default
+    namespace: gethomepage
 ---
 apiVersion: v1
 kind: Service
