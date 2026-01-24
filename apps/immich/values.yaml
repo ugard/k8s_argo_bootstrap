@@ -3,7 +3,7 @@ controllers:
     containers:
       main:
         image:
-          tag: v2.2.2
+          tag: v2.4.1
         env:
           # REDIS_HOSTNAME: '{{ printf "%s-valkey" .Release.Name }}'
           # IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
@@ -34,7 +34,6 @@ valkey:
         main:
           image:
             repository: docker.io/valkey/valkey
-            tag: 8.0-alpine
             pullPolicy: IfNotPresent
   persistence:
     data:
