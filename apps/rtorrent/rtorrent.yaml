@@ -35,7 +35,7 @@ spec:
         - name: FIREWALL_DEBUG
           value: "on"
         - name: FIREWALL_INPUT_PORTS
-          value: "8080,8888"
+          value: "9091,8888"
         - name: HTTP_CONTROL_SERVER_ADDRESS
           value: ":18000"
         securityContext:
@@ -59,13 +59,20 @@ spec:
         - /media
         restartPolicy: Always
       containers:
-      - name: rqbit
-        image: docker.io/ikatson/rqbit:latest
+      - name: transmission
+        image: lscr.io/linuxserver/transmission:latest
+        env:
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        - name: TZ
+          value: "Europe/Warsaw"
         volumeMounts:
         - name: config-data
-          mountPath: /home/rqbit/db
+          mountPath: /config
         - name: media-zfs
-          mountPath: /home/rqbit/downloads
+          mountPath: /downloads
       volumes:
       - name: config-data
         persistentVolumeClaim:
@@ -83,8 +90,8 @@ spec:
   selector:
     app: rtorrent
   ports:
-  - port: 3030
-    targetPort: 3030
+  - port: 9091
+    targetPort: 9091
     name: web
     protocol: TCP
   - port: 8888
@@ -110,7 +117,7 @@ spec:
             service:
               name: rtorrent
               port:
-                number: 3030
+                number: 9091
   tls:
   - hosts:
     - rtorrent.ugard.win
