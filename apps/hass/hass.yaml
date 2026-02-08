@@ -16,6 +16,8 @@ metadata:
   name: home-assistant
   namespace: hass
 spec:
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: home-assistant
@@ -28,7 +30,7 @@ spec:
     spec:
       containers:
       - name: home-assistant
-        image: ghcr.io/home-assistant/home-assistant:stable
+        image: ghcr.io/home-assistant/home-assistant:2026.2.1
         resources:
           limits:
             memory: "2Gi"
