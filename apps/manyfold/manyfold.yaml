@@ -38,7 +38,7 @@ spec:
             name: log-dir
       containers:
       - name: manyfold
-        image: ghcr.io/manyfold3d/manyfold:0.127.0
+        image: ghcr.io/manyfold3d/manyfold:0.132.0
         args:
           - foreman start
         command:
