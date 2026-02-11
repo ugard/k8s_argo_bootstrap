@@ -27,10 +27,34 @@ spec:
           mountPath: /config
         - name: downloads
           mountPath: /downloads
+          mountPropagation: HostToContainer
         - name: media
           mountPath: /media
           mountPropagation: HostToContainer
-      - name: rclone-bridge
+      - name: rclone-bridge-downloads
+        image: docker.io/rclone/rclone:latest
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - SYS_ADMIN
+        command: ["/usr/local/bin/rclone"]
+        args:
+        - mount
+        - ":webdav:"
+        - /downloads
+        - "--webdav-url"
+        - "http://rtorrent.rtorrent.svc.cluster.local:8888"
+        - "--vfs-cache-mode"
+        - "full"
+        - "--allow-other"
+        volumeMounts:
+        - name: downloads
+          mountPath: /downloads
+          mountPropagation: Bidirectional
+        - name: fuse-device
+          mountPath: /dev/fuse
+      - name: rclone-bridge-media
         image: docker.io/rclone/rclone:latest
         securityContext:
           privileged: true
@@ -60,8 +84,7 @@ spec:
         persistentVolumeClaim:
           claimName: sonarr-config
       - name: downloads
-        persistentVolumeClaim:
-          claimName: media-zfs
+        emptyDir: {}
       - name: media
         emptyDir: {}
       - name: fuse-device
