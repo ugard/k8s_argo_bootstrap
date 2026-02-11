@@ -98,7 +98,14 @@ spec:
       - name: media
         emptyDir: {}
       - name: cache
-        emptyDir: {}
+        ephemeral:
+          volumeClaimTemplate:
+            spec:
+              accessModes: [ "ReadWriteOnce" ]
+              storageClassName: "rook-ceph-block"
+              resources:
+                requests:
+                  storage: 20Gi
       - name: fuse-device
         hostPath:
           path: /dev/fuse
