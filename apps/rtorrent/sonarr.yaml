@@ -46,7 +46,9 @@ spec:
         - "--webdav-url"
         - "http://rtorrent.rtorrent.svc.cluster.local:8888"
         - "--vfs-cache-mode"
-        - "full"
+        - "writes"
+        - "--cache-dir"
+        - "/cache/downloads"
         - "--allow-other"
         - "--allow-non-empty"
         volumeMounts:
@@ -55,6 +57,8 @@ spec:
           mountPropagation: Bidirectional
         - name: fuse-device
           mountPath: /dev/fuse
+        - name: cache
+          mountPath: /cache
       - name: rclone-bridge-media
         image: docker.io/rclone/rclone:latest
         securityContext:
@@ -70,7 +74,9 @@ spec:
         - "--webdav-url"
         - "http://jellyfin-bridge.jellyfin.svc.cluster.local:8080"
         - "--vfs-cache-mode"
-        - "full"
+        - "writes"
+        - "--cache-dir"
+        - "/cache/media"
         - "--allow-other"
         - "--allow-non-empty"
         - "--dir-cache-time"
@@ -81,6 +87,8 @@ spec:
           mountPropagation: Bidirectional
         - name: fuse-device
           mountPath: /dev/fuse
+        - name: cache
+          mountPath: /cache
       volumes:
       - name: config
         persistentVolumeClaim:
@@ -88,6 +96,8 @@ spec:
       - name: downloads
         emptyDir: {}
       - name: media
+        emptyDir: {}
+      - name: cache
         emptyDir: {}
       - name: fuse-device
         hostPath:
