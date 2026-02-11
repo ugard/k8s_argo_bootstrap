@@ -23,6 +23,16 @@ volumes:
   secret:
     secretName: rclone-rtorrent
     optional: false
+extraVolumes:
+- name: cache
+  ephemeral:
+    volumeClaimTemplate:
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: "rook-ceph-block"
+        resources:
+          requests:
+            storage: 20Gi
 jellyfin:
   env:
     - name: JELLYFIN_PublishedServerUrl
@@ -48,12 +58,16 @@ extraContainers:
     - --addr
     - :8080
     - --vfs-cache-mode
-    - full
+    - writes
+    - --cache-dir
+    - /cache
     volumeMounts:
     - name: media
       mountPath: /data/jellyfin
     - name: rclone-config
       mountPath: /config/rclone
       readOnly: true
+    - name: cache
+      mountPath: /cache
 nodeSelector:
   kubernetes.io/hostname: talos-jly-e8b
