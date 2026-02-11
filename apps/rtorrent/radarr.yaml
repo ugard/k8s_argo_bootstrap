@@ -47,6 +47,12 @@ spec:
         - "http://rtorrent.rtorrent.svc.cluster.local:8888"
         - "--vfs-cache-mode"
         - "writes"
+        - "--vfs-cache-max-size"
+        - "15G"
+        - "--vfs-cache-max-age"
+        - "1m"
+        - "--vfs-write-back"
+        - "5s"
         - "--cache-dir"
         - "/cache/downloads"
         - "--allow-other"
@@ -75,6 +81,12 @@ spec:
         - "http://jellyfin-bridge.jellyfin.svc.cluster.local:8080"
         - "--vfs-cache-mode"
         - "writes"
+        - "--vfs-cache-max-size"
+        - "15G"
+        - "--vfs-cache-max-age"
+        - "1m"
+        - "--vfs-write-back"
+        - "5s"
         - "--cache-dir"
         - "/cache/media"
         - "--allow-other"
@@ -105,7 +117,7 @@ spec:
               storageClassName: "rook-ceph-block"
               resources:
                 requests:
-                  storage: 20Gi
+                  storage: 100Gi
       - name: fuse-device
         hostPath:
           path: /dev/fuse
