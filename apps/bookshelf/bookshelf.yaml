@@ -12,6 +12,17 @@ spec:
       labels:
         app: bookshelf
     spec:
+      securityContext:
+        fsGroup: 1000
+      initContainers:
+      - name: volume-permissions
+        image: busybox:latest
+        command: ["sh", "-c", "chown -R 1000:1000 /config /books"]
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: books
+          mountPath: /books
       containers:
       - name: bookshelf
         image: ghcr.io/pennydreadful/bookshelf:hardcover
