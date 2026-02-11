@@ -28,13 +28,6 @@ jellyfin:
     - name: JELLYFIN_PublishedServerUrl
       value: jellyfin.ugard.win
 persistence:
-  cache:
-    enabled: true
-    type: ephemeral
-    storageClass: "rook-ceph-block"
-    accessMode: ReadWriteOnce
-    size: 20Gi
-    mountPath: /cache
   media:
     # -- set to false to use emptyDir
     enabled: true

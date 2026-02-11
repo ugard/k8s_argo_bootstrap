@@ -8,16 +8,6 @@ spec:
     spec:
       containers:
       - name: webdav
-        args:
-        - serve
-        - webdav
-        - /data/jellyfin
-        - --addr
-        - :8080
-        - --vfs-cache-mode
-        - writes
-        - --cache-dir
-        - /cache
         volumeMounts:
         - name: cache
           mountPath: /cache
