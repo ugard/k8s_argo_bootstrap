@@ -38,10 +38,17 @@ persistence:
     # -- If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
     storageClass: 'openebs-zfspv-affinity'
 extraContainers:
-  - name: rclone
+  - name: webdav
     image: docker.io/rclone/rclone:latest
-    command: [ "/usr/local/bin/rclone" ]
-    args: [ "rcd", "--rc-web-gui", "--rc-no-auth" ]
+    command: [ "rclone" ]
+    args:
+    - serve
+    - webdav
+    - /data/jellyfin
+    - --addr
+    - :8080
+    - --vfs-cache-mode
+    - full
     volumeMounts:
     - name: media
       mountPath: /data/jellyfin

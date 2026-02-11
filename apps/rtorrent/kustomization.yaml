@@ -6,4 +6,5 @@ resources:
   - sealed_secret.yaml
   - rtorrent.yaml
   - prowlarr.yaml
-  
+  - sonarr.yaml
+  - radarr.yaml

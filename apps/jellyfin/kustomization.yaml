@@ -6,3 +6,4 @@ resources:
   # - migrate.yaml
   # - ftp-service.yaml
   - rclone_secret.yaml
+  - bridge-service.yaml
