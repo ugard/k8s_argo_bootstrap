@@ -7,6 +7,3 @@ resources:
   # - ftp-service.yaml
   - rclone_secret.yaml
   - bridge-service.yaml
-
-patches:
-  - path: deployment-patch.yaml

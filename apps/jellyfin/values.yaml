@@ -23,6 +23,15 @@ volumes:
   secret:
     secretName: rclone-rtorrent
     optional: false
+- name: cache
+  ephemeral:
+    volumeClaimTemplate:
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: "rook-ceph-block"
+        resources:
+          requests:
+            storage: 20Gi
 jellyfin:
   env:
     - name: JELLYFIN_PublishedServerUrl
