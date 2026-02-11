@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookshelf
+  namespace: bookshelf
+spec:
+  selector:
+    matchLabels:
+      app: bookshelf
+  template:
+    metadata:
+      labels:
+        app: bookshelf
+    spec:
+      containers:
+      - name: bookshelf
+        image: ghcr.io/pennydreadful/bookshelf:hardcover
+        env:
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        - name: TZ
+          value: "Europe/Warsaw"
+        ports:
+        - containerPort: 8787
+          name: http
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: books
+          mountPath: /books
+        - name: downloads
+          mountPath: /downloads
+          mountPropagation: HostToContainer
+      - name: rclone-bridge-downloads
+        image: docker.io/rclone/rclone:latest
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - SYS_ADMIN
+        command: ["/usr/local/bin/rclone"]
+        args:
+        - mount
+        - ":webdav:"
+        - /downloads
+        - "--webdav-url"
+        - "http://rtorrent.rtorrent.svc.cluster.local:8888"
+        - "--vfs-cache-mode"
+        - "writes"
+        - "--vfs-cache-max-size"
+        - "15G"
+        - "--vfs-cache-max-age"
+        - "1m"
+        - "--vfs-write-back"
+        - "5s"
+        - "--cache-dir"
+        - "/cache/downloads"
+        - "--allow-other"
+        - "--allow-non-empty"
+        volumeMounts:
+        - name: downloads
+          mountPath: /downloads
+          mountPropagation: Bidirectional
+        - name: fuse-device
+          mountPath: /dev/fuse
+        - name: cache
+          mountPath: /cache
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: bookshelf-config
+      - name: books
+        persistentVolumeClaim:
+          claimName: bookshelf-media
+      - name: downloads
+        emptyDir: {}
+      - name: cache
+        ephemeral:
+          volumeClaimTemplate:
+            spec:
+              accessModes: [ "ReadWriteOnce" ]
+              storageClassName: "rook-ceph-block"
+              resources:
+                requests:
+                  storage: 20Gi
+      - name: fuse-device
+        hostPath:
+          path: /dev/fuse
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookshelf
+  namespace: bookshelf
+spec:
+  selector:
+    app: bookshelf
+  ports:
+  - port: 8787
+    targetPort: 8787
+    name: web
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bookshelf
+  namespace: bookshelf
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
+spec:
+  rules:
+  - host: bookshelf.ugard.win
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: bookshelf
+              port:
+                number: 8787
+  tls:
+  - hosts:
+    - bookshelf.ugard.win
+    secretName: tls-bookshelf-ingress-http

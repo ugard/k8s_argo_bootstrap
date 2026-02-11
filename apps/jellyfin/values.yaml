@@ -56,17 +56,11 @@ extraContainers:
     - /data/jellyfin
     - --addr
     - :8080
-    - --vfs-cache-mode
-    - writes
-    - --cache-dir
-    - /cache
     volumeMounts:
     - name: media
       mountPath: /data/jellyfin
     - name: rclone-config
       mountPath: /config/rclone
       readOnly: true
-    - name: cache
-      mountPath: /cache
 nodeSelector:
   kubernetes.io/hostname: talos-jly-e8b
