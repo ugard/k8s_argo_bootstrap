@@ -23,21 +23,18 @@ volumes:
   secret:
     secretName: rclone-rtorrent
     optional: false
-extraVolumes:
-- name: cache
-  ephemeral:
-    volumeClaimTemplate:
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        storageClassName: "rook-ceph-block"
-        resources:
-          requests:
-            storage: 20Gi
 jellyfin:
   env:
     - name: JELLYFIN_PublishedServerUrl
       value: jellyfin.ugard.win
 persistence:
+  cache:
+    enabled: true
+    type: ephemeral
+    storageClass: "rook-ceph-block"
+    accessMode: ReadWriteOnce
+    size: 20Gi
+    mountPath: /cache
   media:
     # -- set to false to use emptyDir
     enabled: true
