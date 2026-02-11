@@ -48,6 +48,7 @@ spec:
         - "--vfs-cache-mode"
         - "full"
         - "--allow-other"
+        - "--allow-non-empty"
         volumeMounts:
         - name: downloads
           mountPath: /downloads
@@ -71,6 +72,7 @@ spec:
         - "--vfs-cache-mode"
         - "full"
         - "--allow-other"
+        - "--allow-non-empty"
         - "--dir-cache-time"
         - "10s"
         volumeMounts:
