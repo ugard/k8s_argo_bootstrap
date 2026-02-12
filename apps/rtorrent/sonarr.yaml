@@ -22,6 +22,21 @@ spec:
           value: "1000"
         - name: TZ
           value: "Europe/Warsaw"
+        - name: SONARR__POSTGRES__HOST
+          value: postgres.postgres.svc
+        - name: SONARR__POSTGRES__PORT
+          value: "5432"
+        - name: SONARR__POSTGRES__USER
+          value: sonarr
+        - name: SONARR__POSTGRES__MAIN_DB
+          value: sonarr-main
+        - name: SONARR__POSTGRES__LOG_DB
+          value: sonarr-log
+        - name: SONARR__POSTGRES__PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sonarr-postgres
+              key: password
         volumeMounts:
         - name: config
           mountPath: /config

@@ -4,6 +4,7 @@ resources:
   # - migrate.yaml
   - rtorrent.pvc.yaml
   - sealed_secret.yaml
+  - sonarr-postgres.sealed_secret.yaml
   - rtorrent.yaml
   - prowlarr.yaml
   - sonarr.yaml
