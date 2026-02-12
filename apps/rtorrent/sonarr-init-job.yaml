@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sonarr-init-postgres
+  namespace: rtorrent
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: init
+        image: alpine:3.19
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sonarr-postgres
+              key: password
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          
+          echo "Installing psql client..."
+          apk add --no-cache postgresql-client
+          
+          echo "Connecting to PostgreSQL and inserting init record..."
+          psql "postgresql://sonarr:${POSTGRES_PASSWORD}@postgres.postgres.svc:5432/sonarr-main" -c "CREATE TABLE IF NOT EXISTS \"VersionInfo\" (\"Key\" TEXT PRIMARY KEY, \"Value\" TEXT); INSERT INTO \"VersionInfo\" (\"Key\", \"Value\") VALUES ('migration_initialized', 'true') ON CONFLICT DO NOTHING;"
+          
+          echo "Initialization completed. Sonarr should not attempt migration on next start."
+        volumeMounts: []
+  backoffLimit: 0

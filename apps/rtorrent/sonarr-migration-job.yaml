@@ -1,0 +1,86 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sonarr-migration
+  namespace: rtorrent
+spec:
+  template:
+    spec:
+      containers:
+      - name: migration
+        image: lscr.io/linuxserver/sonarr:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -e
+          
+          echo "Starting Sonarr with PostgreSQL configuration..."
+          /app/sonarr/bin/Sonarr -nobrowser -data=/config &
+          SONARR_PID=$!
+          
+          echo "Waiting for Sonarr to be ready..."
+          for i in {1..60}; do
+            if curl -f -s "http://localhost:8989/ping" > /dev/null; then
+              echo "Sonarr is up and responding!"
+              kill $SONARR_PID
+              
+              echo "Waiting for file to appear..."
+              sleep 10
+              
+              if [ -f /config/Backups/migration_backup.zip ]; then
+                echo "Backup found. Restoring..."
+                API_KEY=$(grep -oP '<ApiKey>[^<]+'</ApiKey>' /config/config.xml | sed -n 's/.*<ApiKey>\([^<]*\)<.*/\1/p' || echo '')
+                curl -X POST "http://localhost:8989/api/v3/system/restore" \
+                  -H "X-Api-Key: $API_KEY" \
+                  -H "Content-Type: application/json" \
+                  -d "{\"name\":\"migration_backup\",\"type\":\"manual\",\"full\":true}"
+                
+                echo "Restore initiated. Waiting for restart..."
+                sleep 30
+                
+                echo "Sonarr should be running with restored data!"
+                exit 0
+              else
+                echo "ERROR: Backup file not found in PVC!"
+                exit 1
+              fi
+            fi
+            echo "Attempt $i/60..."
+            sleep 3
+          done
+          
+          echo "ERROR: Sonarr did not start or backup not found."
+          kill $SONARR_PID
+          exit 1
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sonarr-postgres
+              key: password
+        - name: SONARR__POSTGRES__HOST
+          value: postgres.postgres.svc
+        - name: SONARR__POSTGRES__PORT
+          value: "5432"
+        - name: SONARR__POSTGRES__USER
+          value: sonarr
+        - name: SONARR__POSTGRES__MAIN_DB
+          value: sonarr-main
+        - name: SONARR__POSTGRES__LOG_DB
+          value: sonarr-log
+        - name: SONARR__POSTGRES__PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sonarr-postgres
+              key: password
+        volumeMounts:
+        - name: config
+          mountPath: /config
+          readOnly: false
+      restartPolicy: Never
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: sonarr-config
+  backoffLimit: 0

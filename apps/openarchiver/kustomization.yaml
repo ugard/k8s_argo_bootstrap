@@ -15,4 +15,5 @@ resources:
   - meilisearch.service.yaml
   - tika.deployment.yaml
   - tika.service.yaml
+  - rbac.yaml
   - migrate.yaml

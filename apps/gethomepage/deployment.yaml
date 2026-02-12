@@ -84,10 +84,6 @@ data:
             href: https://immich.ugard.win
             description: Photo management
             icon: immich
-        - Photo Memories:
-            href: https://kiosk.ugard.win
-            description: Historical photo frame
-            icon: photos
         - Jellyfin:
             href: https://jellyfin.ugard.win
             description: Media server
@@ -134,40 +130,41 @@ data:
             href: https://hc.ugard.win
             description: Cron job monitoring
             icon: healthchecks
+            widget:
+                type: healthchecks
+                url: https://hc.ugard.win
         - Prometheus:
             href: https://monitoring.ugard.win
             description: Metrics monitoring
             icon: prometheus
+            widget:
+                type: prometheus
+                url: https://monitoring.ugard.win
         - Grafana:
             href: https://grafana.ugard.win
             description: Metrics dashboard
             icon: grafana
-  widgets.yaml: |
-    - type: healthchecks
-      url: https://hc.ugard.win
-    - type: prometheus
-      url: https://monitoring.ugard.win
-    - type: prometheusmetric
-      url: https://monitoring.ugard.win
-      metrics:
-        - label: "Garage Free Space"
-          query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="garage-data"}'
-          format:
-            type: bytes
-        - label: "Jellyfin Free Space"
-          query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="media"}'
-          format:
-            type: bytes
-        - label: "rTorrent Free Space"
-          query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="media-zfs"}'
-          format:
-            type: bytes
-    - type: iframe
-      name: "Photo Memories"
-      src: "https://kiosk.ugard.win?memories=true&past_memory_days=7&show_time=false&show_date=false&disable_ui=true"
-      classes: h-96 w-full
-      allowFullscreen: false
-      allowScrolling: no
+        - Storage Status:
+            href: https://monitoring.ugard.win
+            description: PVC Free Space
+            icon: hard-drive
+            widget:
+                type: prometheusmetric
+                url: https://monitoring.ugard.win
+                metrics:
+                  - label: "Garage"
+                    query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="garage-data"}'
+                    format:
+                      type: bytes
+                  - label: "Jellyfin"
+                    query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="media"}'
+                    format:
+                      type: bytes
+                  - label: "rTorrent"
+                    query: 'kubelet_volume_stats_available_bytes{persistentvolumeclaim="media-zfs"}'
+                    format:
+                      type: bytes
+  widgets.yaml: "[]"
   docker.yaml: ""
 ---
 apiVersion: rbac.authorization.k8s.io/v1
