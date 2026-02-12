@@ -12,6 +12,7 @@ spec:
       labels:
         app: sonarr
     spec:
+      terminationGracePeriodSeconds: 60
       containers:
       - name: sonarr
         image: lscr.io/linuxserver/sonarr:latest
@@ -22,6 +23,10 @@ spec:
           value: "1000"
         - name: TZ
           value: "Europe/Warsaw"
+        - name: SONARR__SERVER__PORT
+          value: "8989"
+        - name: SONARR__UPDATE__MECHANISM
+          value: "None"
         - name: SONARR__POSTGRES__HOST
           value: postgres.postgres.svc
         - name: SONARR__POSTGRES__PORT
@@ -37,6 +42,15 @@ spec:
             secretKeyRef:
               name: sonarr-postgres
               key: password
+        ports:
+        - containerPort: 8989
+          name: web
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: 8989
+          initialDelaySeconds: 15
+          periodSeconds: 10
         volumeMounts:
         - name: config
           mountPath: /config
