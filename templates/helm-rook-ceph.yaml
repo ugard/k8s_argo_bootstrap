@@ -28,6 +28,9 @@ spec:
       valuesObject:
         clusterName: rook-ceph
         operatorNamespace: rook-ceph2
+        monitoring:
+          enabled: true
+          createPrometheusRules: true
         cephClusterSpec:
           # cephVersion:
           #   image: quay.io/ceph/ceph:v18.2.2
@@ -69,9 +72,6 @@ spec:
             count: 2
           mon:
             count: 3
-          monitoring:
-            enabled: true
-            createPrometheusRules: true
           network:
             connections:
               compression: {}
