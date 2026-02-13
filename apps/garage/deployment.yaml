@@ -39,20 +39,6 @@ spec:
         secret:
           secretName: garage-config
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: garage-meta
-  labels:
-    "backup-this-pvc": "true"
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10G
-  storageClassName: rook-ceph-block
----
 kind: PersistentVolumeClaim
 apiVersion: v1
 spec:
@@ -61,7 +47,8 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1500Gi
+      storage: 1800Gi
+  volumeName: pvc-027fb013-5710-4057-bd08-1d4865684077
 metadata:
   name: garage-data
   labels:
@@ -76,6 +63,7 @@ spec:
   resources:
     requests:
       storage: 20Gi
+  volumeName: pvc-3a23bee9-37f3-4053-acea-1c615e4f0a20
 metadata:
   name: garage-meta-zfs
   labels:
