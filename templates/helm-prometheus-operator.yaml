@@ -70,7 +70,7 @@ spec:
             #   finalizers:
             #     - kubernetes.io/pvc-protection
         kubernetesServiceMonitors:
-          enabled: false
+          enabled: true
         kubeApiServer:
           enabled: false
         kubelet:
@@ -99,6 +99,7 @@ spec:
             - rook-ceph2
             - velero
             - cert-manager2
+            - openebs
         alertmanager:
           extraSecretMounts:
           - name: ntfy-secret
