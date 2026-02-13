@@ -1,0 +1,83 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: openebs-ndm
+  namespace: kube-system
+  labels:
+    prometheus: kube-prometheus-stack
+    release: prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+      - kube-system
+  selector:
+    matchLabels:
+      app: openebs-ndm-exporter
+  endpoints:
+    - port: metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: openebs-zfs-localpv
+  namespace: kube-system
+  labels:
+    prometheus: kube-prometheus-stack
+    release: prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+      - kube-system
+  selector:
+    matchLabels:
+      app: openebs-zfs-localpv
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: openebs-alerts
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus-stack
+    release: prometheus
+spec:
+  groups:
+  - name: openebs
+    rules:
+    - alert: OpenEBSNDMDeviceOffline
+      expr: openebs_ndm_block_device_state{state="Offline"} == 1
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "OpenEBS block device {{ $labels.device }} is offline"
+        description: "Block device {{ $labels.device }} on {{ $labels.node }} has been offline for 5 minutes"
+    - alert: OpenEBSNDMDeviceExhausted
+      expr: (openebs_ndm_block_device_capacity_bytes - openebs_ndm_block_device_used_bytes) / openebs_ndm_block_device_capacity_bytes < 0.1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "OpenEBS block device {{ $labels.device }} is running out of space"
+        description: "Block device {{ $labels.device }} has less than 10% free space"
+    - alert: OpenEBSZFSVolumeStatus
+      expr: openebs_zfs_status{vol_state!="healthy"} == 1
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "OpenEBS ZFS volume {{ $labels.volume }} is not healthy"
+        description: "Volume {{ $labels.volume }} state is {{ $labels.vol_state }}"
+    - alert: OpenEBSZFSPoolSpaceWarning
+      expr: (openebs_zfs_pool_size_bytes - openebs_zfs_pool_alloc_bytes) / openebs_zfs_pool_size_bytes < 0.15
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "OpenEBS ZFS pool {{ $labels.pool }} is running out of space"
+        description: "Pool {{ $labels.pool }} has less than 15% free space"
