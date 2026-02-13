@@ -31,4 +31,9 @@ spec:
           namespaces:
             - openebs
             - kube-system
-
+        mayastor:
+          enabled: false
+          dashboards:
+            enabled: false
+          serviceMonitor:
+            enabled: false

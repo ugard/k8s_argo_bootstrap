@@ -24,7 +24,9 @@ spec:
         provisioner:
           enabled: false
         localprovisioner:
-          enabled: false
+          enabled: true
+          hostpathClass:
+            enabled: true
         ndm:
           enabled: true
         ndmOperator:
