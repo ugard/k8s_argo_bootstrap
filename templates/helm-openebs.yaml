@@ -26,9 +26,9 @@ spec:
         localprovisioner:
           enabled: false
         ndm:
-          enabled: false
+          enabled: true
         ndmOperator:
-          enabled: false
+          enabled: true
         webhook:
           enabled: false
         snapshotOperator:
