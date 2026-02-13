@@ -11,7 +11,7 @@ spec:
   sources:
   - chart: rook-ceph
     repoURL: https://charts.rook.io/release
-    targetRevision: v1.17.6
+    targetRevision: v1.18.9
     helm:
       release-name: rook-ceph
       valuesObject:
@@ -22,7 +22,7 @@ spec:
           enabled: true
   - chart: rook-ceph-cluster
     repoURL: https://charts.rook.io/release
-    targetRevision: v1.17.6
+    targetRevision: v1.18.9
     helm:
       release-name: rook-ceph-cluster
       valuesObject:
@@ -146,6 +146,8 @@ spec:
               name: talos-95t-m8m
             - devices:
               - name: /dev/disk/by-id/usb-Realtek_RTL9210B-CG_012345678932-0:0
+              - name: /dev/disk/by-id/t10.ATASPCC_M.2_SSDSP20241029A0100703
+              - name: /dev/disk/by-id/ata-SPCC_M.2_SSD_SP20241029A0100703
               name: talos-jly-e8b
             - devices:
               - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6P7NF0T303215D
