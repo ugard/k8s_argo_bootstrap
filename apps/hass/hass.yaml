@@ -94,17 +94,26 @@ data:
         - 10.0.0.0/8
     
     mqtt:
-     sensor:
-     - name: "Thermostat room temperature"
-       state_topic: "events/central_heating/otmonitor/roomtemperature"
-       unit_of_measurement: "°C"
-       device_class: "temperature"
-       value_template: "{{ value_json.value }}"
-     - name: "Outside temperature"
-       state_topic: "events/central_heating/otmonitor/outsidetemperature"
-       unit_of_measurement: "°C"
-       device_class: "temperature"
-       value_template: "{{ value_json.value }}"
+      discovery: true
+      discovery_prefix: homeassistant
+      broker: mosquitto-mqtt
+      birth_message:
+        topic: 'homeassistant/status'
+        payload: 'online'
+      will_message:
+        topic: 'homeassistant/status'
+        payload: 'offline'
+      sensor:
+      - name: "Thermostat room temperature"
+        state_topic: "events/central_heating/otmonitor/roomtemperature"
+        unit_of_measurement: "°C"
+        device_class: "temperature"
+        value_template: "{{ value_json.value }}"
+      - name: "Outside temperature"
+        state_topic: "events/central_heating/otmonitor/outsidetemperature"
+        unit_of_measurement: "°C"
+        device_class: "temperature"
+        value_template: "{{ value_json.value }}"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
