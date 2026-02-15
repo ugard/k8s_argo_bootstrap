@@ -2,14 +2,14 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: openebs-ndm
-  namespace: kube-system
+  namespace: monitoring
   labels:
     prometheus: kube-prometheus-stack
     release: prometheus
 spec:
   namespaceSelector:
     matchNames:
-      - kube-system
+      - openebs
   selector:
     matchLabels:
       app: openebs-ndm-exporter
@@ -21,14 +21,14 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: openebs-zfs-localpv
-  namespace: kube-system
+  namespace: monitoring
   labels:
     prometheus: kube-prometheus-stack
     release: prometheus
 spec:
   namespaceSelector:
     matchNames:
-      - kube-system
+      - openebs
   selector:
     matchLabels:
       app: openebs-zfs-localpv
