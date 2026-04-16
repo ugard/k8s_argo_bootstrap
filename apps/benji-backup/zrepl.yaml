@@ -128,7 +128,7 @@ spec:
         app: zrepl-garage-push
     spec:
       nodeSelector:
-        openebs.io/nodeid: talos-jly-e8b
+        kubernetes.io/hostname: talos-i8d-hmt
       containers:
         - name: zrepl
           image: registry.ugard.win/zrepl:latest
