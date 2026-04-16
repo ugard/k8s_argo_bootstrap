@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: garage
-        image: dxflrs/garage:v2.1.0
+        image: dxflrs/garage:v2.3.0
         ports:
         - containerPort: 3900
         - containerPort: 3901
@@ -62,7 +62,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 20Gi
+      storage: 60Gi
   volumeName: pvc-3a23bee9-37f3-4053-acea-1c615e4f0a20
 metadata:
   name: garage-meta-zfs
