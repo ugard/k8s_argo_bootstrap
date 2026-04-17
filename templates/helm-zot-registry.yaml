@@ -36,7 +36,7 @@ spec:
           create: true
           name: "zot-registry-pvc"
           storageClassName: "rook-ceph-block"
-          size: "8Gi"
+          storage: "8Gi"
           accessModes:
             - ReadWriteOnce
         metrics:
