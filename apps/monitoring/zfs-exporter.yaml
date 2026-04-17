@@ -1,0 +1,76 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: zfs-exporter
+  labels:
+    app: zfs-exporter
+spec:
+  selector:
+    matchLabels:
+      app: zfs-exporter
+  template:
+    metadata:
+      labels:
+        app: zfs-exporter
+    spec:
+      nodeSelector:
+        openebs.io/zfs: "true"
+      tolerations:
+        - operator: Exists
+      hostNetwork: true
+      containers:
+        - name: zfs-exporter
+          image: ghcr.io/pdf/zfs_exporter:latest
+          args:
+            - --web.listen-address=:9134
+            - --pool=wdc
+          ports:
+            - name: metrics
+              containerPort: 9134
+              hostPort: 9134
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: dev
+              mountPath: /dev
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+      volumes:
+        - name: dev
+          hostPath:
+            path: /dev
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zfs-exporter
+  labels:
+    app: zfs-exporter
+spec:
+  clusterIP: None
+  selector:
+    app: zfs-exporter
+  ports:
+    - name: metrics
+      port: 9134
+      targetPort: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: zfs-exporter
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: zfs-exporter
+  endpoints:
+    - port: metrics
+      interval: 60s
+      path: /metrics

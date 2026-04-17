@@ -163,12 +163,12 @@ data:
           },
           "targets": [
             {
-              "expr": "kubelet_volume_stats_capacity_bytes * on(namespace, persistentvolumeclaim) group_left() kube_persistentvolumeclaim_labels{label_disk_dashboard=\"true\"}",
+              "expr": "label_replace(zfs_dataset_used_bytes + zfs_dataset_available_bytes, \"volumename\", \"$1\", \"dataset\", \".+/(.+)\") * on(volumename) group_left(namespace, persistentvolumeclaim) kube_persistentvolumeclaim_info * on(namespace, persistentvolumeclaim) group_left() kube_persistentvolumeclaim_labels{label_disk_dashboard=\"true\"}",
               "legendFormat": "{{persistentvolumeclaim}} total",
               "refId": "A"
             },
             {
-              "expr": "kubelet_volume_stats_used_bytes * on(namespace, persistentvolumeclaim) group_left() kube_persistentvolumeclaim_labels{label_disk_dashboard=\"true\"}",
+              "expr": "label_replace(zfs_dataset_used_bytes, \"volumename\", \"$1\", \"dataset\", \".+/(.+)\") * on(volumename) group_left(namespace, persistentvolumeclaim) kube_persistentvolumeclaim_info * on(namespace, persistentvolumeclaim) group_left() kube_persistentvolumeclaim_labels{label_disk_dashboard=\"true\"}",
               "legendFormat": "{{persistentvolumeclaim}} used",
               "refId": "B"
             }

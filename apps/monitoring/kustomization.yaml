@@ -8,3 +8,4 @@ resources:
   - namespace.yaml
   - ntfy.sealed-secret.yaml
   - grafana-dashboard-disk.yaml
+  - zfs-exporter.yaml
