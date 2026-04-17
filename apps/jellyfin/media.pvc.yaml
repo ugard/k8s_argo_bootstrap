@@ -12,3 +12,5 @@ spec:
     requests:
       storage: 2500Gi
   storageClassName: openebs-zfspv-affinity
+  volumeName: pvc-344d1342-25ac-4c7f-b9a0-6394f48cbca3
+  volumeMode: Filesystem
