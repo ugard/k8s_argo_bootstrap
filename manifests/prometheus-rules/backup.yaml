@@ -1,0 +1,36 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: backup-alerts
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus-stack
+    release: prometheus
+spec:
+  groups:
+  - name: backup
+    rules:
+    - alert: ZreplHealthcheckJobFailed
+      expr: kube_job_status_failed{namespace="backup-system", job_name=~"zrepl-healthcheck.*"} > 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "zrepl healthcheck job failed"
+        description: "Job {{ $labels.job_name }} in backup-system has failed - zrepl replication may be broken."
+    - alert: ZreplHealthcheckNotScheduled
+      expr: time() - kube_cronjob_status_last_schedule_time{namespace="backup-system", cronjob="zrepl-healthcheck"} > 7200
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "zrepl healthcheck cronjob not running"
+        description: "zrepl-healthcheck has not been scheduled in over 2 hours."
+    - alert: ZreplGaragePushPodMissing
+      expr: kube_daemonset_status_number_ready{namespace="backup-system", daemonset="zrepl-garage-push"} == 0
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        summary: "zrepl-garage-push pod not running"
+        description: "DaemonSet zrepl-garage-push has no ready pods in backup-system - replication is not running."

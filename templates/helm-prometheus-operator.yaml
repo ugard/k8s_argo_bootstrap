@@ -88,7 +88,9 @@ spec:
         kubeStateMetrics:
           enabled: false
         nodeExporter:
-          enabled: false
+          enabled: true
+          hostRootFsMount:
+            enabled: false
         prometheusOperator:
           logLevel: debug
           namespaces:
