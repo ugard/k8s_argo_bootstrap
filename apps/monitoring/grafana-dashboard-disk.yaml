@@ -55,7 +55,7 @@ data:
           },
           "targets": [
             {
-              "expr": "1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\"}",
+              "expr": "1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\",node=~\".+\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\",node=~\".+\"}",
               "legendFormat": "{{node}}",
               "refId": "A"
             }
@@ -92,7 +92,7 @@ data:
           },
           "targets": [
             {
-              "expr": "1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\"}",
+              "expr": "1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\",node=~\".+\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\",node=~\".+\"}",
               "legendFormat": "{{node}}",
               "refId": "A"
             }
@@ -124,7 +124,7 @@ data:
           },
           "targets": [
             {
-              "expr": "node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\"}",
+              "expr": "node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\",node=~\".+\"}",
               "legendFormat": "{{node}} free",
               "refId": "A"
             }
@@ -163,12 +163,12 @@ data:
           },
           "targets": [
             {
-              "expr": "node_filesystem_size_bytes{fstype=\"zfs\",mountpoint!~\".*/.*/.+\"}",
+              "expr": "node_filesystem_size_bytes{fstype=\"zfs\",mountpoint!~\".*/.*/.+\",node=~\".+\"}",
               "legendFormat": "{{node}} {{mountpoint}} total",
               "refId": "A"
             },
             {
-              "expr": "node_filesystem_avail_bytes{fstype=\"zfs\",mountpoint!~\".*/.*/.+\"}",
+              "expr": "node_filesystem_free_bytes{fstype=\"zfs\",mountpoint!~\".*/.*/.+\",node=~\".+\"}",
               "legendFormat": "{{node}} {{mountpoint}} free",
               "refId": "B"
             }
@@ -206,7 +206,7 @@ data:
           },
           "targets": [
             {
-              "expr": "node_zfs_zpool_state{state=\"online\"}",
+              "expr": "node_zfs_zpool_state{state=\"online\",node=~\".+\"}",
               "legendFormat": "{{node}} {{zpool}}",
               "refId": "A"
             }
@@ -307,12 +307,12 @@ data:
           },
           "targets": [
             {
-              "expr": "sum by (node, zpool) (rate(node_zfs_zpool_dataset_nread[5m]))",
+              "expr": "sum by (node, zpool) (rate(node_zfs_zpool_dataset_nread{node=~\".+\"}[5m]))",
               "legendFormat": "{{node}} {{zpool}} read",
               "refId": "A"
             },
             {
-              "expr": "sum by (node, zpool) (rate(node_zfs_zpool_dataset_nwritten[5m]))",
+              "expr": "sum by (node, zpool) (rate(node_zfs_zpool_dataset_nwritten{node=~\".+\"}[5m]))",
               "legendFormat": "{{node}} {{zpool}} write",
               "refId": "B"
             }
