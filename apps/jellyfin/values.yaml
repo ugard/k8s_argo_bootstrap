@@ -40,6 +40,7 @@ persistence:
   media:
     # -- set to false to use emptyDir
     enabled: true
+    existingClaim: jellyfin-media
     accessMode: ReadWriteOnce
     size: 2500Gi
     # -- Custom annotations to be added to the PVC

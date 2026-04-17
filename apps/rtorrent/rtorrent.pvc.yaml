@@ -18,6 +18,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: media-zfs
   namespace: rtorrent
+  labels:
+    disk-dashboard: "true"
 spec:
   accessModes:
   - ReadWriteOnce

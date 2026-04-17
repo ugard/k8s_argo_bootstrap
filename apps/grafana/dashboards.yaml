@@ -85,10 +85,6 @@ data:
                   {
                     "color": "green",
                     "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
                   }
                 ]
               },
@@ -116,17 +112,12 @@ data:
           },
           "targets": [
             {
-              "expr": "kubelet_volume_stats_used_bytes",
-              "legendFormat": "{{persistentvolumeclaim}} Used",
+              "expr": "garage_local_disk_avail",
+              "legendFormat": "{{instance}}",
               "refId": "A"
-            },
-            {
-              "expr": "kubelet_volume_stats_available_bytes",
-              "legendFormat": "{{persistentvolumeclaim}} Free",
-              "refId": "B"
             }
           ],
-          "title": "PVC Usage History",
+          "title": "Garage Disk Availability",
           "type": "timeseries"
         },
         {
@@ -141,20 +132,20 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "red",
                     "value": null
                   },
                   {
                     "color": "orange",
-                    "value": 70
+                    "value": 10737418240
                   },
                   {
-                    "color": "red",
-                    "value": 90
+                    "color": "green",
+                    "value": 53687091200
                   }
                 ]
               },
-              "unit": "percent"
+              "unit": "bytes"
             },
             "overrides": []
           },
@@ -179,12 +170,12 @@ data:
           },
           "targets": [
             {
-              "expr": "kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes * 100",
-              "legendFormat": "{{persistentvolumeclaim}}",
+              "expr": "garage_local_disk_avail",
+              "legendFormat": "{{instance}}",
               "refId": "A"
             }
           ],
-          "title": "PVC Usage %",
+          "title": "Garage Available Space",
           "type": "gauge"
         }
       ],

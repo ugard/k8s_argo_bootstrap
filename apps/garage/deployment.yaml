@@ -53,6 +53,7 @@ metadata:
   name: garage-data
   labels:
     backup-strategy: zfs-local
+    disk-dashboard: "true"
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -68,6 +69,7 @@ metadata:
   name: garage-meta-zfs
   labels:
     backup-strategy: zfs-local
+    disk-dashboard: "true"
 ---
 apiVersion: v1
 kind: Service

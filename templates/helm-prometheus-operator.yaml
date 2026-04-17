@@ -86,7 +86,7 @@ spec:
         kubeProxy:
           enabled: false
         kubeStateMetrics:
-          enabled: false
+          enabled: true
         nodeExporter:
           enabled: true
           hostRootFsMount:

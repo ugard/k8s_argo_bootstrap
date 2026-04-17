@@ -7,3 +7,4 @@ resources:
   # - ftp-service.yaml
   - rclone_secret.yaml
   - bridge-service.yaml
+  - media.pvc.yaml

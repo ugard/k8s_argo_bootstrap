@@ -163,17 +163,17 @@ data:
           },
           "targets": [
             {
-              "expr": "node_filesystem_size_bytes{fstype=\"zfs\",mountpoint!~\".*/.*/.+\",node=~\".+\"}",
-              "legendFormat": "{{node}} {{mountpoint}} total",
+              "expr": "kubelet_volume_stats_capacity_bytes * on(namespace, persistentvolumeclaim) group_left() kube_persistentvolumeclaim_labels{label_disk_dashboard=\"true\"}",
+              "legendFormat": "{{persistentvolumeclaim}} total",
               "refId": "A"
             },
             {
-              "expr": "node_filesystem_free_bytes{fstype=\"zfs\",mountpoint!~\".*/.*/.+\",node=~\".+\"}",
-              "legendFormat": "{{node}} {{mountpoint}} free",
+              "expr": "kubelet_volume_stats_used_bytes * on(namespace, persistentvolumeclaim) group_left() kube_persistentvolumeclaim_labels{label_disk_dashboard=\"true\"}",
+              "legendFormat": "{{persistentvolumeclaim}} used",
               "refId": "B"
             }
           ],
-          "title": "ZFS Pool Capacity",
+          "title": "ZFS Volume Capacity (per PVC)",
           "type": "timeseries"
         },
         {
