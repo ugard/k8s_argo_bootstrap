@@ -91,6 +91,15 @@ spec:
           enabled: true
           hostRootFsMount:
             enabled: false
+        prometheus-node-exporter:
+          prometheus:
+            monitor:
+              attachMetadata:
+                node: true
+              relabelings:
+              - action: replace
+                sourceLabels: [__meta_kubernetes_node_name]
+                targetLabel: node
         prometheusOperator:
           logLevel: debug
           namespaces:

@@ -143,7 +143,7 @@ data:
           "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
-              "unit": "Bps",
+              "unit": "bytes",
               "color": {"mode": "palette-classic"},
               "custom": {
                 "drawStyle": "line",
@@ -163,17 +163,17 @@ data:
           },
           "targets": [
             {
-              "expr": "sum by (zpool) (rate(node_zfs_zpool_dataset_nread[5m]))",
-              "legendFormat": "{{zpool}} read",
+              "expr": "node_filesystem_size_bytes{fstype=\"zfs\",mountpoint!~\".*/.*/.+\"}",
+              "legendFormat": "{{node}} {{mountpoint}} total",
               "refId": "A"
             },
             {
-              "expr": "sum by (zpool) (rate(node_zfs_zpool_dataset_nwritten[5m]))",
-              "legendFormat": "{{zpool}} write",
+              "expr": "node_filesystem_avail_bytes{fstype=\"zfs\",mountpoint!~\".*/.*/.+\"}",
+              "legendFormat": "{{node}} {{mountpoint}} free",
               "refId": "B"
             }
           ],
-          "title": "ZFS Pool I/O Throughput",
+          "title": "ZFS Pool Capacity",
           "type": "timeseries"
         },
         {
@@ -207,7 +207,7 @@ data:
           "targets": [
             {
               "expr": "node_zfs_zpool_state{state=\"online\"}",
-              "legendFormat": "{{zpool}}",
+              "legendFormat": "{{node}} {{zpool}}",
               "refId": "A"
             }
           ],
@@ -281,6 +281,43 @@ data:
             }
           ],
           "title": "ZFS ARC Size Over Time",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps",
+              "color": {"mode": "palette-classic"},
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "spanNulls": false,
+                "showPoints": "never"
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 22},
+          "id": 17,
+          "options": {
+            "legend": {"displayMode": "list", "placement": "bottom", "calcs": ["lastNotNull"]},
+            "tooltip": {"mode": "multi", "sort": "none"}
+          },
+          "targets": [
+            {
+              "expr": "sum by (node, zpool) (rate(node_zfs_zpool_dataset_nread[5m]))",
+              "legendFormat": "{{node}} {{zpool}} read",
+              "refId": "A"
+            },
+            {
+              "expr": "sum by (node, zpool) (rate(node_zfs_zpool_dataset_nwritten[5m]))",
+              "legendFormat": "{{node}} {{zpool}} write",
+              "refId": "B"
+            }
+          ],
+          "title": "ZFS Pool I/O Throughput",
           "type": "timeseries"
         },
         {
@@ -369,7 +406,7 @@ data:
           },
           "targets": [
             {
-              "expr": "ceph_cluster_total_avail_bytes",
+              "expr": "ceph_cluster_total_bytes - ceph_cluster_total_used_raw_bytes",
               "legendFormat": "Available",
               "refId": "A"
             }
@@ -411,7 +448,7 @@ data:
               "refId": "B"
             },
             {
-              "expr": "ceph_cluster_total_avail_bytes",
+              "expr": "ceph_cluster_total_bytes - ceph_cluster_total_used_raw_bytes",
               "legendFormat": "Available",
               "refId": "C"
             }
@@ -455,6 +492,43 @@ data:
           ],
           "title": "Ceph Used % (Current)",
           "type": "gauge"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "color": {"mode": "palette-classic"},
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "spanNulls": false,
+                "showPoints": "never"
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 35},
+          "id": 16,
+          "options": {
+            "legend": {"displayMode": "list", "placement": "bottom", "calcs": ["lastNotNull"]},
+            "tooltip": {"mode": "multi", "sort": "desc"}
+          },
+          "targets": [
+            {
+              "expr": "sum by (hostname) (ceph_osd_stat_bytes_avail * on(ceph_daemon) group_left(hostname) ceph_osd_metadata)",
+              "legendFormat": "{{hostname}} free",
+              "refId": "A"
+            },
+            {
+              "expr": "sum by (hostname) (ceph_osd_stat_bytes * on(ceph_daemon) group_left(hostname) ceph_osd_metadata)",
+              "legendFormat": "{{hostname}} total",
+              "refId": "B"
+            }
+          ],
+          "title": "Ceph Free Space per Node",
+          "type": "timeseries"
         }
       ],
       "refresh": "1m",

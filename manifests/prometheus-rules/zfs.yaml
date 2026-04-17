@@ -10,27 +10,19 @@ spec:
   groups:
   - name: zfs
     rules:
-    - alert: ZFSPoolResilivering
-      expr: node_zfs_zpool_state{state="DEGRADED"} == 1 or node_zfs_zpool_state{state="FAULTED"} == 1
+    - alert: ZFSPoolDegraded
+      expr: node_zfs_zpool_state{state="degraded"} == 1
       for: 1m
       labels:
         severity: warning
       annotations:
-        summary: "ZFS pool {{ $labels.zpool }} on {{ $labels.instance }} is degraded/faulted"
-        description: "ZFS pool {{ $labels.zpool }} on {{ $labels.instance }} is in state {{ $labels.state }}. A resilver or repair may be in progress."
+        summary: "ZFS pool {{ $labels.zpool }} on {{ $labels.instance }} is degraded"
+        description: "ZFS pool {{ $labels.zpool }} on {{ $labels.instance }} is in DEGRADED state. A resilver or repair may be in progress."
     - alert: ZFSPoolUnhealthy
-      expr: node_zfs_zpool_state{state!="ONLINE"} == 1
+      expr: node_zfs_zpool_state{state=~"faulted|unavail|suspended"} == 1
       for: 5m
       labels:
         severity: critical
       annotations:
-        summary: "ZFS pool {{ $labels.zpool }} on {{ $labels.instance }} is not ONLINE"
+        summary: "ZFS pool {{ $labels.zpool }} on {{ $labels.instance }} is unhealthy"
         description: "ZFS pool {{ $labels.zpool }} on {{ $labels.instance }} has been in state {{ $labels.state }} for 5 minutes."
-    - alert: ZFSResilverInProgress
-      expr: node_zfs_zpool_scrub_state{scrub_type="resilver"} == 1
-      for: 0m
-      labels:
-        severity: info
-      annotations:
-        summary: "ZFS resilver in progress on {{ $labels.instance }}"
-        description: "ZFS pool {{ $labels.zpool }} on {{ $labels.instance }} is currently resilvering."
