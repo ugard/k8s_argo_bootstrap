@@ -55,12 +55,12 @@ data:
           },
           "targets": [
             {
-              "expr": "1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/\"}",
+              "expr": "1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\"}",
               "legendFormat": "{{node}}",
               "refId": "A"
             }
           ],
-          "title": "Root FS Used %",
+          "title": "Ephemeral (/var) Used %",
           "type": "timeseries"
         },
         {
@@ -92,7 +92,7 @@ data:
           },
           "targets": [
             {
-              "expr": "1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/\"}",
+              "expr": "1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\"}",
               "legendFormat": "{{node}}",
               "refId": "A"
             }
@@ -124,12 +124,12 @@ data:
           },
           "targets": [
             {
-              "expr": "node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/\"}",
+              "expr": "node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs|ramfs\",mountpoint=\"/var\"}",
               "legendFormat": "{{node}} free",
               "refId": "A"
             }
           ],
-          "title": "Root FS Free Space",
+          "title": "Ephemeral (/var) Free Space",
           "type": "timeseries"
         },
         {
