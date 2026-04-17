@@ -74,7 +74,13 @@ spec:
         kubeApiServer:
           enabled: false
         kubelet:
-          enabled: false
+          enabled: true
+          serviceMonitor:
+            cAdvisor: false
+            metricRelabelings:
+              - sourceLabels: [__name__]
+                regex: kubelet_volume_stats_.*
+                action: keep
         kubeControllerManager:
           enabled: false
         coreDns:
