@@ -32,12 +32,18 @@ spec:
         env:
         - name: TZ
           value: "Europe/Warsaw"
-        - name: FIREWALL_DEBUG
-          value: "on"
+        - name: FIREWALL_IPTABLES_LOG_LEVEL
+          value: "info"
         - name: FIREWALL_INPUT_PORTS
           value: "9091,8888"
         - name: HTTP_CONTROL_SERVER_ADDRESS
-          value: ":18000"
+          value: ':18000'
+        - name: HEALTH_SUCCESS_WAIT_DURATION
+          value: "10s"
+        - name: DOT
+          value: 'off'
+        - name: DNS_ADDRESS
+          value: "1.1.1.1"
         securityContext:
           capabilities:
             add:

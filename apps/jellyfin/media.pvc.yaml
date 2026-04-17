@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: jellyfin-media
+  name: kustomize-jellyfin-media
   namespace: jellyfin
   labels:
     disk-dashboard: "true"
