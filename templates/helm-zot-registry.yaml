@@ -33,8 +33,12 @@ spec:
                 - registry.ugard.win
         persistence: true
         pvc:
-          create: false
+          create: true
           name: "zot-registry-pvc"
+          storageClassName: "rook-ceph-block"
+          size: "8Gi"
+          accessModes:
+            - ReadWriteOnce
         metrics:
           enabled: "true"
         startupProbe:
