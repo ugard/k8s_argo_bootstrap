@@ -64,4 +64,4 @@ extraContainers:
       mountPath: /config/rclone
       readOnly: true
 nodeSelector:
-  kubernetes.io/hostname: talos-jly-e8b
+  kubernetes.io/hostname: talos-i8d-hmt
