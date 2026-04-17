@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    # node-exporter requires hostNetwork, hostPID, hostPath volumes and hostPort,
+    # which are blocked by the default 'baseline' PodSecurity standard.
+    # Talos enforces PodSecurity admission by default; privileged is required here.
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
