@@ -1,0 +1,519 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: para-init-script
+  namespace: obsidian
+data:
+  init.py: |
+    import os, json
+
+    VAULT = "/config/vault"
+
+    FILES = {
+      "Home.md": """\
+    # Second Brain
+
+    > *"Your mind is for having ideas, not holding them."* — David Allen
+
+    ## Quick Capture
+
+    → [[00 Inbox/README|📥 Inbox]] · [[01 Projects/README|🎯 Projects]] · [[02 Areas/README|🔄 Areas]] · [[03 Resources/README|📚 Resources]] · [[04 Archives/README|📦 Archives]]
+
+    ---
+
+    ## Active Projects
+
+    ```dataview
+    TABLE status AS "Status", due AS "Deadline", file.mtime AS "Updated"
+    FROM "01 Projects"
+    WHERE status = "active"
+    SORT due ASC
+    ```
+
+    ## Inbox (to process)
+
+    ```dataview
+    LIST FROM "00 Inbox"
+    WHERE file.name != "README"
+    SORT file.ctime DESC
+    LIMIT 10
+    ```
+
+    ## Recent notes
+
+    ```dataview
+    LIST FROM ""
+    WHERE file.mtime >= date(today) - dur(7 days)
+    AND file.name != "Home"
+    SORT file.mtime DESC
+    LIMIT 15
+    ```
+    """,
+
+      "00 Inbox/README.md": """\
+    # 📥 Inbox
+
+    Capture layer — everything lands here first, zero friction.
+
+    **Rules:**
+    - Never organize while capturing
+    - Review weekly (Sunday)
+    - Every note gets moved to Projects / Areas / Resources or deleted
+
+    **Weekly review checklist:**
+    - [ ] Process all notes in Inbox
+    - [ ] Review active Projects (any stalled?)
+    - [ ] Check Areas (any new responsibilities added?)
+    - [ ] Archive completed Projects
+    """,
+
+      "01 Projects/README.md": """\
+    # 🎯 Projects
+
+    A **project** has a clear outcome and an (implicit or explicit) deadline.
+
+    **What belongs here:**
+    - Short-term effort with a definite finish
+    - Example: "Migrate Obsidian to new vault structure", "Set up Garage S3"
+
+    **What does NOT belong here:**
+    - Ongoing responsibilities → [[../02 Areas/README|Areas]]
+    - Reference material → [[../03 Resources/README|Resources]]
+
+    ---
+
+    ```dataview
+    TABLE status AS "Status", due AS "Deadline", tags AS "Tags"
+    FROM "01 Projects"
+    WHERE file.name != "README"
+    SORT status ASC, due ASC
+    ```
+    """,
+
+      "01 Projects/_template.md": """\
+    ---
+    status: active
+    due:
+    tags: [project]
+    ---
+
+    # Project: <title>
+
+    ## Outcome
+    > What does "done" look like?
+
+    ## Why it matters
+
+
+    ## Next actions
+    - [ ]
+
+    ## Notes & context
+
+
+    ## Log
+    - {{date}} — started
+    """,
+
+      "02 Areas/README.md": """\
+    # 🔄 Areas
+
+    An **area** is an ongoing responsibility with a standard to maintain — no end date.
+
+    **Examples for a homelab admin:**
+    - Homelab / Kubernetes
+    - Health & fitness
+    - Finances
+    - Learning
+    - Home & household
+
+    **What belongs here:**
+    - Anything you're continuously responsible for
+    - Roles, habits, maintenance
+
+    ---
+
+    ```dataview
+    LIST FROM "02 Areas"
+    WHERE file.name != "README"
+    SORT file.name ASC
+    ```
+    """,
+
+      "02 Areas/_template.md": """\
+    ---
+    tags: [area]
+    ---
+
+    # Area: <title>
+
+    ## Standard to maintain
+    > What does "good enough" look like for this area?
+
+    ## Current focus
+
+
+    ## Related projects
+    - [[../01 Projects/]]
+
+    ## Notes & reference
+    """,
+
+      "02 Areas/Homelab.md": """\
+    ---
+    tags: [area, homelab, kubernetes]
+    ---
+
+    # Area: Homelab
+
+    ## Standard to maintain
+    - All ArgoCD apps synced and healthy
+    - Backups verified weekly
+    - No critical alerts unresolved > 24h
+
+    ## Infrastructure overview
+    - **Cluster:** k8s (ArgoCD app-of-apps pattern)
+    - **Storage:** Rook-Ceph, OpenEBS
+    - **Ingress:** Cloudflare Tunnel + cert-manager
+    - **Backup:** Benji / Velero
+
+    ## Current focus
+
+
+    ## Useful links
+    - ArgoCD: https://argocd.ugard.win (adjust as needed)
+    - Grafana: https://grafana.ugard.win
+
+    ## Runbooks & notes
+    """,
+
+      "03 Resources/README.md": """\
+    # 📚 Resources
+
+    A **resource** is a topic of ongoing interest or reference material — no action required.
+
+    **What belongs here:**
+    - How-to notes, cheatsheets, research
+    - Topics you return to: Kubernetes, networking, book notes
+
+    **What does NOT belong here:**
+    - Active work → [[../01 Projects/README|Projects]]
+    - Your responsibilities → [[../02 Areas/README|Areas]]
+
+    ---
+
+    ```dataview
+    LIST FROM "03 Resources"
+    WHERE file.name != "README"
+    SORT file.name ASC
+    ```
+    """,
+
+      "03 Resources/_template.md": """\
+    ---
+    tags: [resource]
+    ---
+
+    # <Topic>
+
+    ## Summary
+
+
+    ## Key concepts
+
+
+    ## References / links
+
+
+    ## Personal notes
+    """,
+
+      "03 Resources/Kubernetes.md": """\
+    ---
+    tags: [resource, kubernetes, homelab]
+    ---
+
+    # Kubernetes
+
+    ## Useful commands
+
+    ```bash
+    kubectl get pods -A
+    kubectl describe pod <name> -n <ns>
+    kubectl logs <pod> -n <ns> -f
+    kubectl rollout restart deployment/<name> -n <ns>
+    ```
+
+    ## ArgoCD
+
+    ```bash
+    argocd app list
+    argocd app sync <app>
+    argocd app diff <app>
+    ```
+
+    ## References
+    - https://kubernetes.io/docs/
+    - https://argo-cd.readthedocs.io/
+    """,
+
+      "04 Archives/README.md": """\
+    # 📦 Archives
+
+    Completed projects, inactive areas, and outdated resources.
+
+    **When to archive:**
+    - Project completed or abandoned
+    - Area no longer your responsibility
+    - Resource no longer relevant
+
+    **How to archive:**
+    Move the folder/note here and update the status tag to `archived`.
+
+    ---
+
+    ```dataview
+    TABLE file.mtime AS "Archived"
+    FROM "04 Archives"
+    WHERE file.name != "README"
+    SORT file.mtime DESC
+    ```
+    """,
+
+      "Templates/Project.md": """\
+    ---
+    status: active
+    due:
+    tags: [project]
+    ---
+
+    # Project: {{title}}
+
+    ## Outcome
+    > What does "done" look like?
+
+    ## Why it matters
+
+
+    ## Next actions
+    - [ ]
+
+    ## Notes
+
+
+    ## Log
+    - {{date}} — started
+    """,
+
+      "Templates/Area.md": """\
+    ---
+    tags: [area]
+    ---
+
+    # Area: {{title}}
+
+    ## Standard to maintain
+
+
+    ## Current focus
+
+
+    ## Notes
+    """,
+
+      "Templates/Resource.md": """\
+    ---
+    tags: [resource]
+    ---
+
+    # {{title}}
+
+    ## Summary
+
+
+    ## Key concepts / notes
+
+
+    ## References
+    """,
+
+      "Templates/Daily Note.md": """\
+    ---
+    tags: [daily]
+    date: {{date}}
+    ---
+
+    # {{date}}
+
+    ## Today's focus
+    > What's the one thing that would make today a win?
+
+    ## Log
+
+
+    ## Notes & captures
+
+
+    ## End of day
+    - [ ] Process Inbox
+    - [ ] Update active project next actions
+    """,
+
+      "Templates/Meeting.md": """\
+    ---
+    tags: [meeting]
+    date: {{date}}
+    attendees:
+    ---
+
+    # Meeting: {{title}}
+
+    **Date:** {{date}}
+    **Attendees:**
+
+    ## Agenda
+
+
+    ## Notes
+
+
+    ## Action items
+    - [ ]
+    """,
+    }
+
+    OBSIDIAN_CONFIG = {
+      "app.json": {
+        "newFileLocation": "folder",
+        "newFileFolderPath": "00 Inbox",
+        "templateFolderPath": "Templates"
+      },
+      "core-plugins.json": [
+        "file-explorer", "search", "switcher", "graph", "backlink",
+        "outgoing-link", "tag-pane", "properties", "page-preview",
+        "daily-notes", "templates", "note-composer", "command-palette",
+        "editor-status", "word-count"
+      ],
+      "daily-notes.json": {
+        "folder": "02 Areas/Journal",
+        "format": "YYYY-MM-DD",
+        "template": "Templates/Daily Note"
+      }
+    }
+
+    def write_if_new(path, content):
+        if not os.path.exists(path):
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w") as f:
+                f.write(content)
+            print(f"  created: {path}")
+        else:
+            print(f"  exists (skip): {path}")
+
+    print("=== PARA init ===")
+    for rel, content in FILES.items():
+        write_if_new(os.path.join(VAULT, rel), content)
+
+    obsidian_dir = os.path.join(VAULT, ".obsidian")
+    os.makedirs(obsidian_dir, exist_ok=True)
+    for fname, data in OBSIDIAN_CONFIG.items():
+        path = os.path.join(obsidian_dir, fname)
+        if not os.path.exists(path):
+            with open(path, "w") as f:
+                json.dump(data, f, indent=2)
+            print(f"  created: .obsidian/{fname}")
+        else:
+            print(f"  exists (skip): .obsidian/{fname}")
+
+    print("=== Done — open vault at /config/vault in Obsidian ===")
+
+    # === Git setup ===
+    import subprocess
+
+    GITEA_TOKEN = os.environ.get("GITEA_TOKEN", "")
+    GITEA_USER  = "luck"
+    GITEA_HOST  = "gitea.ugard.win"
+    GITEA_REPO  = "obsidian-vault"
+    REMOTE_URL  = f"https://{GITEA_USER}:{GITEA_TOKEN}@{GITEA_HOST}/{GITEA_USER}/{GITEA_REPO}.git"
+
+    GIT_ENV = {**os.environ, "HOME": "/config", "GIT_AUTHOR_NAME": "Łukasz",
+               "GIT_AUTHOR_EMAIL": f"{GITEA_USER}@{GITEA_HOST}",
+               "GIT_COMMITTER_NAME": "Łukasz",
+               "GIT_COMMITTER_EMAIL": f"{GITEA_USER}@{GITEA_HOST}"}
+
+    def git(args, cwd=VAULT):
+        r = subprocess.run(["git"] + args, cwd=cwd, env=GIT_ENV,
+                           capture_output=True, text=True)
+        if r.stdout.strip(): print(" ", r.stdout.strip())
+        if r.returncode != 0 and r.stderr.strip():
+            print(f"  git warning: {r.stderr.strip()}")
+        return r.returncode == 0
+
+    print("=== Git setup ===")
+
+    # Write .gitconfig (idempotent — always refresh with current values)
+    gitconfig_path = "/config/.gitconfig"
+    with open(gitconfig_path, "w") as f:
+        f.write(
+            f"[user]\n\tname = Łukasz\n\temail = {GITEA_USER}@{GITEA_HOST}\n"
+            "[credential]\n\thelper = store --file /config/.git-credentials\n"
+            "[init]\n\tdefaultBranch = main\n"
+            "[core]\n\tautocrlf = false\n"
+        )
+    os.chmod(gitconfig_path, 0o600)
+    try: os.chown(gitconfig_path, 1000, 1000)
+    except Exception: pass
+
+    # Write .git-credentials (only if token provided)
+    creds_path = "/config/.git-credentials"
+    if GITEA_TOKEN:
+        with open(creds_path, "w") as f:
+            f.write(f"https://{GITEA_USER}:{GITEA_TOKEN}@{GITEA_HOST}\n")
+        os.chmod(creds_path, 0o600)
+        try: os.chown(creds_path, 1000, 1000)
+        except Exception: pass
+        print("  git credentials written")
+    else:
+        print("  GITEA_TOKEN not set — skipping credentials (set it to enable auto-push)")
+
+    # Initialize git repo in vault
+    if not os.path.exists(os.path.join(VAULT, ".git")):
+        gitignore = (
+            ".obsidian/workspace.json\n"
+            ".obsidian/workspace-mobile.json\n"
+            ".trash/\n.DS_Store\n"
+        )
+        write_if_new(os.path.join(VAULT, ".gitignore"), gitignore)
+        git(["init"])
+        git(["add", "-A"])
+        git(["commit", "-m", "feat: initial PARA structure"])
+        if GITEA_TOKEN:
+            git(["remote", "add", "origin", REMOTE_URL])
+            print(f"  remote origin set → {GITEA_HOST}/{GITEA_USER}/{GITEA_REPO}")
+        print("  git init done")
+    else:
+        # Refresh remote URL if token changed
+        if GITEA_TOKEN:
+            git(["remote", "set-url", "origin", REMOTE_URL])
+            print("  remote URL refreshed")
+        print("  git already initialized (skip init)")
+
+    # Pre-configure Obsidian Git plugin data.json so it works after UI install
+    plugin_dir = os.path.join(VAULT, ".obsidian", "plugins", "obsidian-git")
+    plugin_data = os.path.join(plugin_dir, "data.json")
+    if not os.path.exists(plugin_data):
+        os.makedirs(plugin_dir, exist_ok=True)
+        with open(plugin_data, "w") as f:
+            json.dump({
+                "commitMessage": "vault: {{date}}",
+                "commitDateFormat": "YYYY-MM-DD HH:mm:ss",
+                "autoSaveIntervalMinutes": 10,
+                "autoPushOnCommit": True,
+                "pullBeforePush": True,
+                "disablePush": False,
+                "syncMethod": "merge",
+                "gitPath": ""
+            }, f, indent=2)
+        print("  obsidian-git plugin data.json pre-configured")
+
+    print("=== All done ===")

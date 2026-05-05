@@ -5,3 +5,6 @@ resources:
   - obsidian.yaml
   - obsidian.pvc.yaml
   - obsidian.ingress.yaml
+  - para-init-configmap.yaml
+  - para-init-job.yaml
+  - gitea.sealed-secret.yaml

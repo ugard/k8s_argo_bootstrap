@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: obsidian-para-init
+  namespace: obsidian
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: para-init
+          image: python:3.12-alpine
+          command:
+            - /bin/sh
+            - -c
+            - apk add --no-cache git > /dev/null && python3 /scripts/init.py
+          env:
+            - name: GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: obsidian-gitea-credentials
+                  key: GITEA_TOKEN
+                  optional: true
+          volumeMounts:
+            - name: vault
+              mountPath: /config
+            - name: script
+              mountPath: /scripts
+      volumes:
+        - name: vault
+          persistentVolumeClaim:
+            claimName: obsidian-data-ceph
+        - name: script
+          configMap:
+            name: para-init-script
