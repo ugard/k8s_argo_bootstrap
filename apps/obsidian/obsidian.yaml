@@ -42,6 +42,12 @@ spec:
           value: "1000"
         - name: TZ
           value: "Etc/UTC"
+        - name: SELKIES_ENCODER
+          value: "x264"
+        - name: SELKIES_FRAMERATE
+          value: "30"
+        - name: SELKIES_VIDEO_BITRATE
+          value: "2000"
         volumeMounts:
           - name: data
             mountPath: /config
