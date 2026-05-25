@@ -19,10 +19,14 @@ spec:
       initContainers:
         - name: fix-permissions
           image: alpine:latest
-          command: ["chmod", "-R", "777", "/opt/printer_data/logs"]
+          command: ["sh", "-c", "chmod -R 777 /opt/printer_data/logs /home/moonraker-telegram-bot/moonraker-telegram-bot-timelapse /home/moonraker-telegram-bot/timelapse_finished"]
           volumeMounts:
             - name: logs
               mountPath: /opt/printer_data/logs
+            - name: timelapse-data
+              mountPath: /home/moonraker-telegram-bot/moonraker-telegram-bot-timelapse
+            - name: timelapse-finished
+              mountPath: /home/moonraker-telegram-bot/timelapse_finished
       containers:
         - name: moonraker-telegram-bot
           image: lefskiy/moonraker-telegram-bot:latest
