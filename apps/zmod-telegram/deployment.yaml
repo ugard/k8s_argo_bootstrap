@@ -16,6 +16,13 @@ spec:
       labels:
         app: moonraker-telegram-bot
     spec:
+      initContainers:
+        - name: fix-permissions
+          image: alpine:latest
+          command: ["chmod", "-R", "777", "/opt/printer_data/logs"]
+          volumeMounts:
+            - name: logs
+              mountPath: /opt/printer_data/logs
       containers:
         - name: moonraker-telegram-bot
           image: lefskiy/moonraker-telegram-bot:latest
