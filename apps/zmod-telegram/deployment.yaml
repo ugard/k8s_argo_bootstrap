@@ -1,0 +1,84 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moonraker-telegram-bot
+  namespace: zmod-telegram
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: moonraker-telegram-bot
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: moonraker-telegram-bot
+    spec:
+      containers:
+        - name: moonraker-telegram-bot
+          image: lefskiy/moonraker-telegram-bot:latest
+          imagePullPolicy: Always
+          command:
+            - python3
+            - moonraker-telegram-bot/bot/main.py
+            - -c
+            - /opt/printer_data/config/telegram.conf
+            - -l
+            - /opt/printer_data/logs
+          env:
+            - name: TZ
+              value: Europe/Warsaw
+          resources:
+            requests:
+              memory: 300M
+              cpu: 200m
+            limits:
+              memory: 300M
+              cpu: 200m
+          volumeMounts:
+            - name: telegram-conf
+              mountPath: /opt/printer_data/config/telegram.conf
+              subPath: telegram.conf
+              readOnly: true
+            - name: timelapse-data
+              mountPath: /home/moonraker-telegram-bot/moonraker-telegram-bot-timelapse
+            - name: timelapse-finished
+              mountPath: /home/moonraker-telegram-bot/timelapse_finished
+            - name: logs
+              mountPath: /opt/printer_data/logs
+
+        - name: cron
+          image: alpine:latest
+          imagePullPolicy: Always
+          command:
+            - /bin/sh
+            - -c
+            - "while sleep 600; do find /home/moonraker-telegram-bot/ -type f -mtime +10 -delete; done"
+          resources:
+            requests:
+              memory: 150M
+              cpu: 50m
+            limits:
+              memory: 150M
+              cpu: 100m
+          volumeMounts:
+            - name: timelapse-data
+              mountPath: /home/moonraker-telegram-bot/moonraker-telegram-bot-timelapse
+            - name: timelapse-finished
+              mountPath: /home/moonraker-telegram-bot/timelapse_finished
+
+      volumes:
+        - name: telegram-conf
+          secret:
+            secretName: zmod-telegram-conf
+        - name: timelapse-data
+          persistentVolumeClaim:
+            claimName: zmod-telegram-timelapse-data
+        - name: timelapse-finished
+          persistentVolumeClaim:
+            claimName: zmod-telegram-timelapse-finished
+        - name: logs
+          persistentVolumeClaim:
+            claimName: zmod-telegram-logs
