@@ -11,6 +11,8 @@ metadata:
   name: rtorrent
   namespace: rtorrent
 spec:
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: rtorrent
