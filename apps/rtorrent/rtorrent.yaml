@@ -34,10 +34,8 @@ spec:
         env:
         - name: TZ
           value: "Europe/Warsaw"
-        - name: HEALTH_LISTEN_PORT
-          value: "9999"
-        - name: HEALTH_LISTEN_ADDRESS
-          value: "0.0.0.0"
+        - name: HEALTH_SERVER_ADDRESS
+          value: "0.0.0.0:9999"
         - name: FIREWALL_IPTABLES_LOG_LEVEL
           value: "info"
         - name: FIREWALL_INPUT_PORTS
