@@ -23,7 +23,7 @@ spec:
     spec:
       initContainers:
       - name: gluetun
-        image: "ghcr.io/qdm12/gluetun:latest"
+        image: "ghcr.io/qdm12/gluetun:v3.41.1"
         restartPolicy: Always
         envFrom:
          - secretRef:
@@ -32,6 +32,8 @@ spec:
         env:
         - name: TZ
           value: "Europe/Warsaw"
+        - name: HEALTH_LISTEN_PORT
+          value: "9999"
         - name: FIREWALL_IPTABLES_LOG_LEVEL
           value: "info"
         - name: FIREWALL_INPUT_PORTS
@@ -44,6 +46,13 @@ spec:
           value: 'off'
         - name: DNS_ADDRESS
           value: "1.1.1.1"
+        readinessProbe:
+          httpGet:
+            path: /v1/health
+            port: 9999
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 30
         securityContext:
           capabilities:
             add:
