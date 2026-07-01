@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: omemo-store
+  namespace: xmpp-bridge
+  labels:
+    app.kubernetes.io/name: xmpp-omemo-core
+    app.kubernetes.io/component: bridge
+    app.kubernetes.io/part-of: mqtt-xmpp-bridge
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

@@ -1,0 +1,14 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: xmpp-omemo-core
+  namespace: xmpp-bridge
+  labels:
+    app.kubernetes.io/name: xmpp-omemo-core
+    app.kubernetes.io/component: bridge
+    app.kubernetes.io/part-of: mqtt-xmpp-bridge
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: xmpp-omemo-core
