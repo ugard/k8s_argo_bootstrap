@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xmpp-omemo-core
+  namespace: xmpp-bridge
+  labels:
+    app.kubernetes.io/name: xmpp-omemo-core
+    app.kubernetes.io/component: bridge
+    app.kubernetes.io/part-of: mqtt-xmpp-bridge
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: xmpp-omemo-core
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: xmpp-omemo-core
+        app.kubernetes.io/component: bridge
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: xmpp-omemo-core
+          image: registry.ugard.win/xmpp-omemo-core:latest
+          imagePullPolicy: Always
+          env:
+            - name: OMEMO_SERVER
+              value: "xmpp.jp"
+            - name: OMEMO_PORT
+              value: "5222"
+            - name: OMEMO_JID
+              valueFrom:
+                secretKeyRef:
+                  name: xmpp-credentials
+                  key: XMPP_JID
+            - name: OMEMO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: xmpp-credentials
+                  key: XMPP_PASSWORD
+            - name: OMEMO_TRUST_ALL_DEVICES
+              value: "true"
+            - name: MQTT_BROKER
+              valueFrom:
+                secretKeyRef:
+                  name: xmpp-credentials
+                  key: MQTT_BROKER
+            - name: MQTT_CLIENT_ID
+              value: "xmpp-bridge"
+            - name: MQTT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: xmpp-credentials
+                  key: MQTT_USERNAME
+            - name: MQTT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: xmpp-credentials
+                  key: MQTT_PASSWORD
+            - name: CLUSTER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: xmpp-credentials
+                  key: CLUSTER_NAME
+            - name: ALERTS_ROOM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: xmpp-credentials
+                  key: ALERTS_ROOM_PASSWORD
+            - name: PRINTER_ROOM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: xmpp-credentials
+                  key: PRINTER_ROOM_PASSWORD
+            - name: XIYOHE_ROOM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: xmpp-credentials
+                  key: XIYOHE_ROOM_PASSWORD
+            - name: OMEMO_STORE_PATH
+              value: "/data/omemo-store"
+          livenessProbe:
+            exec:
+              command:
+                - xmpp-omemo-core
+                - --probe
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          volumeMounts:
+            - name: omemo-store
+              mountPath: /data/omemo-store
+            - name: bridge-routes
+              mountPath: /etc/xmpp-omemo-core/routes.properties
+              subPath: routes.properties
+              readOnly: true
+      volumes:
+        - name: omemo-store
+          persistentVolumeClaim:
+            claimName: omemo-store
+        - name: bridge-routes
+          configMap:
+            name: bridge-routes

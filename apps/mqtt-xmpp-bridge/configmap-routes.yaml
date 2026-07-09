@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bridge-routes
+  namespace: xmpp-bridge
+  labels:
+    app.kubernetes.io/part-of: mqtt-xmpp-bridge
+data:
+  routes.properties: |
+    route.1.mqtt.topic = alerts/#
+    route.1.xmpp.room = k8s-alerts@conference.xmpp.jp
+    route.1.xmpp.room.password = ${ALERTS_ROOM_PASSWORD}
+    route.1.direction = to_xmpp
+    route.1.format = text
+
+    route.2.mqtt.topic = printer/+/status
+    route.2.mqtt.qos = 1
+    route.2.xmpp.room = printer-3d@conference.xmpp.jp
+    route.2.xmpp.room.password = ${PRINTER_ROOM_PASSWORD}
+    route.2.direction = to_xmpp
+    route.2.format = text
+
+    route.3.mqtt.topic = printer/commands
+    route.3.xmpp.room = printer-3d@conference.xmpp.jp
+    route.3.xmpp.room.password = ${PRINTER_ROOM_PASSWORD}
+    route.3.direction = to_mqtt
+    route.3.format = text
+
+    route.4.mqtt.topic = printer/+/photo
+    route.4.xmpp.room = printer-3d@conference.xmpp.jp
+    route.4.xmpp.room.password = ${PRINTER_ROOM_PASSWORD}
+    route.4.direction = to_xmpp
+    route.4.format = link
+
+    # ── Route 5: Dummy topic → Xiyohe room (one-way MQTT → XMPP) ──
+    route.5.mqtt.topic = dummy/#
+    route.5.xmpp.room = xiyohe@conference.xmpp.jp
+    route.5.xmpp.room.password = ${XIYOHE_ROOM_PASSWORD}
+    route.5.direction = to_xmpp
+    route.5.format = text

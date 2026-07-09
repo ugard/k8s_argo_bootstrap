@@ -52,6 +52,15 @@ Edit a key in a Kubernetes secret and generate a new sealed secret.
 - `kubeseal` for creating sealed secrets
 - Text editor (vim, nano, etc.)
 
+### create-mqtt-xmpp-bridge-sealed-secret.sh
+Interaktywnie generuje `apps/mqtt-xmpp-bridge/sealed_secret.yaml` bez zapisywania jawnego `Secret` do plików tymczasowych.
+
+```bash
+./scripts/create-mqtt-xmpp-bridge-sealed-secret.sh
+```
+
+Skrypt poprosi o credentiale runtime (z opcją MQTT anonymous) i zapisze wyłącznie zaszyfrowany SealedSecret.
+
 ## Workflow
 
 ### To edit app.ini in gitea secret:
