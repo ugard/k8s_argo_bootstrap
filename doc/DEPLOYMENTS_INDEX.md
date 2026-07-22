@@ -78,10 +78,10 @@ sonarr, spoolman, syncthing, vault (vaultwarden). Also `prom.ugard.win`,
 ## Monitoring / observability
 | App (template) | Namespace | Type | Notes |
 |---|---|---|---|
-| prometheus (`helm-prometheus-operator`) | monitoring | helm+kustomize | kube-prometheus-stack 75.15.1; grafana enabled; ingresses prom.ugard.win & monitoring.ugard.win; Prometheus storage rook-ceph-block 10Gi; alertmanager -> ntfy via alert-webhook; loads `manifests/prometheus-rules` (zfs, backup, openebs, cert-manager) |
+| prometheus (`helm-prometheus-operator`) | monitoring | helm+kustomize | kube-prometheus-stack 75.15.1; grafana enabled; ingresses prom.ugard.win & monitoring.ugard.win; Prometheus storage rook-ceph-block 10Gi; alertmanager -> alert-webhook -> MQTT -> XMPP; loads `manifests/prometheus-rules` (zfs, backup, openebs, cert-manager) |
 | monitoring-secrets (`kustomize-monitoring-secrets`) | monitoring | kustomize | `apps/monitoring`: ntfy sealed secret, zfs-exporter, grafana disk dashboard |
 | grafana (`kustomize-grafana`) | grafana | kustomize | `apps/grafana`: standalone grafana + datasources + dashboards |
-| alert-webhook (`kustomize-alert-webhook`) | monitoring | kustomize | custom Flask-ish webhook (`apps/alert-webhook`: Dockerfile, webhook.sh), image `registry.ugard.win/alert-webhook:<sha>`, kaniko build job; relays Alertmanager -> ntfy |
+| alert-webhook (`kustomize-alert-webhook`) | monitoring | kustomize | Rust (axum), repo git.ugard.win/lkrzyzak/alert-webhook, image `registry.ugard.win/alert-webhook:<sha>` (Drone CI); relays Alertmanager -> MQTT `alerts/{severity}` na mosquitto.mqtt-internal.svc (dalej mostek XMPP); secret `alert-webhook-mqtt` (sealed) |
 
 ## Backup
 | App (template) | Namespace | Type | Notes |

@@ -23,18 +23,34 @@ spec:
     spec:
       containers:
       - name: webhook
-        image: registry.ugard.win/alert-webhook:3592b75ed4f8763cc614ef4213b67702464d1f8f
+        # Rust, źródło: git.ugard.win/lkrzyzak/alert-webhook (build: Drone CI)
+        image: registry.ugard.win/alert-webhook:64b22769
         ports:
         - containerPort: 5000
         env:
-        - name: NTFY_URL
-          value: "https://ntfy.sh/lTw2Yxq33ICYDPpX"
-        - name: NTFY_TOKEN
+        # MQTT-only: alerty lecą na wewnętrzny broker (mqtt-internal),
+        # stamtąd mostek xmpp-omemo-core podnosi je z alerts/# na Jabbera.
+        - name: MQTT_BROKER
+          value: "tcp://mosquitto.mqtt-internal.svc:1883"
+        - name: MQTT_USERNAME
+          value: "alert-webhook"
+        - name: MQTT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: ntfy-alert-topic
-              key: topic
-              optional: true
+              name: alert-webhook-mqtt
+              key: MQTT_PASSWORD
+        - name: RUST_LOG
+          value: "info"
+        readinessProbe:
+          tcpSocket:
+            port: 5000
+          initialDelaySeconds: 2
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 15
         resources:
           requests:
             cpu: 10m
