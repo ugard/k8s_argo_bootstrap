@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mosquitto-config
+  namespace: mqtt-internal
+  labels:
+    app.kubernetes.io/part-of: mqtt-internal
+data:
+  mosquitto.conf: |
+    listener 1883
+    protocol mqtt
+
+    allow_anonymous false
+    password_file /mosquitto/auth/passwd
+    acl_file /mosquitto/config/acl
+
+    persistence true
+    persistence_location /mosquitto/data/
+
+    log_dest stdout
+    log_type warning
+    log_type notice
+
+  # ACL musi być spójne z trasami mostka:
+  # apps/mqtt-xmpp-bridge/configmap-routes.yaml
+  acl: |
+    user xmpp-bridge
+    topic read alerts/#
+    topic read printer/+/status
+    topic read printer/+/photo
+    topic write printer/commands
+    topic read dummy/#
+    topic readwrite bridge/status
+
+    user alert-webhook
+    topic write alerts/#
