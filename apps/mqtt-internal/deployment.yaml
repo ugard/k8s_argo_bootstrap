@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto
+  namespace: mqtt-internal
+  labels:
+    app.kubernetes.io/name: mosquitto
+    app.kubernetes.io/part-of: mqtt-internal
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mosquitto
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mosquitto
+        app.kubernetes.io/part-of: mqtt-internal
+    spec:
+      initContainers:
+        # mosquitto wymaga haseł w postaci zahashowanej (mosquitto_passwd),
+        # więc plik passwd budujemy przy starcie z sekretu z jawnymi hasłami.
+        - name: gen-passwd
+          image: docker.io/eclipse-mosquitto:2
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              mosquitto_passwd -c -b /mosquitto/auth/passwd xmpp-bridge "$XMPP_BRIDGE_PASSWORD"
+              mosquitto_passwd -b /mosquitto/auth/passwd alert-webhook "$ALERT_WEBHOOK_PASSWORD"
+              chown 1883:1883 /mosquitto/auth/passwd
+              chmod 600 /mosquitto/auth/passwd
+          env:
+            - name: XMPP_BRIDGE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mosquitto-credentials
+                  key: XMPP_BRIDGE_PASSWORD
+            - name: ALERT_WEBHOOK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mosquitto-credentials
+                  key: ALERT_WEBHOOK_PASSWORD
+          volumeMounts:
+            - name: auth
+              mountPath: /mosquitto/auth
+      containers:
+        - name: mosquitto
+          image: docker.io/eclipse-mosquitto:2
+          ports:
+            - name: mqtt
+              containerPort: 1883
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          livenessProbe:
+            tcpSocket:
+              port: mqtt
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: mqtt
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /mosquitto/config/mosquitto.conf
+              subPath: mosquitto.conf
+            - name: config
+              mountPath: /mosquitto/config/acl
+              subPath: acl
+            - name: auth
+              mountPath: /mosquitto/auth
+            - name: data
+              mountPath: /mosquitto/data
+      volumes:
+        - name: config
+          configMap:
+            name: mosquitto-config
+        - name: auth
+          emptyDir:
+            medium: Memory
+        - name: data
+          persistentVolumeClaim:
+            claimName: mosquitto-data

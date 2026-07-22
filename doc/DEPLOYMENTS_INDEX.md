@@ -112,6 +112,8 @@ See `doc/backup/README.md` for full backup topology (Velero/Benji/Zrepl/Postgres
 | App (template) | Namespace | Type | Notes |
 |---|---|---|---|
 | hass (`kustomize-hass`) | hass | kustomize+helm | home-assistant 2026.2.1 (ghcr) + zigbee2mqtt chart 2.6.3 (ember adapter, tcp://192.168.100.122:6638), mosquitto, otgw-ds/otgw-test, zigbee-converter configmap; hosts hass.ugard.win & otgw.ugard.win |
+| mqtt-internal (`kustomize-mqtt-internal`) | mqtt-internal | kustomize | wewnętrzny Mosquitto 2 (ClusterIP `mosquitto.mqtt-internal.svc:1883`, allow_anonymous false, passwd z sekretu `mosquitto-credentials` via initContainer, ACL per klient, PVC 1Gi); dla alertów i mostka XMPP — broker zigbee w `hass` bez zmian |
+| mqtt-xmpp-bridge (`kustomize-mqtt-xmpp-bridge`) | xmpp-bridge | kustomize | xmpp-omemo-core (MQTT→XMPP/OMEMO bridge, image `registry.ugard.win/xmpp-omemo-core`); trasy w `configmap-routes.yaml` (alerts/# → k8s-alerts@conference.xmpp.jp, printer/*); secret `xmpp-credentials` (sealed), PVC omemo-store, replicas 1 + Recreate |
 | immich-kiosk (`kustomize-immich-kiosk`) | immich-kiosk | kustomize | `apps/immich-kiosk/argo-app`; ghcr.io/damongolding/immich-kiosk (host kiosk.ugard.win) |
 | spoolman (`kustomize-spoolman`) | spoolman | kustomize | spoolman (3D filament) |
 | zmod-telegram (`kustomize-zmod-telegram`) | zmod-telegram | kustomize | moonraker-telegram-bot for 3D printer |
