@@ -88,7 +88,7 @@ sonarr, spoolman, syncthing, vault (vaultwarden). Also `prom.ugard.win`,
 |---|---|---|---|
 | velero (`helm-velero`) | velero | helm | velero 10.0.10; nodeAgent + CSI; BSLs: `garage` (S3 @ http://192.168.10.5:3900) default, `scaleway` (pl-waw); VSL csi default |
 | velero-healthchecks (`kustomize-velero-healthchecks`) | velero | kustomize | `apps/velero`: schedules, resource-modifiers, change-storage-class config, healthcheck cronjob + python script |
-| benji (`kustomize-benji`) | backup-system | kustomize | `apps/benji-backup`: zrepl push/sink for Garage ZFS replication + zrepl healthcheck; image `registry.ugard.win/zrepl:latest` |
+| benji (`kustomize-benji`) | backup-system | kustomize | `apps/benji-backup`: zrepl PULL for Garage ZFS replication (source on i8d-hmt served via MetalLB VIP 192.168.10.210:8888, pull on 95t-m8m) + zrepl healthcheck; certs via `scripts/create-zrepl-sealed-secret.sh`; image `registry.ugard.win/zrepl:latest` |
 | (postgres backup) | postgres | via velero schedule | `postgres-backup` schedule 04:00, pg_dumpall pre-hook, FS backup to Garage (see `doc/backup/README.md`) |
 
 See `doc/backup/README.md` for full backup topology (Velero/Benji/Zrepl/Postgres).

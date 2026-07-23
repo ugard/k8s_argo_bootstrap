@@ -26,11 +26,19 @@ spec:
       annotations:
         summary: "zrepl healthcheck cronjob not running"
         description: "zrepl-healthcheck has not been scheduled in over 2 hours."
-    - alert: ZreplGaragePushPodMissing
-      expr: kube_daemonset_status_number_ready{namespace="backup-system", daemonset="zrepl-garage-push"} == 0
+    - alert: ZreplGarageSourcePodMissing
+      expr: kube_daemonset_status_number_ready{namespace="backup-system", daemonset="zrepl-garage-source"} == 0
       for: 10m
       labels:
         severity: critical
       annotations:
-        summary: "zrepl-garage-push pod not running"
-        description: "DaemonSet zrepl-garage-push has no ready pods in backup-system - replication is not running."
+        summary: "zrepl-garage-source pod not running"
+        description: "DaemonSet zrepl-garage-source (i8d-hmt) has no ready pods in backup-system - backup source is not serving, pull cannot replicate."
+    - alert: ZreplGaragePullPodMissing
+      expr: kube_daemonset_status_number_ready{namespace="backup-system", daemonset="zrepl-garage-pull"} == 0
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        summary: "zrepl-garage-pull pod not running"
+        description: "DaemonSet zrepl-garage-pull (95t-m8m) has no ready pods in backup-system - backup replication is not running."

@@ -6,7 +6,7 @@ import urllib.request
 import os
 
 # Configuration
-ZREPL_POD_SELECTOR = "app=zrepl-garage-push"
+ZREPL_POD_SELECTOR = "app=zrepl-garage-pull"
 ZREPL_NAMESPACE = "backup-system"
 ZREPL_CONFIG_PATH = "/etc/zrepl/zrepl.yaml"
 HC_PING_URL = os.environ.get("HC_PING_URL")
@@ -35,15 +35,15 @@ def get_zrepl_status(pod_name):
 
 def check_replication(status):
     jobs = status.get("Jobs", {})
-    job = jobs.get("prod_to_backups", {})
-    
-    # The job status is nested under the type ("push")
-    push_status = job.get("push", {})
-    if not push_status:
-        print("Job 'prod_to_backups' (push) not found")
+    job = jobs.get("garage_pull", {})
+
+    # The job status is nested under the type ("pull")
+    pull_status = job.get("pull", {})
+    if not pull_status:
+        print("Job 'garage_pull' (pull) not found")
         return False
 
-    replication = push_status.get("Replication", {})
+    replication = pull_status.get("Replication", {})
     attempts = replication.get("Attempts", [])
     
     if not attempts:

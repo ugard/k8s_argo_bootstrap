@@ -84,31 +84,39 @@ graph LR
 
 ## 3. Zrepl Replication Flow
 
-Zrepl is used for continuous replication of the Garage data ZFS dataset.
+Zrepl replicates the Garage data ZFS dataset using a **pull** model: the backup
+node (`95t-m8m`) initiates the connection and pulls ZFS snapshots from the
+source node (`i8d-hmt`). The cluster (source) never connects to the backup —
+groundwork for later physically separating `95t-m8m` (ransomware/lightning
+protection). Source is exposed on a stable MetalLB VIP so the pull config does
+not change when `95t-m8m` eventually leaves the cluster.
 
 ### 3.1 Garage Data Replication
-*   **Components**: `zrepl-garage-push` (Sender), `zrepl-sink` (Receiver)
-*   **Frequency**: Periodic (Every 10 minutes)
-*   **Source**: Garage Data PVC (ZFS Dataset)
+*   **Components**: `zrepl-garage-source` (Source/server, i8d-hmt), `zrepl-garage-pull` (Pull/client, 95t-m8m)
+*   **Transport**: TLS on MetalLB VIP `192.168.10.210:8888` (Service `zrepl-source`)
+*   **TLS**: source presents cert `CN=prod` and authorises client `CN=backups`; pull presents `CN=backups` and verifies `server_cn=prod`. Self-signed pair in SealedSecrets `zrepl-prod`/`zrepl-backup` (regenerate via `scripts/create-zrepl-sealed-secret.sh`; certs carry both serverAuth+clientAuth EKU).
+*   **Frequency**: Source snapshots every 10 min; pull interval 10 min.
+*   **Source**: Garage Data PVCs (ZFS Datasets `wdc/talos/pvc-...`)
 *   **Target**: Backup Node (`wdc/zrepl/garage`)
 *   **Pruning**:
-    *   Sender: Keep last 10
+    *   Source (keep): `not_replicated` + last 10 (protects snapshots not yet pulled)
     *   Receiver: Grid retention (`1x1h(keep=all) | 24x1h | 30x1d | 6x30d`)
 
 ```mermaid
 graph LR
-    subgraph Node A (Source)
+    subgraph Node A (Source, i8d-hmt)
         SourceFS[Garage Data ZFS]
-        Push[zrepl-garage-push]
+        Source[zrepl-garage-source]
     end
-    subgraph Node B (Backup)
-        Sink[zrepl-sink]
+    subgraph Node B (Backup, 95t-m8m)
+        Pull[zrepl-garage-pull]
         TargetFS[wdc/zrepl/garage]
     end
 
-    Push -- Reads --> SourceFS
-    Push -- TLS Stream --> Sink
-    Sink -- Writes --> TargetFS
+    Source -- Reads --> SourceFS
+    Pull -- initiates TLS pull --> Source
+    Source -- ZFS send stream --> Pull
+    Pull -- Writes --> TargetFS
 ```
 
 
