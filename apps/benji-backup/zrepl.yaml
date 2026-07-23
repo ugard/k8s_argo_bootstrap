@@ -30,13 +30,8 @@ data:
         type: periodic
         prefix: zrepl_
         interval: 10m
-      pruning:
-        # not_replicated chroni snapshoty jeszcze niepobrane przez pull
-        # (kluczowe gdy 95t bywa offline); last_n to zapas na sourcie.
-        keep:
-        - type: not_replicated
-        - type: last_n
-          count: 10
+      # Brak pruning: joby type=source go nie wspierają (strict parser odrzuca
+      # cały config); retencję źródła realizuje keep_sender w jobie garage_pull.
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -73,7 +68,7 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: zrepl-source
+  name: zrepl-garage-source
   namespace: backup-system
   annotations:
     metallb.universe.tf/loadBalancerIPs: 192.168.10.210
@@ -125,9 +120,13 @@ spec:
         - name: zrepl-prod
           secret:
             secretName: zrepl-prod
+        # Peer: tylko tls.crt (CA klienta CN=backups); tls.key nie jest tu potrzebny.
         - name: zrepl-backup
           secret:
             secretName: zrepl-backup
+            items:
+              - key: tls.crt
+                path: tls.crt
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -144,7 +143,7 @@ spec:
         app: zrepl-garage-pull
     spec:
       nodeSelector:
-        openebs.io/nodeid: talos-95t-m8m
+        kubernetes.io/hostname: talos-95t-m8m
       containers:
         - name: zrepl
           image: registry.ugard.win/zrepl:latest
@@ -164,9 +163,13 @@ spec:
         - name: config
           configMap:
             name: zrepl-garage-pull
+        # Peer: tylko tls.crt (CA serwera CN=prod); tls.key nie jest tu potrzebny.
         - name: zrepl-prod
           secret:
             secretName: zrepl-prod
+            items:
+              - key: tls.crt
+                path: tls.crt
         - name: zrepl-backup
           secret:
             secretName: zrepl-backup

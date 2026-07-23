@@ -23,7 +23,7 @@ Velero is configured with two specific schedules targeting the `garage` namespac
 ```mermaid
 graph LR
     subgraph Cluster
-        PVC[PVC (garage/backup-this-pvc=true)]
+        PVC["PVC (garage/backup-this-pvc=true)"]
         Velero[Velero Controller]
     end
     subgraph Scaleway
@@ -44,7 +44,7 @@ graph LR
 ```mermaid
 graph LR
     subgraph Cluster
-        PVC[PVC (garage/backup-strategy=zfs-local)]
+        PVC["PVC (garage/backup-strategy=zfs-local)"]
         Velero[Velero Controller]
         ZFS[Local ZFS Pool]
     end
@@ -71,7 +71,7 @@ Benji is configured to perform block-level backups of PVCs based on labels.
 ```mermaid
 graph LR
     subgraph Cluster
-        PVC[PVC (label: backup-this-pvc=true)]
+        PVC["PVC (label: backup-this-pvc=true)"]
         Benji[Benji CronJob]
     end
     subgraph Storage
@@ -93,7 +93,7 @@ not change when `95t-m8m` eventually leaves the cluster.
 
 ### 3.1 Garage Data Replication
 *   **Components**: `zrepl-garage-source` (Source/server, i8d-hmt), `zrepl-garage-pull` (Pull/client, 95t-m8m)
-*   **Transport**: TLS on MetalLB VIP `192.168.10.210:8888` (Service `zrepl-source`)
+*   **Transport**: TLS on MetalLB VIP `192.168.10.210:8888` (Service `zrepl-garage-source`)
 *   **TLS**: source presents cert `CN=prod` and authorises client `CN=backups`; pull presents `CN=backups` and verifies `server_cn=prod`. Self-signed pair in SealedSecrets `zrepl-prod`/`zrepl-backup` (regenerate via `scripts/create-zrepl-sealed-secret.sh`; certs carry both serverAuth+clientAuth EKU).
 *   **Frequency**: Source snapshots every 10 min; pull interval 10 min.
 *   **Source**: Garage Data PVCs (ZFS Datasets `wdc/talos/pvc-...`)
@@ -104,11 +104,11 @@ not change when `95t-m8m` eventually leaves the cluster.
 
 ```mermaid
 graph LR
-    subgraph Node A (Source, i8d-hmt)
+    subgraph nodeA ["Node A (Source, i8d-hmt)"]
         SourceFS[Garage Data ZFS]
         Source[zrepl-garage-source]
     end
-    subgraph Node B (Backup, 95t-m8m)
+    subgraph nodeB ["Node B (Backup, 95t-m8m)"]
         Pull[zrepl-garage-pull]
         TargetFS[wdc/zrepl/garage]
     end
@@ -141,7 +141,7 @@ Postgres is backed up using Velero with a pre-backup hook to perform a logical d
 graph LR
     subgraph Cluster
         Pod[Postgres Pod]
-        Ephemeral[Ephemeral Volume (/backups)]
+        Ephemeral["Ephemeral Volume (/backups)"]
         Velero[Velero Controller]
     end
     subgraph Garage

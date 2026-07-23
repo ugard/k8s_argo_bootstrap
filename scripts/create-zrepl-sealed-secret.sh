@@ -87,14 +87,16 @@ trap 'rm -rf "$WORKDIR"; rm -f "$TMP_OUTPUT"' EXIT
 
 {
     seal zrepl-prod prod
-    echo "---"
     seal zrepl-backup backups
 } > "$TMP_OUTPUT"
 
 mv "$TMP_OUTPUT" "$OUTPUT_FILE"
 
 if ! grep -q "sealed-secrets.yaml" "$KUSTOMIZATION_FILE"; then
-    echo "  - sealed-secrets.yaml" >> "$KUSTOMIZATION_FILE"
+    echo "Error: '${OUTPUT_FILE##*/}' is not referenced in ${KUSTOMIZATION_FILE}." >&2
+    echo "Add the following entry under 'resources:' manually, then re-run:" >&2
+    echo "  - ${OUTPUT_FILE##*/}" >&2
+    exit 1
 fi
 
 echo ""
