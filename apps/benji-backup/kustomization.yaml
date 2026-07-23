@@ -5,8 +5,3 @@ resources:
   - sealed-secrets.yaml
   - zrepl.yaml
   - zrepl-healthcheck.yaml
-configMapGenerator:
-  - name: zrepl-healthcheck-script
-    namespace: backup-system
-    files:
-      - zrepl-healthcheck.py

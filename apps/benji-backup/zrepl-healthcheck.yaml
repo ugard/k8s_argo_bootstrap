@@ -31,9 +31,11 @@ roleRef:
   name: zrepl-healthcheck
   apiGroup: rbac.authorization.k8s.io
 ---
-# ConfigMap zrepl-healthcheck-script jest generowany przez configMapGenerator
-# w kustomization.yaml z apps/benji-backup/zrepl-healthcheck.py (single source of
-# truth). Nie wklejaj tu kopii skryptu.
+# Healthcheck logic lives in the Rust binary at
+# registry.ugard.win/zrepl-healthcheck (source:
+# ssh://git@git.ugard.win/lkrzyzak/zrepl-healthcheck.git). It talks to the
+# Kubernetes API via this ServiceAccount (kube-rs) instead of downloading
+# kubectl at runtime. Behaviour and defaults match the old Python script.
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -48,23 +50,9 @@ spec:
           serviceAccountName: zrepl-healthcheck
           containers:
             - name: zrepl-healthcheck
-              image: python:3-slim
-              command: ["/bin/bash", "-c"]
-              args:
-                - |
-                  apt-get update && apt-get install -y curl && \
-                  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
-                  chmod +x kubectl && \
-                  mv kubectl /usr/local/bin/ && \
-                  python /scripts/zrepl-healthcheck.py
+              image: registry.ugard.win/zrepl-healthcheck:latest
+              imagePullPolicy: Always
               env:
                 - name: HC_PING_URL
                   value: "http://healthchecks.healthchecks.svc.cluster.local/ping/a5f49456-96db-4998-ae3c-accaa3dbf783"
-              volumeMounts:
-                - name: script
-                  mountPath: /scripts
-          volumes:
-            - name: script
-              configMap:
-                name: zrepl-healthcheck-script
           restartPolicy: OnFailure
