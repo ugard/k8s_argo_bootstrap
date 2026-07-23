@@ -15,7 +15,12 @@ rules:
     verbs: ["get", "list"]
   - apiGroups: [""]
     resources: ["pods/exec"]
-    verbs: ["create"]
+    # "get" is required in addition to "create": kube-rs (and modern kubectl)
+    # exec over a WebSocket upgrade, which is an HTTP GET the API server
+    # authorizes as verb "get" on pods/exec. "create" only covers the legacy
+    # SPDY (HTTP POST) path. Without "get", the WebSocket upgrade returns
+    # 403 "cannot get resource pods/exec" and the healthcheck fails.
+    verbs: ["create", "get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
