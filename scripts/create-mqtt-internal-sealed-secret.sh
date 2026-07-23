@@ -11,12 +11,20 @@ CONTROLLER_NAME="${SEALED_SECRETS_CONTROLLER_NAME:-sealed-secrets-controller}"
 CONTROLLER_NAMESPACE="${SEALED_SECRETS_CONTROLLER_NAMESPACE:-kube-system}"
 KUBECTL_CONTEXT="${KUBECTL_CONTEXT:-}"
 
+trim() {
+    local s="$1"
+    s="${s#"${s%%[![:space:]]*}"}"
+    s="${s%"${s##*[![:space:]]}"}"
+    printf '%s' "$s"
+}
+
 read_password_or_generate() {
     local label="$1"
     local value=""
 
     read -r -s -p "${label} (puste = wygeneruj losowe): " value >&2
     echo >&2
+    value="$(trim "$value")"
     if [[ -z "$value" ]]; then
         value="$(openssl rand -base64 24 | tr -d '/+=' | head -c 24)"
         echo "  wygenerowano losowe hasło" >&2

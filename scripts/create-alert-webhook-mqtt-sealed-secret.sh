@@ -39,6 +39,8 @@ MQTT_PASSWORD=""
 while [[ -z "$MQTT_PASSWORD" ]]; do
     read -r -s -p "MQTT_PASSWORD: " MQTT_PASSWORD
     echo
+    MQTT_PASSWORD="${MQTT_PASSWORD#"${MQTT_PASSWORD%%[![:space:]]*}"}"
+    MQTT_PASSWORD="${MQTT_PASSWORD%"${MQTT_PASSWORD##*[![:space:]]}"}"
     [[ -z "$MQTT_PASSWORD" ]] && echo "Value cannot be empty."
 done
 

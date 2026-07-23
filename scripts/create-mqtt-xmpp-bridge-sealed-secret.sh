@@ -11,17 +11,27 @@ CONTROLLER_NAME="${SEALED_SECRETS_CONTROLLER_NAME:-sealed-secrets-controller}"
 CONTROLLER_NAMESPACE="${SEALED_SECRETS_CONTROLLER_NAMESPACE:-kube-system}"
 KUBECTL_CONTEXT="${KUBECTL_CONTEXT:-}"
 
+# UWAGA: wynik tych funkcji jest łapany przez $(...) — wszystko poza samą
+# wartością (echo, komunikaty) MUSI iść na stderr, inaczej trafi do hasła.
+trim() {
+    local s="$1"
+    s="${s#"${s%%[![:space:]]*}"}"
+    s="${s%"${s##*[![:space:]]}"}"
+    printf '%s' "$s"
+}
+
 read_required() {
     local label="$1"
     local value=""
 
     while true; do
         read -r -p "${label}: " value
+        value="$(trim "$value")"
         if [[ -n "$value" ]]; then
             printf '%s' "$value"
             return
         fi
-        echo "Value cannot be empty."
+        echo "Value cannot be empty." >&2
     done
 }
 
@@ -31,12 +41,13 @@ read_required_secret() {
 
     while true; do
         read -r -s -p "${label}: " value
-        echo
+        echo >&2
+        value="$(trim "$value")"
         if [[ -n "$value" ]]; then
             printf '%s' "$value"
             return
         fi
-        echo "Value cannot be empty."
+        echo "Value cannot be empty." >&2
     done
 }
 
@@ -46,6 +57,7 @@ read_with_default() {
     local value=""
 
     read -r -p "${label} [${default_value}]: " value
+    value="$(trim "$value")"
     if [[ -z "$value" ]]; then
         printf '%s' "$default_value"
         return
@@ -68,6 +80,7 @@ read_yes_no_default() {
 
     while true; do
         read -r -p "${label} ${prompt_suffix}: " value
+        value="$(trim "$value")"
         if [[ -z "$value" ]]; then
             value="$default_value"
         fi
@@ -82,7 +95,7 @@ read_yes_no_default() {
                 return
                 ;;
             *)
-                echo "Please answer y or n."
+                echo "Please answer y or n." >&2
                 ;;
         esac
     done
