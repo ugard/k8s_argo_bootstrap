@@ -42,6 +42,11 @@ spec:
                   key: XMPP_PASSWORD
             - name: OMEMO_TRUST_ALL_DEVICES
               value: "true"
+            # JID-y dostające membership w auto-tworzonych pokojach;
+            # gdy niepuste, pokoje powstają jako members-only
+            # (wymagane przez Conversations do wysyłania OMEMO w MUC).
+            - name: OMEMO_ROOM_MEMBER_JIDS
+              value: "ugard@xmpp.jp"
             - name: MQTT_BROKER
               valueFrom:
                 secretKeyRef:
