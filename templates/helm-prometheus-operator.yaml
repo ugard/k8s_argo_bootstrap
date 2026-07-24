@@ -8,6 +8,11 @@ spec:
     namespace: monitoring
     server: {{ .Values.spec.destination.server }}
   project: default
+  syncPolicy:
+    syncOptions:
+    # prometheus-operator CRDs przekraczaja limit 256KB annotacji
+    # last-applied-configuration przy client-side apply
+    - ServerSideApply=true
   sources:
   - chart: kube-prometheus-stack
     repoURL: https://prometheus-community.github.io/helm-charts
