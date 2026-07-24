@@ -16,7 +16,19 @@ spec:
       release-name: kube-prometheus-stack
       valuesObject:
         defaultRules:
-          create: false
+          create: true
+          rules:
+            # control-plane components not scraped on this cluster
+            etcd: false
+            kubeApiserverAvailability: false
+            kubeApiserverBurnrate: false
+            kubeApiserverHistogram: false
+            kubeApiserverSlos: false
+            kubeControllerManager: false
+            kubeProxy: false
+            kubeSchedulerAlerting: false
+            kubeSchedulerRecording: false
+            windows: false
         grafana:
           enabled: true
           defaultDashboardsEnabled: false
@@ -76,7 +88,23 @@ spec:
         kubelet:
           enabled: true
           serviceMonitor:
-            cAdvisor: false
+            interval: 60s
+            cAdvisor: true
+            # keep cardinality down: drop metrics unused by any rule/dashboard
+            cAdvisorMetricRelabelings:
+              - sourceLabels: [__name__]
+                action: drop
+                regex: container_(cpu_cfs_throttled_seconds_total|cpu_load_average_10s|cpu_system_seconds_total|cpu_user_seconds_total|file_descriptors|tasks_state|threads_max|memory_failures_total|memory_mapped_file)
+              - sourceLabels: [__name__]
+                action: drop
+                regex: container_fs_(io_current|io_time_seconds_total|io_time_weighted_seconds_total|reads_merged_total|sector_reads_total|sector_writes_total|writes_merged_total)
+              - sourceLabels: [__name__]
+                action: drop
+                regex: container_spec.*
+              # drop cgroup-only series that have no pod attached
+              - sourceLabels: [id, pod]
+                action: drop
+                regex: '.+;'
         kubeControllerManager:
           enabled: false
         coreDns:
@@ -106,7 +134,6 @@ spec:
                 sourceLabels: [__meta_kubernetes_node_name]
                 targetLabel: node
         prometheusOperator:
-          logLevel: debug
           namespaces:
             releaseNamespace: true
             additional:
@@ -128,14 +155,39 @@ spec:
             route:
               receiver: 'ntfy'
               routes:
+              # dead man's switch: Watchdog zawsze sie pali i pinguje
+              # healthchecks co ~10m; healthchecks alarmuje gdy pingi ustana
+              - match:
+                  alertname: Watchdog
+                receiver: 'healthchecks-watchdog'
+                group_wait: 0s
+                group_interval: 5m
+                repeat_interval: 10m
+              # InfoInhibitor to techniczny always-firing alert stacka
+              - match:
+                  alertname: InfoInhibitor
+                receiver: 'null'
+              - match:
+                  severity: info
+                receiver: 'null'
               - match:
                   severity: critical
                 receiver: 'ntfy'
+            inhibit_rules:
+            # nie duplikuj warning gdy critical o tym samym juz sie pali
+            - source_matchers: ['severity = critical']
+              target_matchers: ['severity = warning']
+              equal: ['namespace', 'alertname']
             receivers:
             - name: 'ntfy'
               webhook_configs:
               - url: 'http://alert-webhook.monitoring/webhook'
                 send_resolved: true
+            - name: 'null'
+            - name: 'healthchecks-watchdog'
+              webhook_configs:
+              - url: 'http://healthchecks.healthchecks.svc.cluster.local/ping/00049641-d7b9-468d-b772-806b84684f92'
+                send_resolved: false
         prometheus:
           ingress:
             enabled: true
@@ -152,10 +204,13 @@ spec:
                   - monitoring.ugard.win
           prometheusSpec:
             serviceMonitorSelectorNilUsesHelmValues: false
-            prometheusRulesSelector:
-              matchLabels:
-                prometheus: kube-prometheus-stack
-            logLevel: debug
+            # pick up ALL PrometheusRules in watched namespaces (e.g. rook-ceph
+            # ships its rules with label prometheus: rook-prometheus, which the
+            # old prometheusRulesSelector — a nonexistent chart key anyway —
+            # silently excluded)
+            ruleSelectorNilUsesHelmValues: false
+            retention: 10d
+            retentionSize: 8GiB
             storageSpec:
               volumeClaimTemplate:
                 spec:
