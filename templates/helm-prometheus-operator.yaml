@@ -13,6 +13,9 @@ spec:
     # prometheus-operator CRDs przekraczaja limit 256KB annotacji
     # last-applied-configuration przy client-side apply
     - ServerSideApply=true
+    # nie dotykaj zasobow ktore sa w sync (CRDs) — bez tego kazdy sync
+    # próbuje patchowac ogromne CRDy i wywala sie na limicie annotacji
+    - ApplyOutOfSyncOnly=true
   sources:
   - chart: kube-prometheus-stack
     repoURL: https://prometheus-community.github.io/helm-charts
