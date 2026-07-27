@@ -31,7 +31,7 @@ spec:
           name: config
         resources:
           limits:
-            squat.ai/serial: "1"
+            devic.es/serial: "1"
         # securityContext:
         #   allowPrivilegeEscalation: false
         #   capabilities:
