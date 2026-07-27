@@ -70,7 +70,7 @@ spec:
     spec:
       containers:
       - name: tika
-        image: ghcr.io/paperless-ngx/tika:latest
+        image: docker.io/apache/tika:latest
         resources:
           limits:
             memory: "2Gi"
