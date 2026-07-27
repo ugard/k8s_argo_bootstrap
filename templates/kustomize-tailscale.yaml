@@ -8,10 +8,13 @@ spec:
     namespace: tailscale
     server: {{ .Values.spec.destination.server }}
   project: default
-  source:
-    chart: tailscale-operator
-    repoURL: https://pkgs.tailscale.com/helmcharts
-    targetRevision: 1.92.5
-    helm:
-      release-name: tailscale-operator
-      
+  sources:
+    - chart: tailscale-operator
+      repoURL: https://pkgs.tailscale.com/helmcharts
+      targetRevision: 1.92.5
+      helm:
+        release-name: tailscale-operator
+    # ProxyClass prod — applies to every proxy StatefulSet the operator creates.
+    - path: apps/tailscale
+      repoURL: {{ .Values.spec.source.repoURL }}
+      targetRevision: {{ .Values.spec.source.targetRevision }}

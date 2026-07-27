@@ -1,0 +1,17 @@
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: prod
+spec:
+  statefulSet:
+    pod:
+      tailscaleContainer:
+        resources:
+          limits:
+            # generic-device-plugin advertises the TUN device under the
+            # devic.es domain (it used to be squat.ai). Requesting the old name
+            # leaves every proxy Pending with "Insufficient squat.ai/tun",
+            # because that resource only survives as a zeroed leftover in node
+            # status — which is exactly what kept the four proxies down for 32
+            # days until 2026-07-27.
+            devic.es/tun: "1"
