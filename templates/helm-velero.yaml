@@ -23,16 +23,17 @@ spec:
             enabled: true
           nodeAgentPodMonitor:
             enabled: true
-        # The upgrade-crds hook copies a shell and the kubectl binary out of this
-        # image into an emptyDir, so it needs an image that actually has both.
-        # The chart default (docker.io/bitnami/kubectl) was withdrawn from Docker
-        # Hub and now 404s, which left the hook Job stuck for days. Distroless
-        # images (registry.k8s.io/kubectl, rancher/kubectl) cannot be used here:
-        # they have no /bin/sh, so the init container fails to even start.
-        kubectl:
-          image:
-            repository: docker.io/alpine/k8s
-            tag: 1.36.2
+        # Argo renders the chart's crds/ directory and applies all ten velero
+        # CRDs on every sync, so the pre-upgrade hook that installs them a
+        # second time buys nothing here — and it could not run anyway: it copies
+        # a shell plus kubectl out of docker.io/bitnami/kubectl, which Bitnami
+        # withdrew from Docker Hub (the tag 404s, and it is gone from
+        # mirror.gcr.io and bitnamilegacy too). No drop-in replacement works
+        # either: registry.k8s.io/kubectl and rancher/kubectl are distroless and
+        # have no /bin/sh, alpine/k8s copies a musl-linked busybox that the
+        # glibc-based velero image cannot exec, and origin-cli needs x86-64-v3,
+        # which these CPUs lack. All four verified in-cluster on 2026-07-28.
+        upgradeCRDs: false
         initContainers:
           - name: velero-plugin-for-aws
             image: velero/velero-plugin-for-aws:v1.12.1
