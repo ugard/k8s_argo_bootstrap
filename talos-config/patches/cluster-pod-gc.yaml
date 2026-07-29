@@ -1,0 +1,27 @@
+# Talos machine config patch - terminated pod garbage collection.
+#
+# Without this the cluster ran on the upstream default (12500), which for a
+# 5-node homelab means GC effectively never fires: 74 dead pod objects piled up
+# over 18-380 days and drowned Alertmanager in KubePodNotReady (see issue #3,
+# category 1).
+#
+# 200 is picked against a steady state of ~80 terminated pods (mostly Completed
+# velero/kopia and healthcheck job pods). That leaves enough headroom that
+# recent job pods stay around for `kubectl logs`, while capping the long tail.
+# GC evicts oldest-terminated first, so the stale Failed pods go before any
+# fresh Completed ones.
+#
+# Applies to every control-plane node (`cluster:` section is control-plane only):
+#
+#   for n in 192.168.101.192 192.168.101.193 192.168.101.197 \
+#            192.168.101.198 192.168.101.199; do
+#     talosctl -n "$n" patch machineconfig \
+#       --patch @talos-config/patches/cluster-pod-gc.yaml
+#   done
+#
+# Only rewrites the kube-controller-manager static pod manifest, so it restarts
+# in place - no node reboot.
+cluster:
+  controllerManager:
+    extraArgs:
+      terminated-pod-gc-threshold: "200"
