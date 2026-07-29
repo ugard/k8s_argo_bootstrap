@@ -4,6 +4,8 @@ metadata:
   name: tika
   namespace: openarchiver
 spec:
+  # No PVC here, so the default RollingUpdate is fine.
+  replicas: 1
   selector:
     matchLabels:
       app: tika

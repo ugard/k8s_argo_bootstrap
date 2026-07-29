@@ -4,6 +4,10 @@ metadata:
   name: meilisearch
   namespace: openarchiver
 spec:
+  replicas: 1
+  # openarchiver-meilidata is ReadWriteOnce — see openarchiver.deployment.yaml.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: meilisearch

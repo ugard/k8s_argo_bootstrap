@@ -4,6 +4,10 @@ metadata:
   name: valkey
   namespace: openarchiver
 spec:
+  replicas: 1
+  # openarchiver-valkey-data is ReadWriteOnce — see openarchiver.deployment.yaml.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: valkey
