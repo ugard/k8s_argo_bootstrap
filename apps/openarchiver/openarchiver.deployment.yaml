@@ -29,9 +29,18 @@ spec:
         # silent, unreviewed upgrade. v0.5.2 is what :latest resolved to on
         # 2026-07-29 (same digest sha256:3d756fa1…).
         image: logiclabshq/open-archiver:v0.5.2
+        # One container runs eight node processes: frontend, backend, three
+        # workers and the pnpm/concurrently supervisors nesting them, which cost
+        # ~500Mi on their own before any work happens. At 1Gi the cgroup sat at
+        # 92% idle and peaked at 992Mi, so a 500-email indexing batch tipped it
+        # over -- OOMKilled mid-POST, which is what left Meilisearch parsing a
+        # JSON body truncated at 4MiB, and what orphaned the in-flight IMAP jobs
+        # that BullMQ then reported as stalled.
         resources:
-          limits:
+          requests:
             memory: "1Gi"
+          limits:
+            memory: "3Gi"
         ports:
         - containerPort: 3000
         - containerPort: 4000
