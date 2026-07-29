@@ -22,13 +22,23 @@ spec:
       - name: meilisearch
         image: getmeili/meilisearch:v1.15
         resources:
+          # 1Gi indexing budget + LMDB page cache and the HTTP workers on top.
           limits:
-            memory: "2Gi"
+            memory: "3Gi"
           requests:
             memory: "1Gi"
         ports:
         - containerPort: 7700
         env:
+        # Meilisearch sizes its indexing buffer at 2/3 of the RAM it *sees*, and
+        # inside a container that is the node's 29Gi, not the cgroup limit -- so
+        # it blows past any limit we set and gets OOMKilled seconds after start.
+        # Raising the limit alone did not help (see 6c79240, 1Gi -> 2Gi); the
+        # budget has to be capped explicitly.
+        - name: MEILI_MAX_INDEXING_MEMORY
+          value: "1Gi"
+        - name: MEILI_MAX_INDEXING_THREADS
+          value: "2"
         - name: MEILI_MASTER_KEY
           valueFrom:
             secretKeyRef:
