@@ -9,9 +9,12 @@ spec:
     server: {{ .Values.spec.destination.server }}
   project: default
   sources:
-  - chart: immich
-    repoURL: https://immich-app.github.io/immich-charts
-    targetRevision: 0.10.3
+  # The classic Helm index stopped at 0.12.0; the chart moved to OCI publishing
+  # in 0.13.0, so newer versions are only reachable this way (same pattern as
+  # the vikunja app). 0.13.1 ships appVersion v3.0.0.
+  - repoURL: oci://ghcr.io/immich-app/immich-charts/immich
+    targetRevision: 0.13.1
+    path: .
     helm:
       release-name: immich
       valueFiles:
