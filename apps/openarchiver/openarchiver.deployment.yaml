@@ -40,18 +40,27 @@ spec:
         # deploy the backend exited because Meilisearch was still crashlooping,
         # and the pod stayed Running 1/1 while every API call 500'd. Probing
         # 4000 rather than the frontend on 3000 is what makes that visible.
+        # A cold start after a long shutdown takes minutes -- the workers drain
+        # their backlog while the backend is still coming up, and a plain
+        # initialDelaySeconds on the liveness probe killed the container before
+        # it ever bound. startupProbe holds liveness off for up to 5 minutes and
+        # then hands over; a warm restart binds in about 4 seconds.
+        startupProbe:
+          httpGet:
+            path: /
+            port: 4000
+          periodSeconds: 10
+          failureThreshold: 30
         readinessProbe:
           httpGet:
             path: /
             port: 4000
-          initialDelaySeconds: 20
           periodSeconds: 10
           failureThreshold: 6
         livenessProbe:
           httpGet:
             path: /
             port: 4000
-          initialDelaySeconds: 90
           periodSeconds: 30
           failureThreshold: 3
         envFrom:
