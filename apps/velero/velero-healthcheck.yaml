@@ -196,6 +196,10 @@ spec:
   schedule: "0 * * * *" # Every hour
   jobTemplate:
     spec:
+      # Reap finished Jobs after a day, so a failed run cannot linger
+      # indefinitely under failedJobsHistoryLimit. Long enough to keep the pod
+      # logs around for a post-mortem.
+      ttlSecondsAfterFinished: 86400
       template:
         spec:
           serviceAccountName: velero-healthcheck

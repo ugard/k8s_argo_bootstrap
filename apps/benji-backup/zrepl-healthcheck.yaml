@@ -50,6 +50,11 @@ spec:
   schedule: "0 * * * *" # Every hour
   jobTemplate:
     spec:
+      # Reap finished Jobs after a day. failedJobsHistoryLimit keeps a failed
+      # Job forever otherwise, which is how a single failure sat in the cluster
+      # for days. A day is well clear of ZreplHealthcheckJobFailed's `for: 5m`,
+      # so the alert still fires and the pod logs stay readable afterwards.
+      ttlSecondsAfterFinished: 86400
       template:
         spec:
           serviceAccountName: zrepl-healthcheck
