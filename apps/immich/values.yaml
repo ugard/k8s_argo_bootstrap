@@ -51,6 +51,10 @@ server:
   enabled: true
   controllers:
     main:
+      # immich-data-pvc is ReadWriteOnce, so a RollingUpdate deadlocks: the new
+      # pod lands on another node and hits Multi-Attach while the old one still
+      # holds the volume. Recreate tears the old pod down first (brief downtime).
+      strategy: Recreate
       containers:
         main:
           image:
