@@ -11,13 +11,25 @@ spec:
   - name: backup
     rules:
     - alert: ZreplHealthcheckJobFailed
-      expr: kube_job_status_failed{namespace="backup-system", job_name=~"zrepl-healthcheck.*"} > 0
+      # Only the most recent run counts. Matching on kube_job_status_failed alone kept
+      # the alert critical for days: failedJobsHistoryLimit keeps the failed Job object
+      # around, so a single old failure outlived every successful run after it.
+      expr: |-
+        (
+          kube_job_status_failed{namespace="backup-system", job_name=~"zrepl-healthcheck.*"} > 0
+        )
+        and on (job_name)
+        (
+          kube_job_status_start_time{namespace="backup-system", job_name=~"zrepl-healthcheck.*"}
+            == on () group_left ()
+          max (kube_job_status_start_time{namespace="backup-system", job_name=~"zrepl-healthcheck.*"})
+        )
       for: 5m
       labels:
         severity: critical
       annotations:
         summary: "zrepl healthcheck job failed"
-        description: "Job {{ $labels.job_name }} in backup-system has failed - zrepl replication may be broken."
+        description: "Latest zrepl-healthcheck job {{ $labels.job_name }} in backup-system has failed - zrepl replication may be broken."
     - alert: ZreplHealthcheckNotScheduled
       expr: time() - kube_cronjob_status_last_schedule_time{namespace="backup-system", cronjob="zrepl-healthcheck"} > 7200
       for: 5m
