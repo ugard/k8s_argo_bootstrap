@@ -34,6 +34,26 @@ spec:
             memory: "1Gi"
         ports:
         - containerPort: 3000
+        - containerPort: 4000
+        # The container runs frontend, backend and three workers under
+        # `concurrently`, which keeps going when one of them dies. On this
+        # deploy the backend exited because Meilisearch was still crashlooping,
+        # and the pod stayed Running 1/1 while every API call 500'd. Probing
+        # 4000 rather than the frontend on 3000 is what makes that visible.
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 4000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 6
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 4000
+          initialDelaySeconds: 90
+          periodSeconds: 30
+          failureThreshold: 3
         envFrom:
         - secretRef:
             name: openarchiver
