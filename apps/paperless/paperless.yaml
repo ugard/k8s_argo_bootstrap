@@ -87,6 +87,13 @@ metadata:
   name: webserver
   namespace: paperless
 spec:
+  # paperless-data, paperless-media and paperless-export are all ReadWriteOnce
+  # on rook-ceph-block, so the default RollingUpdate deadlocks: the new pod is
+  # scheduled to another node and sits in ContainerCreating with Multi-Attach
+  # while the old pod, which has to die first, is still holding the volumes.
+  # Only paperless-consume is RWX. Recreate is the one strategy that works here.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: webserver
