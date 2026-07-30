@@ -32,23 +32,27 @@ spec:
         - name: dovecot
           image: dovecot/dovecot:2.4.4
           securityContext:
-            # allowPrivilegeEscalation is deliberately NOT false here.
-            #
-            # Setting it sets no_new_privs, and execve() of a file carrying file
-            # capabilities fails with EPERM under no_new_privs. Two binaries in
-            # this image carry a security.capability xattr -- imap-login and
-            # anvil -- and they were exactly the two that died on
-            # "execv(...) failed: Operation not permitted" in a restart loop,
-            # while auth, config and imap, which carry none, started fine.
-            #
-            # This costs nothing in practice: dropping ALL capabilities empties
-            # the bounding set, so the file capabilities are masked at exec and
-            # the process gains no privilege it could not already have had.
             # Verified against this image: it writes only to /run, /tmp and the
             # mail volume, all of which are mounted below.
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
+              # Dovecot's login processes chroot themselves, so the image ships
+              # imap-login, anvil and the other *-login binaries with
+              # CAP_SYS_CHROOT in their file-capability permitted set. With an
+              # empty bounding set the kernel cannot honour that at execve() and
+              # refuses outright rather than degrading silently, which is why
+              # exactly those binaries -- and only those -- looped on
+              # "execv(...) failed: Operation not permitted" while auth, config
+              # and imap, which carry no file capabilities, started fine.
+              #
+              # This grants the bounding set entry only. The process runs as uid
+              # 1000 and picks the capability up solely from the binary that
+              # needs it, for the chroot it performs at startup.
+              add: ["SYS_CHROOT"]
+            # allowPrivilegeEscalation stays unset: no_new_privs also blocks
+            # execve() of a file with capabilities, so setting it false here
+            # would reintroduce the same failure by a different route.
           ports:
             - name: imaps
               containerPort: 31993
