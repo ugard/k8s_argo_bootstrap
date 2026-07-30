@@ -38,3 +38,14 @@ data:
     route.5.xmpp.room.password = ${XIYOHE_ROOM_PASSWORD}
     route.5.direction = to_xmpp
     route.5.format = text
+
+    # ── Route 6: pokój alertów → MQTT (komendy, np. „status") ──
+    # Ten sam pokój co trasa 1, w drugą stronę (wzorzec drukarki: trasy 2+3).
+    # Topic celowo poza drzewem alerts/ — inaczej trasa 1 odbijałaby komendy
+    # z powrotem do pokoju. Odpowiedź webhooka leci na alerts/status i wraca
+    # do pokoju trasą 1.
+    route.6.mqtt.topic = commands/alerts
+    route.6.xmpp.room = k8s-alerts-58be376e@conference.xmpp.jp
+    route.6.xmpp.room.password = ${ALERTS_ROOM_PASSWORD}
+    route.6.direction = to_mqtt
+    route.6.format = text
