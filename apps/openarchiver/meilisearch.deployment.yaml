@@ -4,7 +4,8 @@ metadata:
   name: meilisearch
   namespace: openarchiver
 spec:
-  replicas: 1
+  # 0 since 2026-07-30: this exists only to serve openarchiver, which is stopped.
+  replicas: 0
   # openarchiver-meilidata is ReadWriteOnce — see openarchiver.deployment.yaml.
   strategy:
     type: Recreate

@@ -1,5 +1,12 @@
 # OpenArchiver Setup Guide
 
+> **Stopped since 2026-07-30.** All four Deployments (`openarchiver`,
+> `meilisearch`, `tika`, `valkey`) are pinned to `replicas: 0`. `apps/mailarchive`
+> holds the archive now. Nothing else was removed — the PVCs, the SealedSecret
+> and the Ingress are all still here, so the rollback is putting the four
+> `replicas` back to `1` and syncing. Deleting this app for good is a separate
+> decision that has not been made.
+
 ## Quick Start
 
 ### Option 1: Full Automated Setup (Recommended)

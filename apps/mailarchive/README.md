@@ -5,8 +5,10 @@ CephFS volume; Dovecot serves that Maildir over IMAPS on the LAN with
 full-text search. There is no web application and no database — all state is
 plain files sitting next to the mail, so losing a pod costs nothing.
 
-This replaces what `apps/openarchiver` was supposed to do. **OpenArchiver is
-deliberately still running**; retiring it is a separate decision.
+This replaces what `apps/openarchiver` was supposed to do. **OpenArchiver was
+scaled to zero on 2026-07-30** — its Deployments are stopped but its PVCs,
+secret and Ingress remain, so it can be brought back. Deleting it is still a
+separate decision.
 
 ## Shape
 

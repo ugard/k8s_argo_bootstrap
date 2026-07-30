@@ -5,7 +5,8 @@ metadata:
   namespace: openarchiver
 spec:
   # No PVC here, so the default RollingUpdate is fine.
-  replicas: 1
+  # 0 since 2026-07-30: this exists only to serve openarchiver, which is stopped.
+  replicas: 0
   selector:
     matchLabels:
       app: tika
