@@ -1,0 +1,96 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mbsync
+  namespace: mailarchive
+spec:
+  # Hourly. Anything finer buys nothing for an archive and multiplies the
+  # number of IMAP logins against the providers.
+  schedule: "0 * * * *"
+  # Two mbsync processes on one Maildir is precisely the check-then-insert race
+  # that left 211 duplicate Message-IDs in the OpenArchiver database. A slow
+  # run must delay the next one, never overlap it.
+  concurrencyPolicy: Forbid
+  # If the controller was down over a scheduled slot, still run -- but do not
+  # stampede through a backlog of missed slots after a long outage.
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      # Without a TTL, failedJobsHistoryLimit keeps a failed Job (and its pod)
+      # around indefinitely. A day is long enough to read the logs for a
+      # post-mortem, and long enough that the kube_job_failed metric outlives
+      # the "for: 5m" on the alert rule that watches it.
+      ttlSecondsAfterFinished: 86400
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            # uid/gid 1000 is "vmail" in the Dovecot image. mbsync and Dovecot
+            # must agree on ownership: mbsync creates the folder directories,
+            # and Dovecot then has to write its own index files and the Xapian
+            # full-text index inside them.
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+          containers:
+            - name: mbsync
+              # Deliberately a plain distro image plus a package from the signed
+              # Alpine repositories. Every mbsync image on Docker Hub is a
+              # one-person project, and this container holds the passwords to
+              # private mail. See Dockerfile.mbsync for pinning this later.
+              image: alpine:3.23
+              # apk needs to write to /usr, so the install step has to run as
+              # root; the securityContext above is overridden for that reason
+              # and privileges are dropped again before mbsync ever touches the
+              # network or the mail.
+              securityContext:
+                runAsUser: 0
+                runAsGroup: 0
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  apk add --no-cache isync ca-certificates su-exec
+                  # Drop to vmail for the actual sync so that every file landing
+                  # on the PVC is owned by the same uid Dovecot runs as.
+                  exec su-exec 1000:1000 mbsync -c /config/mbsyncrc -a
+              volumeMounts:
+                - name: config
+                  mountPath: /config
+                  readOnly: true
+                - name: secrets
+                  mountPath: /secrets
+                  readOnly: true
+                - name: data
+                  mountPath: /srv/vmail
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: "1"
+                  memory: 512Mi
+          volumes:
+            - name: config
+              configMap:
+                name: mbsync-config
+            - name: secrets
+              secret:
+                secretName: mailarchive-imap
+                # 0440 with fsGroup 1000: the files are owned root:1000, so the
+                # unprivileged mbsync process can read them and nobody else can.
+                defaultMode: 0440
+                items:
+                  - key: gmail
+                    path: gmail
+                  - key: o2
+                    path: o2
+            - name: data
+              persistentVolumeClaim:
+                claimName: mailarchive-data

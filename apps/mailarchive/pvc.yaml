@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mailarchive-data
+  namespace: mailarchive
+  labels:
+    # Picked up by the Velero schedules, same convention as apps/openarchiver.
+    "backup-this-pvc": "true"
+spec:
+  # ReadWriteMany is a hard requirement, not a preference. The Maildir is
+  # written by the mbsync CronJob and read (plus indexed) by the Dovecot
+  # Deployment at the same time. On a ReadWriteOnce class the second consumer
+  # gets stuck in Multi-Attach and never starts. Maildir is specifically
+  # designed for lockless concurrent access, so sharing the volume is safe.
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      # The OpenArchiver copy of the same mail is 23.3G; 60Gi leaves headroom
+      # for the Xapian full-text index, which lives next to the mail.
+      storage: 60Gi
+  # rook-ceph-filesystem is the only CephFS (RWX-capable) class in this
+  # cluster. rook-ceph-block is RBD and cannot do ReadWriteMany.
+  storageClassName: rook-ceph-filesystem

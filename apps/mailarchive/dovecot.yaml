@@ -1,0 +1,159 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dovecot
+  namespace: mailarchive
+spec:
+  # Written out explicitly. With no replicas field ArgoCD does not manage the
+  # value, so a manual "scale to 0" survives every subsequent sync and the app
+  # stays silently dead -- that is how apps/openarchiver sat down since
+  # 2026-01-18 while reporting Synced.
+  replicas: 1
+  # The PVC is RWX so Multi-Attach is not a risk, but two Dovecot processes
+  # writing one Maildir and one Xapian index is a good way to corrupt the index.
+  # Recreate guarantees the old pod is gone before the new one starts.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: dovecot
+  template:
+    metadata:
+      labels:
+        app: dovecot
+    spec:
+      securityContext:
+        # "vmail" in the image. Must match the mbsync CronJob so both can write
+        # into the same folder directories on the shared volume.
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: dovecot
+          image: dovecot/dovecot:2.4.4
+          securityContext:
+            allowPrivilegeEscalation: false
+            # Verified against this image: it writes only to /run, /tmp and the
+            # mail volume, all of which are mounted below.
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: imaps
+              containerPort: 31993
+            - name: imap
+              containerPort: 31143
+            - name: metrics
+              containerPort: 9090
+          volumeMounts:
+            # Individual files via subPath, NOT the whole conf.d directory: a
+            # directory mount would hide the fts.conf/ssl.conf/mail.conf/
+            # metrics.conf the image ships, which is where the entire flatcurve
+            # full-text search configuration lives.
+            - name: config
+              mountPath: /etc/dovecot/conf.d/zz-mailarchive.conf
+              subPath: zz-mailarchive.conf
+              readOnly: true
+            - name: config
+              mountPath: /etc/dovecot/conf.d/auth.conf
+              subPath: auth.conf
+              readOnly: true
+            # Local (client-facing) login passwords, one line per account.
+            - name: users
+              mountPath: /etc/dovecot/users.d
+              readOnly: true
+            # The image expects exactly tls.crt and tls.key here, which is also
+            # what cert-manager puts in a kubernetes.io/tls secret.
+            - name: tls
+              mountPath: /etc/dovecot/ssl
+              readOnly: true
+            - name: data
+              mountPath: /srv/vmail
+            # base_dir and state_dir are /run/dovecot, and the image expects
+            # both of these to be writable tmpfs.
+            - name: run
+              mountPath: /run
+            - name: tmp
+              mountPath: /tmp
+          startupProbe:
+            # Generous: the first start after a restore has to open a large
+            # Maildir before it begins accepting connections.
+            tcpSocket:
+              port: 31993
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            tcpSocket:
+              port: 31993
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 31993
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              # Both a request and a limit. A limit on its own leaves the
+              # scheduler with nothing to reserve, so the pod lands on a node
+              # that is already full and then gets OOM-killed under indexing
+              # load -- how Meilisearch kept dying in openarchiver.
+              memory: 256Mi
+            limits:
+              cpu: "2"
+              # Xapian indexing is the memory-hungry part, not serving IMAP.
+              memory: 1Gi
+      volumes:
+        - name: config
+          configMap:
+            name: dovecot-config
+        - name: users
+          secret:
+            secretName: mailarchive-imap
+            # Owned root:1000 mode 0440 via fsGroup, so vmail can read it.
+            defaultMode: 0440
+            items:
+              - key: dovecot-users
+                path: users
+        - name: tls
+          secret:
+            secretName: tls-mailarchive
+            defaultMode: 0440
+        - name: data
+          persistentVolumeClaim:
+            claimName: mailarchive-data
+        - name: run
+          # Sockets and pid files only; tiny, so memory-backed is fine.
+          emptyDir:
+            medium: Memory
+        - name: tmp
+          # Deliberately NOT memory-backed. A memory emptyDir counts against the
+          # container's memory limit, so a large attachment being indexed could
+          # OOM-kill the pod instead of just using scratch space.
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dovecot
+  namespace: mailarchive
+  annotations:
+    # Fixed address so the mail client's account settings never have to change.
+    # .220 was free at the time of writing; the MetalLB pool first-pool is
+    # 192.168.10.0/24.
+    metallb.universe.tf/loadBalancerIPs: 192.168.10.220
+spec:
+  type: LoadBalancer
+  # externalTrafficPolicy is left at the default (Cluster), matching every other
+  # MetalLB service in this repo. Local would preserve the client IP in Dovecot's
+  # auth log, but it also ties the address announcement to the node currently
+  # running the single replica; not worth the extra failure mode here.
+  selector:
+    app: dovecot
+  ports:
+    # Only IMAPS is published. Plaintext 31143 stays inside the pod: the
+    # archive is reached over TLS or not at all.
+    - name: imaps
+      port: 993
+      targetPort: 31993
+      protocol: TCP

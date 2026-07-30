@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: mailarchive-tls
+  namespace: mailarchive
+spec:
+  secretName: tls-mailarchive
+  # letsencrypt-cloudflare solves DNS-01, so a host that only ever resolves
+  # inside the LAN still gets a publicly trusted certificate without any
+  # inbound HTTP traffic. That matters because the Service is a MetalLB IP,
+  # not an Ingress.
+  issuerRef:
+    name: letsencrypt-cloudflare
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames:
+    - mail-archive.ugard.win

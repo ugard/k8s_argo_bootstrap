@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dovecot-config
+  namespace: mailarchive
+data:
+  # Both keys below are mounted into /etc/dovecot/conf.d/ as INDIVIDUAL files
+  # via subPath (see dovecot.yaml). Mounting the whole directory would shadow
+  # the files the image ships there -- fts.conf (the entire flatcurve setup),
+  # ssl.conf, mail.conf and metrics.conf -- and silently disable full-text
+  # search. dovecot.conf ends with "!include_try conf.d/*.conf", which is
+  # processed alphabetically, so the "zz-" prefix makes these overrides land
+  # after the stock files and win.
+
+  # Replaces the stock conf.d/auth.conf. The stock file installs a catch-all
+  # "passdb static" whose password is taken from $USER_PASSWORD. Its default is
+  # {CRYPT}* which never matches, so it is inert as shipped -- but it means
+  # anyone who later sets USER_PASSWORD on this Deployment would be able to log
+  # in as ANY user. An archive of private mail should not have that failure
+  # mode within reach, so the static passdb is dropped and replaced by a
+  # passwd-file with one line per account.
+  auth.conf: |
+    import_environment {
+      DOVEADM_PASSWORD = %{env:DOVEADM_PASSWORD | default}
+    }
+
+    # Supplied by the SealedSecret mailarchive-imap, key "dovecot-users".
+    # Format is one "user:{CRYPT}$6$..." line per account. These are the
+    # passwords used by the mail CLIENT (Thunderbird/K-9); they are unrelated
+    # to the upstream IMAP passwords mbsync uses.
+    passdb passwd-file {
+      passwd_file_path = /etc/dovecot/users.d/users
+    }
+
+    doveadm_password = $ENV:DOVEADM_PASSWORD
+
+  zz-mailarchive.conf: |
+    # The image ships mailbox_list_layout = index, which cannot see the
+    # ".Foldername" directories that mbsync writes at all -- with the stock
+    # value Dovecot shows an archive containing nothing but INBOX. Maildir++ is
+    # the one on-disk layout both tools agree on: it is exactly what mbsync
+    # produces with "SubFolders Maildir++".
+    mailbox_list_layout = maildir++
+
+    # Nothing is ever delivered into this archive locally and there is no
+    # webmail; it is read over IMAPS by a desktop/phone client and written only
+    # by the mbsync CronJob. Turning off submission, LMTP and sieve removes
+    # three listeners and the whole sieve interpreter from the attack surface.
+    protocols = imap
+
+    # mail_driver = maildir, mail_home = /srv/vmail/%{user | lower} and
+    # mail_path = ~/mail all come from the image and are already correct, so the
+    # per-account Maildir root is /srv/vmail/<account>/mail. That is the exact
+    # path the mbsync "Inbox" directives point at. mailbox_list_utf8 = yes is
+    # also inherited and is correct: mbsync writes folder names to disk as
+    # literal UTF-8 (".dachówka"), not as modified UTF-7.

@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mbsync-config
+  namespace: mailarchive
+data:
+  mbsyncrc: |
+    # ---------------------------------------------------------------------
+    # Global safety defaults.
+    #
+    # These four settings are what make this an ARCHIVE rather than a mirror,
+    # and getting them wrong can empty the upstream mailbox. They are repeated
+    # verbatim in every Channel below. That duplication is deliberate: three of
+    # the four are already the upstream default, but a default is invisible,
+    # and an invisible default protecting a private mailbox is not good enough.
+    # Setting them globally AND per-Channel means a future Channel added by
+    # someone in a hurry inherits the safe behaviour even if they forget.
+    #
+    #   Sync Pull New   propagate ONLY newly appeared messages, and ONLY from
+    #                   far (the mail provider) to near (this archive). No
+    #                   flags, no deletions, and nothing at all in the
+    #                   upload direction.
+    #   Create Near     auto-create missing mailboxes on the near side only;
+    #                   mbsync may never create a folder on the provider.
+    #   Remove None     never propagate mailbox deletions in either direction.
+    #                   Deleting a label upstream leaves the archived copy.
+    #   Expunge None    never permanently remove messages on either side.
+    # ---------------------------------------------------------------------
+    Sync Pull New
+    Create Near
+    Remove None
+    Expunge None
+
+    # Keep each Channel's sync state in a .mbsyncstate file inside the near-side
+    # Maildir itself instead of in $HOME. The pod filesystem is ephemeral; the
+    # PVC is not, so state survives pod restarts and re-scheduling. Without
+    # this every run would start from UID 1 and re-download the whole mailbox --
+    # the exact failure that made OpenArchiver unusable.
+    SyncState *
+
+    # ---------------------------------------------------------------------
+    # gmail
+    # ---------------------------------------------------------------------
+    IMAPAccount gmail
+    Host imap.gmail.com
+    Port 993
+    User lkrzyzak@gmail.com
+    # Read the app password from the mounted SealedSecret rather than inlining
+    # it with "Pass". Two reasons: the ConfigMap then contains no secret at all,
+    # and mbsync refuses to use a config file whose permissions it considers too
+    # liberal when that file contains a literal password -- ConfigMaps mount
+    # 0644, so "Pass" would make mbsync complain.
+    PassCmd "cat /secrets/gmail"
+    TLSType IMAPS
+    AuthMechs LOGIN PLAIN
+    # Gmail throttles deep pipelines on fast links (documented in mbsync(1)).
+    PipelineDepth 10
+    Timeout 120
+
+    IMAPStore gmail-remote
+    Account gmail
+
+    MaildirStore gmail-local
+    SubFolders Maildir++
+    # In Maildir++ mode mbsync REJECTS any attempt to set Path, so Inbox is the
+    # only location directive, and it must NOT have a trailing slash -- with one
+    # mbsync builds "mail//" and dies with "cannot create mailbox: File exists".
+    # This is the Maildir root Dovecot derives from mail_home + mail_path.
+    Inbox /srv/vmail/gmail/mail
+
+    Channel gmail
+    Far :gmail-remote:
+    Near :gmail-local:
+    # INBOX is listed explicitly because mbsync(1) states that INBOX is not
+    # matched by wildcards unless it lives under Path -- with "*" alone the
+    # inbox is silently skipped.
+    #
+    # "![Gmail]/*" then re-including two folders is deliberate and is safer than
+    # naming the folders to skip. Gmail's special folders are localised, so
+    # blacklisting "[Gmail]/Spam" and "[Gmail]/Kosz" by name would silently do
+    # nothing if a name differs by one character. Excluding the whole [Gmail]/
+    # namespace and adding back only what is wanted fails closed instead.
+    # What this drops, and why:
+    #   All Mail  ([Gmail]/Wszystkie)          - contains a copy of every single
+    #                                            message in every other folder
+    #   Spam, Trash                            - user's explicit decision
+    #   Important, Starred                     - virtual views, duplicate mail
+    # To archive any of these, append it as another quoted pattern; later
+    # patterns take precedence over earlier ones.
+    Patterns "INBOX" "*" "![Gmail]/*" "[Gmail]/Wysłane" "[Gmail]/Wersje robocze"
+    Sync Pull New
+    Create Near
+    Remove None
+    Expunge None
+    SyncState *
+
+    # ---------------------------------------------------------------------
+    # o2
+    # ---------------------------------------------------------------------
+    IMAPAccount o2
+    Host poczta.o2.pl
+    Port 993
+    User dragu645@o2.pl
+    PassCmd "cat /secrets/o2"
+    TLSType IMAPS
+    AuthMechs LOGIN PLAIN
+    Timeout 120
+
+    IMAPStore o2-remote
+    Account o2
+
+    MaildirStore o2-local
+    SubFolders Maildir++
+    Inbox /srv/vmail/o2/mail
+
+    Channel o2
+    Far :o2-remote:
+    Near :o2-local:
+    # o2's folder names have not been enumerated yet, so both the English and
+    # the Polish spellings of the junk/deleted folders are excluded. Confirm the
+    # real list with the --list command documented in README.md and tighten this
+    # if a spelling here turns out not to exist.
+    Patterns "INBOX" "*" "!Spam" "!SPAM" "!Junk" "!Trash" "!Kosz" "!Kosz na śmieci"
+    Sync Pull New
+    Create Near
+    Remove None
+    Expunge None
+    SyncState *
+
+    # No Group is defined on purpose: the CronJob runs "mbsync -a", which per
+    # mbsync(1) selects every configured Channel and ignores any Group or
+    # Channel named on the command line. A new Channel added above is therefore
+    # picked up with no further wiring.
