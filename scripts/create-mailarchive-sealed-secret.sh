@@ -142,9 +142,15 @@ fi
 
 mv "$TMP_OUTPUT" "$OUTPUT_FILE"
 
-if ! grep -q "sealed-secret.yaml" "$KUSTOMIZATION_FILE"; then
+# Match an actual resource entry, not any mention of the filename. A plain
+# `grep -q sealed-secret.yaml` matched the comment in kustomization.yaml that
+# explained this very step, so the append was skipped silently and the
+# SealedSecret was committed but never applied by Argo.
+if ! grep -qE '^[[:space:]]*-[[:space:]]+sealed-secret\.yaml[[:space:]]*$' "$KUSTOMIZATION_FILE"; then
     printf '  - sealed-secret.yaml\n' >> "$KUSTOMIZATION_FILE"
     echo "✓ kustomization updated: ${KUSTOMIZATION_FILE}"
+else
+    echo "✓ kustomization already lists sealed-secret.yaml"
 fi
 
 unset GMAIL_PASS O2_PASS DOVECOT_GMAIL_PASS DOVECOT_O2_PASS DOVECOT_USERS
