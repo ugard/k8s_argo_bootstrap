@@ -37,29 +37,26 @@ spec:
             fsGroup: 1000
           containers:
             - name: mbsync
-              # Deliberately a plain distro image plus a package from the signed
-              # Alpine repositories. Every mbsync image on Docker Hub is a
-              # one-person project, and this container holds the passwords to
-              # private mail. See Dockerfile.mbsync for pinning this later.
-              image: alpine:3.23
-              # apk needs to write to /usr, so the install step has to run as
-              # root; the securityContext above is overridden for that reason
-              # and privileges are dropped again before mbsync ever touches the
-              # network or the mail.
+              # Built from ssh://git@git.ugard.win/lkrzyzak/mbox_sync.git by
+              # Drone: alpine:3.23 plus isync from the signed Alpine repository.
+              # Still not an image off Docker Hub -- every mbsync image there is
+              # a one-person build, and this container holds the passwords to
+              # private mail -- but the package is now resolved once at build
+              # time instead of on every hourly run, which takes an Alpine
+              # mirror off the critical path and lets the container run
+              # unprivileged from the start.
+              #
+              # Pinned to the commit SHA, not :latest. A floating tag makes
+              # every pod restart a silent upgrade.
+              image: registry.ugard.win/mbox_sync:217f6708
+              # No root anywhere in this container now: the image declares
+              # USER 1000 and the pod securityContext above says the same.
               securityContext:
-                runAsUser: 0
-                runAsGroup: 0
                 allowPrivilegeEscalation: false
                 capabilities:
                   drop: ["ALL"]
-              command: ["/bin/sh", "-c"]
-              args:
-                - |
-                  set -eu
-                  apk add --no-cache isync ca-certificates su-exec
-                  # Drop to vmail for the actual sync so that every file landing
-                  # on the PVC is owned by the same uid Dovecot runs as.
-                  exec su-exec 1000:1000 mbsync -c /config/mbsyncrc -a
+              # ENTRYPOINT is already mbsync, so pass arguments only.
+              args: ["-c", "/config/mbsyncrc", "-a"]
               volumeMounts:
                 - name: config
                   mountPath: /config

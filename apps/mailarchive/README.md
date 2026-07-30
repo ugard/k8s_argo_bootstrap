@@ -13,7 +13,7 @@ deliberately still running**; retiring it is a separate decision.
 | component | what it is |
 |---|---|
 | `mailarchive-data` PVC | 60Gi, `rook-ceph-filesystem`, **RWX**, labelled `backup-this-pvc: "true"` |
-| `mbsync` CronJob | hourly, `alpine:3.23` + `apk add isync`, one-way pull into the Maildir |
+| `mbsync` CronJob | hourly, `registry.ugard.win/mbox_sync`, one-way pull into the Maildir |
 | `dovecot` Deployment | `dovecot/dovecot:2.4.4`, 1 replica, `Recreate` |
 | `dovecot` Service | LoadBalancer on **192.168.10.220**, port **993** |
 | `mailarchive-tls` Certificate | `mail-archive.ugard.win` via `letsencrypt-cloudflare` (DNS-01) |
@@ -118,10 +118,10 @@ To list folders without syncing anything, run mbsync by hand in a throwaway pod
 
 ```bash
 kubectl -n mailarchive run mbsync-list --rm -it --restart=Never \
-    --image=alpine:3.23 --overrides='
+    --image=registry.ugard.win/mbox_sync:217f6708 --overrides='
 {"spec":{"securityContext":{"runAsUser":1000,"runAsGroup":1000,"fsGroup":1000},
- "containers":[{"name":"m","image":"alpine:3.23","command":["sh","-c"],
-  "args":["apk add --no-cache isync ca-certificates >/dev/null && mbsync -c /config/mbsyncrc --list o2"],
+ "containers":[{"name":"m","image":"registry.ugard.win/mbox_sync:217f6708",
+  "args":["-c","/config/mbsyncrc","--list","o2"],
   "volumeMounts":[{"name":"c","mountPath":"/config"},{"name":"s","mountPath":"/secrets"}]}],
  "volumes":[{"name":"c","configMap":{"name":"mbsync-config"}},
             {"name":"s","secret":{"secretName":"mailarchive-imap","defaultMode":288}}]}}'
@@ -231,10 +231,14 @@ needed, but the hostname must resolve to `192.168.10.220` from where you are.
 - **Gmail labels mean one message is stored several times**, once per label it
   carries. That is inherent to mapping labels onto folders and is why All Mail is
   excluded.
-- The CronJob container starts as root purely so `apk add` can write to `/usr`,
-  then drops to uid 1000 via `su-exec` before mbsync touches the network or the
-  mail. `Dockerfile.mbsync` exists to remove that step once there are
-  credentials for `registry.ugard.win`.
+- The CronJob image is built by Drone from
+  [mbox_sync](https://gitea.ugard.win/lkrzyzak/mbox_sync) and pinned to a commit
+  SHA. It is `alpine:3.23` plus `isync` from the signed Alpine repository, so
+  the supply chain is unchanged from the earlier runtime `apk add` — but the
+  package is resolved at build time, which keeps an Alpine mirror off the
+  critical path of every hourly run and lets the container run as uid 1000 from
+  the start instead of beginning as root and dropping privileges with `su-exec`.
+  To pick up a new isync, push to that repo and re-pin the tag here.
 - Do **not** set a `USER_PASSWORD` env var on the Dovecot Deployment. The
   image's stock `auth.conf` uses it for a catch-all `passdb static` that would
   let anyone log in as any user. This app replaces that file precisely so the
