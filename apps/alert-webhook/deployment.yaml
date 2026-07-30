@@ -24,7 +24,7 @@ spec:
       containers:
       - name: webhook
         # Rust, źródło: git.ugard.win/lkrzyzak/alert-webhook (build: Drone CI)
-        image: registry.ugard.win/alert-webhook:64b22769
+        image: registry.ugard.win/alert-webhook:ea135893
         ports:
         - containerPort: 5000
         env:
@@ -39,6 +39,14 @@ spec:
             secretKeyRef:
               name: alert-webhook-mqtt
               key: MQTT_PASSWORD
+        # Komenda „status" w pokoju alertów: mostek wrzuca treść wiadomości
+        # z pokoju na commands/alerts, webhook odpytuje Alertmanagera i
+        # odpowiada na alerts/status (trasa 1 mostka odnosi to do pokoju).
+        # Brak/puste MQTT_COMMAND_TOPIC = funkcja wyłączona.
+        - name: MQTT_COMMAND_TOPIC
+          value: "commands/alerts"
+        - name: ALERTMANAGER_URL
+          value: "http://prometheus-kube-prometheus-alertmanager.monitoring.svc:9093"
         - name: RUST_LOG
           value: "info"
         readinessProbe:
