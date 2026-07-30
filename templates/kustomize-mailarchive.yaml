@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kustomize-mailarchive
+  namespace: argocd
+spec:
+  destination:
+    namespace: mailarchive
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  source:
+    path: apps/mailarchive
+    repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
