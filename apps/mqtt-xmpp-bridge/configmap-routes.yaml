@@ -7,8 +7,12 @@ metadata:
     app.kubernetes.io/part-of: mqtt-xmpp-bridge
 data:
   routes.properties: |
+    # Pokój odtworzony 2026-07-30 pod nową nazwą: stary (…58be376e) nie był
+    # members-only, a Conversations wymaga members-only + membershipu, żeby
+    # WYSYŁAĆ OMEMO w MUC (komenda „status"). Konfigurację pokoju można
+    # ustawić wyłącznie przy jego tworzeniu, stąd nowa losowa nazwa.
     route.1.mqtt.topic = alerts/#
-    route.1.xmpp.room = k8s-alerts-58be376e@conference.xmpp.jp
+    route.1.xmpp.room = k8s-alerts-2afa5fba@conference.xmpp.jp
     route.1.xmpp.room.password = ${ALERTS_ROOM_PASSWORD}
     route.1.direction = to_xmpp
     route.1.format = text
@@ -45,7 +49,7 @@ data:
     # z powrotem do pokoju. Odpowiedź webhooka leci na alerts/status i wraca
     # do pokoju trasą 1.
     route.6.mqtt.topic = commands/alerts
-    route.6.xmpp.room = k8s-alerts-58be376e@conference.xmpp.jp
+    route.6.xmpp.room = k8s-alerts-2afa5fba@conference.xmpp.jp
     route.6.xmpp.room.password = ${ALERTS_ROOM_PASSWORD}
     route.6.direction = to_mqtt
     route.6.format = text
