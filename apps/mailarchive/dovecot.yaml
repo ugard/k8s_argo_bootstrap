@@ -32,7 +32,18 @@ spec:
         - name: dovecot
           image: dovecot/dovecot:2.4.4
           securityContext:
-            allowPrivilegeEscalation: false
+            # allowPrivilegeEscalation is deliberately NOT false here.
+            #
+            # Setting it sets no_new_privs, and execve() of a file carrying file
+            # capabilities fails with EPERM under no_new_privs. Two binaries in
+            # this image carry a security.capability xattr -- imap-login and
+            # anvil -- and they were exactly the two that died on
+            # "execv(...) failed: Operation not permitted" in a restart loop,
+            # while auth, config and imap, which carry none, started fine.
+            #
+            # This costs nothing in practice: dropping ALL capabilities empties
+            # the bounding set, so the file capabilities are masked at exec and
+            # the process gains no privilege it could not already have had.
             # Verified against this image: it writes only to /run, /tmp and the
             # mail volume, all of which are mounted below.
             readOnlyRootFilesystem: true
