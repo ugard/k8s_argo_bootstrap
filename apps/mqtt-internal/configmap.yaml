@@ -29,8 +29,10 @@ data:
     topic read printer/+/status
     topic read printer/+/photo
     topic write printer/commands
+    topic write commands/alerts
     topic read dummy/#
     topic readwrite bridge/status
 
     user alert-webhook
     topic write alerts/#
+    topic read commands/alerts
