@@ -13,6 +13,10 @@ metadata:
     app: alert-webhook
 spec:
   replicas: 1
+  # Recreate: przy RollingUpdate stary i nowy pod walczą o MQTT client-id
+  # „alert-webhook" (broker wyrzuca starszą sesję przy każdym reconnect).
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: alert-webhook
