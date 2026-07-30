@@ -70,7 +70,11 @@ spec:
     spec:
       containers:
       - name: tika
-        image: docker.io/apache/tika:latest
+        # 3.3.1.0 is exactly what :latest resolved to while this was running, so
+        # pinning changes nothing today -- it only stops the next node reboot
+        # from turning a pod restart into an unplanned upgrade, which is what
+        # happened to the webserver above.
+        image: docker.io/apache/tika:3.3.1.0
         resources:
           limits:
             memory: "2Gi"
@@ -95,7 +99,15 @@ spec:
     spec:
       containers:
       - name: webserver
-        image: ghcr.io/paperless-ngx/paperless-ngx:latest
+        # Pinned, not :latest. On 2026-07-28 talos-jly-e8b rebooted, the pod was
+        # recreated, and :latest silently pulled 3.0.4 -- a major jump from the
+        # 2.x that had been running. 3.x makes an unset PAPERLESS_SECRET_KEY a
+        # hard error instead of a warning, so the webserver crash-looped for two
+        # and a half days. The 2.x -> 3.x migrations never ran (the crash is at
+        # settings import, before init-migrations), so the database was still on
+        # the 2.x schema and this pin is a clean restore rather than a rollback.
+        # Moving to 3.x is a deliberate change: dump the database first.
+        image: ghcr.io/paperless-ngx/paperless-ngx:2.20.15
         resources:
           limits:
             memory: "2Gi"
@@ -151,6 +163,16 @@ spec:
             secretKeyRef:
               name: postgresdb
               key: PAPERLESS_ADMIN_PASSWORD
+        # Until 2026-07-30 this was never set, so paperless fell back to its
+        # built-in default key. That is what 3.x refuses to start on. It also
+        # encrypts the stored mail-account passwords, so switching to a real key
+        # invalidates them -- the two existing accounts need their passwords
+        # re-entered in the UI once. Documents are not affected.
+        - name: PAPERLESS_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: postgresdb
+              key: PAPERLESS_SECRET_KEY
         volumeMounts:
         - name: data
           mountPath: /usr/src/paperless/data
