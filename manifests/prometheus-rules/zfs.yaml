@@ -26,3 +26,39 @@ spec:
       annotations:
         summary: "ZFS pool {{ $labels.zpool }} on {{ $labels.instance }} is unhealthy"
         description: "ZFS pool {{ $labels.zpool }} on {{ $labels.instance }} has been in state {{ $labels.state }} for 5 minutes."
+    - alert: ZFSPoolSpaceLow
+      expr: zfs_pool_free_bytes / zfs_pool_size_bytes < 0.15
+      for: 30m
+      labels:
+        severity: warning
+      annotations:
+        summary: "ZFS pool {{ $labels.pool }} on {{ $labels.instance }} is running out of space"
+        description: "Pool {{ $labels.pool }} has {{ $value | humanizePercentage }} free space left. Above ~85% fill ZFS switches to best-fit allocation and performance degrades."
+    - alert: ZFSPoolSpaceCritical
+      expr: zfs_pool_free_bytes / zfs_pool_size_bytes < 0.08
+      for: 30m
+      labels:
+        severity: critical
+      annotations:
+        summary: "ZFS pool {{ $labels.pool }} on {{ $labels.instance }} is almost full"
+        description: "Pool {{ $labels.pool }} has {{ $value | humanizePercentage }} free space left."
+    - alert: ZFSDatasetSpaceLow
+      expr: >-
+        zfs_dataset_available_bytes
+          / (zfs_dataset_used_bytes + zfs_dataset_available_bytes) < 0.10
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "ZFS dataset {{ $labels.dataset }} on {{ $labels.instance }} is running out of space"
+        description: "Dataset {{ $labels.dataset }} has less than 10% space left (quota or pool limit). Available: {{ $value | humanizePercentage }}."
+    - alert: ZFSDatasetSpaceCritical
+      expr: >-
+        zfs_dataset_available_bytes
+          / (zfs_dataset_used_bytes + zfs_dataset_available_bytes) < 0.05
+      for: 15m
+      labels:
+        severity: critical
+      annotations:
+        summary: "ZFS dataset {{ $labels.dataset }} on {{ $labels.instance }} is almost full"
+        description: "Dataset {{ $labels.dataset }} has less than 5% space left (quota or pool limit)."

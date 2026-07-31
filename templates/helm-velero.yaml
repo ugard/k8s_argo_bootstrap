@@ -48,7 +48,11 @@ spec:
         deployNodeAgent: true
         configuration:
           features: EnableCSI
-          
+          # Default kopia maintenance interval for NEW BackupRepository objects.
+          # Existing ones keep the frequency baked into spec.maintenanceFrequency
+          # at creation time and must be patched by hand.
+          defaultRepoMaintainFrequency: 24h
+
           # Parameters for the BackupStorageLocation(s). Configure multiple by adding other element(s) to the backupStorageLocation slice.
           # See https://velero.io/docs/v1.6/api-types/backupstoragelocation/
           backupStorageLocation:
