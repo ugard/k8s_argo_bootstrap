@@ -17,7 +17,7 @@ spec:
     spec:
       priorityClassName: system-node-critical
       nodeSelector:
-        kubernetes.io/hostname: talos-jly-e8b
+        kubernetes.io/hostname: talos-6wr-lvz
       tolerations:
       - operator: "Exists"
         effect: "NoExecute"

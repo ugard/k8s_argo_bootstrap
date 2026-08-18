@@ -14,8 +14,14 @@ spec:
         app: otgw
         namespace: hass
     spec:
+      # dongle OTGW wisi na RPi (talos-6wr-lvz, arm64) — jedynym wezle z taintem
+      # control-plane; obraz wlasny, bo hvxl/otmonitor jest amd64-only
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
       containers:
-      - image: docker.io/hvxl/otmonitor:stable
+      - image: registry.ugard.win/otmonitor:latest
         imagePullPolicy: IfNotPresent
         name: otgw
         ports:
