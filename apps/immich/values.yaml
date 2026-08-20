@@ -4,8 +4,8 @@ controllers:
       main:
         image:
           # Chart 0.13.1 pins appVersion v3.0.0; this override carries both the
-          # server and machine-learning images to the newest 3.x patch.
-          tag: v3.0.3
+          # server and machine-learning images to the newest 3.x release.
+          tag: v3.1.0
         env:
           # REDIS_HOSTNAME: '{{ printf "%s-valkey" .Release.Name }}'
           # IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
