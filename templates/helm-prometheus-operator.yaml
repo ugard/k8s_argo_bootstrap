@@ -151,6 +151,7 @@ spec:
             - velero
             - cert-manager2
             - openebs
+            - traefik
         alertmanager:
           extraSecretMounts:
           - name: ntfy-secret
