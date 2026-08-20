@@ -34,6 +34,8 @@ spec:
           value: "0.0.0.0"
         - name: SPOOLMAN_PORT
           value: "7912"
+        - name: SPOOLMAN_CORS_ORIGIN
+          value: "http://192.168.101.190"
 ---
 apiVersion: v1
 kind: Service
