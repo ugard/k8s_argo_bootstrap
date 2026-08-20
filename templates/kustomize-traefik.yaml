@@ -16,7 +16,26 @@ spec:
       release-name: traefik
       valuesObject:
         service:
-        annotations:
-          tailscale.com/expose: "true"
-        spec:
-          loadBalancerIP: 192.168.10.253
+          annotations:
+            tailscale.com/expose: "true"
+          spec:
+            loadBalancerIP: 192.168.10.253
+        # domyślny readTimeout w Traefiku v3 to 60s i ucina dłuższe uploady
+        # (np. backup filmów z telefonu do Immicha)
+        ports:
+          web:
+            transport:
+              respondingTimeouts:
+                readTimeout: 5m
+          websecure:
+            transport:
+              respondingTimeouts:
+                readTimeout: 5m
+        metrics:
+          prometheus:
+            # ArgoCD renderuje chart bez dostępu do klastra, więc check CRD musi być wyłączony
+            disableAPICheck: true
+            service:
+              enabled: true
+            serviceMonitor:
+              enabled: true
