@@ -28,7 +28,7 @@ spec:
       containers:
       - name: webhook
         # Rust, źródło: git.ugard.win/lkrzyzak/alert-webhook (build: Drone CI)
-        image: registry.ugard.win/alert-webhook:ea135893
+        image: registry.ugard.win/alert-webhook:b6e11e24
         ports:
         - containerPort: 5000
         env:
@@ -51,6 +51,17 @@ spec:
           value: "commands/alerts"
         - name: ALERTMANAGER_URL
           value: "http://prometheus-kube-prometheus-alertmanager.monitoring.svc:9093"
+        # Komenda „backups": lista checków z healthchecks (ostatni udany ping
+        # per backup). Klucz read-only (hcr_…) z SealedSecreta; brak klucza =
+        # komenda odpowiada podpowiedzią zamiast danymi.
+        - name: HEALTHCHECKS_URL
+          value: "http://healthchecks.healthchecks.svc"
+        - name: HEALTHCHECKS_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: alert-webhook-healthchecks
+              key: HEALTHCHECKS_API_KEY
+              optional: true
         - name: RUST_LOG
           value: "info"
         readinessProbe:

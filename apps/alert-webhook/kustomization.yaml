@@ -7,3 +7,4 @@ namespace: monitoring
 resources:
   - deployment.yaml
   - sealed_secret.yaml
+  - sealed_secret_healthchecks.yaml
