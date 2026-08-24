@@ -8,6 +8,16 @@ spec:
     namespace: firefly
     server: {{ .Values.spec.destination.server }}
   project: default
+  ignoreDifferences:
+    # Chart liczy APP_KEY przez `lookup`, ktore w `helm template` ArgoCD zwraca nil,
+    # wiec przy kazdym renderze leci randAlphaNum 32 i Secret wiecznie migocze.
+    # Efektywny APP_KEY i tak pochodzi z firefly-iii-secret (ostatni w envFrom).
+    - group: ""
+      kind: Secret
+      name: firefly-iii-app-key
+      namespace: firefly
+      jsonPointers:
+        - /data/APP_KEY
   sources:
     - chart: firefly-iii
       repoURL: https://firefly-iii.github.io/kubernetes
