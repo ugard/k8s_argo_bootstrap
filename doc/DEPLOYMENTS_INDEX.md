@@ -133,7 +133,7 @@ See `doc/backup/README.md` for full backup topology (Velero/Benji/Zrepl/Postgres
 | App (template) | Namespace | Type | Notes |
 |---|---|---|---|
 | appflowy (`kustomize-appflowy` no — `kustomize-*`? actual: appflowy) | appflowy | kustomize | full AppFlowy stack: cloud, web, ai, gotrue, admin; admin/web_hosts; sealed secret |
-| firefly-iii (`helm-firefly-iii`) | firefly | helm+kustomize | firefly-iii chart 1.8.2 + importer 1.4.0; values from `apps/firefly`; sealed secret |
+| firefly-iii (`helm-firefly-iii`) | firefly | helm+kustomize | firefly-iii chart 1.10.1 + importer 1.6.0; values from `apps/firefly`; sealed secret |
 | vikunja (`helm-vikunja`) | vikunja | helm+git | oci://ghcr.io/go-vikunja helm 1.0.0 + `apps/vikunja` overlay; ingress vikunja.ugard.win; postgres disabled (external) |
 | paperless (`kustomize-paperless`) | paperless | kustomize | paperless-ngx + tika + gotenberg + sftpgo + postgres sealed secret; network; migrate; host paperless.ugard.win |
 | obsidian (`kustomize-obsidian`) | obsidian | kustomize | linuxserver/obsidian; gitea pull secrets; para-init configmap+job; host notes.ugard.win |
