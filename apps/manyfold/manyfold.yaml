@@ -40,6 +40,35 @@ spec:
             name: tmp-dir
           - mountPath: /usr/src/app/log
             name: log-dir
+      # Nadpisujemy command w kontenerze glownym, przez co pomijany jest
+      # bin/docker-entrypoint.sh z obrazu -- a to on odpala migracje.
+      # Dlatego robimy je tutaj, jawnie, przed startem aplikacji.
+      - name: db-migrate
+        image: ghcr.io/manyfold3d/manyfold:0.149.0
+        workingDir: /usr/src/app
+        command:
+          - /bin/ash
+          - '-c'
+        args:
+          - bundle exec rails db:prepare:with_data
+        envFrom:
+          - secretRef:
+              name: manyfold
+              optional: false
+        env:
+          - name: DATABASE_ADAPTER
+            value: "postgresql"
+          - name: DATABASE_HOST
+            value: postgres.postgres
+          - name: DATABASE_PORT
+            value: "5432"
+          - name: HOME
+            value: /usr/src/app/tmp
+        volumeMounts:
+          - mountPath: /usr/src/app/tmp
+            name: tmp-dir
+          - mountPath: /usr/src/app/log
+            name: log-dir
       containers:
       - name: manyfold
         image: ghcr.io/manyfold3d/manyfold:0.149.0
