@@ -4,6 +4,10 @@ metadata:
   name: manyfold
   namespace: manyfold
 spec:
+  # PVC jest ReadWriteOnce -> stary i nowy pod nie moga trzymac wolumenu
+  # jednoczesnie; RollingUpdate przy 1 replice konczy sie Multi-Attach error.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: manyfold
