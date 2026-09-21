@@ -62,9 +62,17 @@ spec:
             value: postgres.postgres
           - name: DATABASE_PORT
             value: "5432"
+          - name: "REDIS_URL"
+            value: "redis://redis:6379/1"
+          - name: TZ
+            value: "Europe/Warsaw"
           - name: HOME
             value: /usr/src/app/tmp
         volumeMounts:
+          # /models jest wymagane: boot Railsow rejestruje storage bibliotek
+          # (Library#register_storage) i bez tego leci EACCES na mkdir /models.
+          - mountPath: /models
+            name: model-data
           - mountPath: /usr/src/app/tmp
             name: tmp-dir
           - mountPath: /usr/src/app/log
