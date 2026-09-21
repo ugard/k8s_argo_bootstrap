@@ -126,7 +126,7 @@ See `doc/backup/README.md` for full backup topology (Velero/Benji/Zrepl/Postgres
 | immich (`kustomize-immich`) | immich | helm+kustomize | immich chart 0.10.3 + postgres + PVC + sealed secret (host immich.ugard.win) |
 | lychee (`kustomize-lychee`) | lychee | kustomize | lycheeorg/lychee, ingress/PVC/sealed secret |
 | rtorrent (`kustomize-rtorrent`) | rtorrent | kustomize | transmission + radarr + sonarr + prowlarr (linuxserver/hotio); postgres for sonarr; sftpgo; migrate jobs; hosts rtorrent/radarr/sonarr/prowlarr.ugard.win |
-| manyfold (`kustomize-manyfold`) | manyfold | kustomize | manyfold 0.132.0 (3D model library) + sealed secret |
+| manyfold (`kustomize-manyfold`) | manyfold | kustomize | manyfold 0.149.0 (3D model library) + sealed secret |
 | bookshelf (`kustomize-bookshelf`) | bookshelf | kustomize | ghcr.io/pennydreadful/bookshelf:hardcover + PVC |
 
 ## Productivity / self-hosted apps
