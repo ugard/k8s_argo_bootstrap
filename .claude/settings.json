@@ -1,0 +1,60 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(kubectl get *)",
+      "Bash(kubectl logs *)",
+      "Bash(kubectl describe *)",
+      "Bash(kubectl top *)",
+      "Bash(kubectl events *)",
+      "Bash(kubectl api-resources *)",
+      "Bash(kubectl explain *)",
+      "Bash(kubectl version *)",
+      "Bash(kubectl config get-contexts *)",
+      "Bash(kubectl rollout status *)",
+      "Bash(kubectl rollout history *)",
+      "Bash(kubectl -n * get *)",
+      "Bash(kubectl -n * logs *)",
+      "Bash(kubectl -n * describe *)",
+      "Bash(kubectl -n * top *)",
+      "Bash(kubectl -n * events *)",
+      "Bash(kubectl -n * rollout status *)",
+      "Bash(kubectl -n * rollout history *)",
+      "Bash(kubectl --context * get *)",
+      "Bash(kubectl --context * logs *)",
+      "Bash(kubectl --context * describe *)",
+      "Bash(kubectl --context * top *)",
+      "Bash(kubectl --context * events *)",
+      "Bash(kubectl kustomize *)",
+      "Bash(helm lint *)",
+      "Bash(helm template *)",
+      "Bash(talosctl --talosconfig * dmesg*)",
+      "Bash(talosctl --talosconfig * service*)",
+      "Bash(git -C /home/luck/work/k8s/k8s_argo_bootstrap diff HEAD~1)"
+    ],
+    "ask": [
+      "Bash(kubectl exec *)",
+      "Bash(kubectl -n * exec *)",
+      "Bash(kubectl --context * exec *)",
+      "Bash(kubectl port-forward *)",
+      "Bash(kubectl run *)",
+      "Bash(kubectl cp *)"
+    ],
+    "deny": [
+      "Bash(kubectl apply *)",
+      "Bash(kubectl create *)",
+      "Bash(kubectl delete *)",
+      "Bash(kubectl patch *)",
+      "Bash(kubectl annotate *)",
+      "Bash(kubectl label *)",
+      "Bash(kubectl edit *)",
+      "Bash(kubectl replace *)",
+      "Bash(kubectl scale *)",
+      "Bash(kubectl drain *)",
+      "Bash(kubectl cordon *)",
+      "Bash(kubectl uncordon *)",
+      "Bash(kubectl taint *)",
+      "Bash(kubectl rollout restart *)",
+      "Bash(kubectl rollout undo *)"
+    ]
+  }
+}
