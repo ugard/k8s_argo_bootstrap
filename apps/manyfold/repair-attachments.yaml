@@ -1,0 +1,128 @@
+---
+# Naprawia pliki, ktorym nie powiodla sie promocja z cache do biblioteki.
+#
+# Manyfold po dodaniu pliku robi dwie rzeczy naraz: FilePromoteJob przenosi plik z cache
+# do biblioteki i zapisuje rekord, a Analysis::GeometricAnalysisJob dopisuje bounding_box
+# do tej samej kolumny attachment_data. Gdy analiza zdazy pierwsza, atomic_promote wykrywa
+# zmiane i przerywa -- po cichu, bo FilePromoteJob ma "rescue Shrine::AttachmentChanged".
+# Plik lezy juz w bibliotece, ale rekord wskazuje pusty cache i pobieranie zwraca HTTP 500.
+# Zglaszane upstream jako objaw w manyfold3d/manyfold#6869; w 0.149.0/0.150.0 nienaprawione.
+#
+# Przestawiamy tylko rekordy, dla ktorych plik faktycznie lezy pod sciezka biblioteki
+# I ma rozmiar zgodny z metadanymi. Cokolwiek innego jest pomijane i logowane.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: manyfold-repair-attachments
+  namespace: manyfold
+data:
+  repair.rb: |
+    col = ModelFile.columns_hash["attachment_data"]
+    jsonish = [:json, :jsonb].include?(col.type)
+    stuck = ModelFile.all.select { |f| f.attachment_data["storage"] == "cache" }
+    if stuck.empty?
+      puts "nic do naprawy"
+    else
+      warn "znaleziono #{stuck.size} rekordow na cache"
+      stuck.sort_by(&:id).each do |f|
+        model = f.model
+        lib = model&.library
+        next warn("POMIJAM #{f.id} #{f.filename}: brak modelu/biblioteki") unless model && lib
+        rel = File.join(model.path, f.filename)
+        abs = File.join(lib.path, rel)
+        declared = f.attachment_data.dig("metadata", "size").to_i
+        unless File.exist?(abs)
+          next warn("POMIJAM #{f.id} #{f.filename}: brak pliku na dysku (#{abs})")
+        end
+        unless File.size(abs).to_i == declared
+          next warn("POMIJAM #{f.id} #{f.filename}: rozmiar #{File.size(abs)} != #{declared}")
+        end
+        data = f.attachment_data.dup.merge("id" => rel, "storage" => "library_#{lib.id}")
+        f.update_column(:attachment_data, jsonish ? data : data.to_json)
+        bytes = f.reload.attachment.read.bytesize
+        puts "NAPRAWIONY #{f.id} #{f.filename} (#{bytes} B)"
+      end
+      left = ModelFile.all.count { |f| f.attachment_data["storage"] == "cache" }
+      puts "pozostalo na cache: #{left}"
+    end
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: manyfold-repair-attachments
+  namespace: manyfold
+spec:
+  schedule: "*/15 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 300
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 3600
+      template:
+        spec:
+          restartPolicy: Never
+          # manyfold-data-pvc jest ReadWriteOnce -- wolumen da sie zamontowac w kilku
+          # podach tylko na tym samym nodzie, wiec siadamy tam, gdzie stoi manyfold.
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchLabels:
+                      app: manyfold
+                  topologyKey: kubernetes.io/hostname
+          securityContext:
+            fsGroup: 1000
+            runAsGroup: 1000
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: repair
+              image: ghcr.io/manyfold3d/manyfold:0.149.0
+              workingDir: /usr/src/app
+              command:
+                - /bin/ash
+                - '-c'
+              args:
+                - bundle exec rails runner /scripts/repair.rb
+              envFrom:
+                - secretRef:
+                    name: manyfold
+                    optional: false
+              env:
+                - name: TZ
+                  value: "Europe/Warsaw"
+                - name: DATABASE_ADAPTER
+                  value: "postgresql"
+                - name: DATABASE_HOST
+                  value: postgres.postgres
+                - name: DATABASE_PORT
+                  value: "5432"
+                - name: "REDIS_URL"
+                  value: "redis://redis:6379/1"
+                - name: HOME
+                  value: /usr/src/app/tmp
+              volumeMounts:
+                # /models musi byc: boot Railsow rejestruje storage bibliotek
+                - mountPath: /models
+                  name: model-data
+                - mountPath: /scripts
+                  name: repair-script
+                - mountPath: /usr/src/app/tmp
+                  name: tmp-dir
+                - mountPath: /usr/src/app/log
+                  name: log-dir
+          volumes:
+            - name: model-data
+              persistentVolumeClaim:
+                claimName: manyfold-data-pvc
+            - name: repair-script
+              configMap:
+                name: manyfold-repair-attachments
+            - emptyDir: {}
+              name: tmp-dir
+            - emptyDir: {}
+              name: log-dir

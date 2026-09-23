@@ -109,6 +109,13 @@ spec:
           value: "redis://redis:6379/1"
         - name: MANYFOLD_LOG_LEVEL
           value: debug
+        # 1 watek zamiast 4: FilePromoteJob nie jedzie rownolegle z analiza tego samego
+        # pliku, ktora dopisuje bounding_box do attachment_data i wywala promocje
+        # (rescue Shrine::AttachmentChanged -> rekord zostaje na pustym cache, HTTP 500).
+        # Nie zamyka wyscigu do zera, bo GeometricAnalysisJob chodzi w osobnym procesie
+        # performance_worker -- od tego jest CronJob manyfold-repair-attachments.
+        - name: DEFAULT_WORKER_CONCURRENCY
+          value: "1"
         - name: PUID
           value: '1000'
         - name: PGID
