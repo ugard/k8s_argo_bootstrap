@@ -94,15 +94,6 @@ data:
         - 10.0.0.0/8
     
     mqtt:
-      discovery: true
-      discovery_prefix: homeassistant
-      broker: mosquitto-mqtt
-      birth_message:
-        topic: 'homeassistant/status'
-        payload: 'online'
-      will_message:
-        topic: 'homeassistant/status'
-        payload: 'offline'
       sensor:
       - name: "Thermostat room temperature"
         state_topic: "events/central_heating/otmonitor/roomtemperature"
