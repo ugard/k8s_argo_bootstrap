@@ -1,0 +1,467 @@
+# Piec (otmonitor) i czujniki/glowice (zigbee2mqtt) z MQTT -> Prometheus.
+# Niezalezne od Home Assistanta - dziala nawet gdy HA lezy.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mqtt2prometheus-config
+data:
+  otgw.yaml: |
+    mqtt:
+      server: tcp://mosquitto-mqtt.hass.svc:1883
+      client_id: mqtt2prometheus-otgw
+      topic_path: events/central_heating/otmonitor/+
+      qos: 0
+    cache:
+      timeout: -1
+    metrics:
+    - prom_name: otgw_boiler_water_temperature_celsius
+      mqtt_name: value
+      sensor_name_filter: ^boilerwatertemperature$
+      help: Boiler flow water temperature
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_return_water_temperature_celsius
+      mqtt_name: value
+      sensor_name_filter: ^returnwatertemperature$
+      help: Boiler return water temperature
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_control_setpoint_celsius
+      mqtt_name: value
+      sensor_name_filter: ^controlsetpoint$
+      help: CH water setpoint requested by thermostat
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_max_ch_setpoint_celsius
+      mqtt_name: value
+      sensor_name_filter: ^chsetpoint$
+      help: Max CH water setpoint
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_dhw_temperature_celsius
+      mqtt_name: value
+      sensor_name_filter: ^dhwtemperature$
+      help: Domestic hot water temperature
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_dhw_setpoint_celsius
+      mqtt_name: value
+      sensor_name_filter: ^dhwsetpoint$
+      help: Domestic hot water setpoint
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_dhw_flow_rate
+      mqtt_name: value
+      sensor_name_filter: ^dhwflowrate$
+      help: Domestic hot water flow rate
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_room_temperature_celsius
+      mqtt_name: value
+      sensor_name_filter: ^roomtemperature$
+      help: Room temperature measured by thermostat
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_room_setpoint_celsius
+      mqtt_name: value
+      sensor_name_filter: ^setpoint$
+      help: Room setpoint set on thermostat
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_remote_override_room_setpoint_celsius
+      mqtt_name: value
+      sensor_name_filter: ^remoteoverrideroomsetpoint$
+      help: Remote override room setpoint (0 = none)
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_outside_temperature_celsius
+      mqtt_name: value
+      sensor_name_filter: ^outsidetemperature$
+      help: Outside temperature
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_ch_water_pressure_bar
+      mqtt_name: value
+      sensor_name_filter: ^chwaterpressure$
+      help: CH water pressure
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_relative_modulation_percent
+      mqtt_name: value
+      sensor_name_filter: ^modulation$
+      help: Relative modulation level
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_max_relative_modulation_percent
+      mqtt_name: value
+      sensor_name_filter: ^maxmodulation$
+      help: Max relative modulation level
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_flame
+      mqtt_name: value
+      sensor_name_filter: ^flame$
+      help: Burner flame on
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_ch_active
+      mqtt_name: value
+      sensor_name_filter: ^centralheating$
+      help: Central heating active
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_dhw_active
+      mqtt_name: value
+      sensor_name_filter: ^hotwater$
+      help: Domestic hot water active
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_ch_enabled
+      mqtt_name: value
+      sensor_name_filter: ^chenable$
+      help: Central heating enabled by thermostat
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_dhw_enabled
+      mqtt_name: value
+      sensor_name_filter: ^dhwenable$
+      help: Domestic hot water enabled by thermostat
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_fault
+      mqtt_name: value
+      sensor_name_filter: ^fault$
+      help: Boiler fault indication
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_diagnostic
+      mqtt_name: value
+      sensor_name_filter: ^diagnostic$
+      help: Boiler diagnostic indication
+      type: gauge
+      omit_timestamp: true
+    - prom_name: otgw_thermostat_connected
+      mqtt_name: value
+      sensor_name_filter: ^thermostat$
+      help: Thermostat connected to gateway
+      type: gauge
+      omit_timestamp: true
+  z2m.yaml: |
+    mqtt:
+      server: tcp://mosquitto-mqtt.hass.svc:1883
+      client_id: mqtt2prometheus-z2m
+      topic_path: zigbee2mqtt/+
+      qos: 0
+    cache:
+      timeout: 6h
+    metrics:
+    - prom_name: z2m_temperature_celsius
+      mqtt_name: temperature
+      help: Temperature (TH01 room sensor)
+      type: gauge
+      omit_timestamp: true
+    - prom_name: z2m_humidity_percent
+      mqtt_name: humidity
+      help: Relative humidity
+      type: gauge
+      omit_timestamp: true
+    - prom_name: z2m_trv_local_temperature_celsius
+      mqtt_name: local_temperature
+      help: TRV internal temperature
+      type: gauge
+      omit_timestamp: true
+    - prom_name: z2m_trv_setpoint_celsius
+      mqtt_name: current_heating_setpoint
+      help: TRV heating setpoint
+      type: gauge
+      omit_timestamp: true
+    - prom_name: z2m_trv_system_mode
+      mqtt_name: system_mode
+      help: TRV mode (0=off 1=auto 2=heat)
+      type: gauge
+      omit_timestamp: true
+      string_value_mapping:
+        map:
+          'off': 0
+          auto: 1
+          heat: 2
+        error_value: -1
+    - prom_name: z2m_trv_running
+      mqtt_name: running_state
+      help: TRV valve heating (0=idle 1=heat)
+      type: gauge
+      omit_timestamp: true
+      string_value_mapping:
+        map:
+          idle: 0
+          heat: 1
+        error_value: -1
+    - prom_name: z2m_trv_heating_demand_percent
+      mqtt_name: pi_heating_demand
+      help: TRV valve opening
+      type: gauge
+      omit_timestamp: true
+    - prom_name: z2m_battery_percent
+      mqtt_name: battery
+      help: Battery level
+      type: gauge
+      omit_timestamp: true
+    - prom_name: z2m_battery_low
+      mqtt_name: battery_low
+      help: Battery low flag
+      type: gauge
+      omit_timestamp: true
+    - prom_name: z2m_battery_voltage_millivolts
+      mqtt_name: voltage
+      help: Battery voltage
+      type: gauge
+      omit_timestamp: true
+    - prom_name: z2m_linkquality
+      mqtt_name: linkquality
+      help: Zigbee link quality
+      type: gauge
+      omit_timestamp: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt2prometheus
+  labels:
+    app: mqtt2prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mqtt2prometheus
+  template:
+    metadata:
+      labels:
+        app: mqtt2prometheus
+      annotations:
+        checksum/config: v1
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: otgw
+        image: ghcr.io/hikhvar/mqtt2prometheus:v0.1.7
+        args:
+        - -config=/config/otgw.yaml
+        - -listen-port=9641
+        ports:
+        - name: otgw-metrics
+          containerPort: 9641
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        resources:
+          requests:
+            cpu: 5m
+            memory: 16Mi
+          limits:
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      - name: z2m
+        image: ghcr.io/hikhvar/mqtt2prometheus:v0.1.7
+        args:
+        - -config=/config/z2m.yaml
+        - -listen-port=9642
+        ports:
+        - name: z2m-metrics
+          containerPort: 9642
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        resources:
+          requests:
+            cpu: 5m
+            memory: 16Mi
+          limits:
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: config
+        configMap:
+          name: mqtt2prometheus-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt2prometheus
+  labels:
+    app: mqtt2prometheus
+spec:
+  selector:
+    app: mqtt2prometheus
+  ports:
+  - name: otgw-metrics
+    port: 9641
+    targetPort: otgw-metrics
+  - name: z2m-metrics
+    port: 9642
+    targetPort: z2m-metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mqtt2prometheus
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: mqtt2prometheus
+  endpoints:
+  - port: otgw-metrics
+    interval: 30s
+    metricRelabelings:
+    - action: labeldrop
+      regex: topic
+  - port: z2m-metrics
+    interval: 60s
+    metricRelabelings:
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b00251935eb'
+      targetLabel: room
+      replacement: gabinet
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b00251935eb'
+      targetLabel: kind
+      replacement: th01
+    - sourceLabels:
+      - sensor
+      regex: '0xa4c13834a11fbf91'
+      targetLabel: room
+      replacement: gabinet
+    - sourceLabels:
+      - sensor
+      regex: '0xa4c13834a11fbf91'
+      targetLabel: kind
+      replacement: trv
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b002513cb00'
+      targetLabel: room
+      replacement: bawialnia
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b002513cb00'
+      targetLabel: kind
+      replacement: th01
+    - sourceLabels:
+      - sensor
+      regex: '0xa4c138d6d99599d6'
+      targetLabel: room
+      replacement: bawialnia
+    - sourceLabels:
+      - sensor
+      regex: '0xa4c138d6d99599d6'
+      targetLabel: kind
+      replacement: trv
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b002519377f'
+      targetLabel: room
+      replacement: goscinny
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b002519377f'
+      targetLabel: kind
+      replacement: th01
+    - sourceLabels:
+      - sensor
+      regex: '0xa4c138dacbe09ca8'
+      targetLabel: room
+      replacement: goscinny
+    - sourceLabels:
+      - sensor
+      regex: '0xa4c138dacbe09ca8'
+      targetLabel: kind
+      replacement: trv
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b002519377a'
+      targetLabel: room
+      replacement: sypialnia
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b002519377a'
+      targetLabel: kind
+      replacement: th01
+    - sourceLabels:
+      - sensor
+      regex: '0xa4c138cede8316bc'
+      targetLabel: room
+      replacement: sypialnia
+    - sourceLabels:
+      - sensor
+      regex: '0xa4c138cede8316bc'
+      targetLabel: kind
+      replacement: trv
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b00251335f6'
+      targetLabel: room
+      replacement: dziewczyny
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b00251335f6'
+      targetLabel: kind
+      replacement: th01
+    - sourceLabels:
+      - sensor
+      regex: '0xa4c138e03f42179a'
+      targetLabel: room
+      replacement: dziewczyny
+    - sourceLabels:
+      - sensor
+      regex: '0xa4c138e03f42179a'
+      targetLabel: kind
+      replacement: trv
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b002513c894'
+      targetLabel: room
+      replacement: salon
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b002513c894'
+      targetLabel: kind
+      replacement: th01
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b0025132e77'
+      targetLabel: room
+      replacement: lazienka_dol
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b0025132e77'
+      targetLabel: kind
+      replacement: th01
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b00251335ea'
+      targetLabel: room
+      replacement: lazienka_gora
+    - sourceLabels:
+      - sensor
+      regex: '0x00124b00251335ea'
+      targetLabel: kind
+      replacement: th01
+    - action: labeldrop
+      regex: topic
