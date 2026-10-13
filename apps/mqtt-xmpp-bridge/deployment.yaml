@@ -86,6 +86,11 @@ spec:
                   key: XIYOHE_ROOM_PASSWORD
             - name: OMEMO_STORE_PATH
               value: "/data/omemo-store"
+            # Health file on tmpfs, not the Ceph RBD store: a 5 s heartbeat write
+            # stalled >30 s whenever an OSD was slow, and the liveness probe then
+            # killed a healthy bridge (~3 restarts/day).
+            - name: BRIDGE_HEALTH_FILE
+              value: "/run/bridge/bridge.health"
           livenessProbe:
             exec:
               command:
@@ -98,6 +103,8 @@ spec:
           volumeMounts:
             - name: omemo-store
               mountPath: /data/omemo-store
+            - name: health
+              mountPath: /run/bridge
             - name: bridge-routes
               mountPath: /etc/xmpp-omemo-core/routes.properties
               subPath: routes.properties
@@ -106,6 +113,10 @@ spec:
         - name: omemo-store
           persistentVolumeClaim:
             claimName: omemo-store
+        - name: health
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Mi
         - name: bridge-routes
           configMap:
             name: bridge-routes
