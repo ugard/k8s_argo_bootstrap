@@ -72,7 +72,6 @@ ArgoCD Applications flagged for future investigation:
 | kustomize-lychee | OutOfSync | Missing | not deployed |
 | kustomize-openarchiver | OutOfSync | Missing | not deployed (live per-app manifest drift) |
 | node-red | OutOfSync | Missing | not deployed |
-| trivy | OutOfSync | Missing | not deployed |
 | flashweb | OutOfSync | Healthy | config drift |
 | kustomize-paperless | Synced | Progressing | still rolling out |
 | rook-ceph | Synced | Degraded | Ceph health issue — check `ceph status` via rook toolbox |

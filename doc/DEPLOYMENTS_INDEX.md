@@ -66,7 +66,6 @@ sonarr, spoolman, syncthing, vault (vaultwarden). Also `prom.ugard.win`,
 | openebs-helm (`helm-openebs.yaml`) | kube-system | helm | openebs 4.4.0; local hostpath + ZFS-LocalPV enabled, lvm/mayastor/disabled; serviceMonitor on |
 | openebs (kustomize) (`kustomize-openebs`) | openebs | kustomize | `apps/openebs`: storage-classes, openebs-vsc (VolumeSnapshotClass) |
 | metallb (`helm-metallb`) | metallb-system | helm+kustomize | chart 0.15.3 + `apps/metallb` pools/ads |
-| trivy (`helm-trivy`) | trivy-system | helm | trivy-operator 0.30.0 (security scanning) |
 
 ## Cert-manager
 - `helm-cert-manager` (namespace `cert-manager2`): jetstack cert-manager v1.16.1,
