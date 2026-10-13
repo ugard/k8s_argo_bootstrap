@@ -5,3 +5,4 @@ resources:
   - resource-modifiers.yaml
   - velero-healthcheck.yaml
   - schedules.yaml
+  - repo-maintenance-job-config.yaml

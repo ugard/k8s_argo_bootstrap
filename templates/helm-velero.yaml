@@ -48,6 +48,10 @@ spec:
         deployNodeAgent: true
         configuration:
           features: EnableCSI
+          # Kopia maintenance job placement (keeps it off talos-jly-e8b),
+          # see apps/velero/repo-maintenance-job-config.yaml.
+          extraArgs:
+            - --repo-maintenance-job-configmap=velero-repo-maintenance-job-config
           # Default kopia maintenance interval for NEW BackupRepository objects.
           # Existing ones keep the frequency baked into spec.maintenanceFrequency
           # at creation time and must be patched by hand.

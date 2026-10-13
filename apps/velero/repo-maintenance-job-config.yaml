@@ -1,0 +1,22 @@
+# Read by `velero server --repo-maintenance-job-configmap` (set in
+# templates/helm-velero.yaml). Keeps kopia maintenance jobs off talos-jly-e8b:
+# its single SATA SSD also carries etcd and osd.0, and heavy writes there stall
+# etcd and the apiserver (2026-10-13).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: velero-repo-maintenance-job-config
+  namespace: velero
+data:
+  global: |
+    {
+      "loadAffinity": [
+        {
+          "nodeSelector": {
+            "matchExpressions": [
+              {"key": "kubernetes.io/hostname", "operator": "NotIn", "values": ["talos-jly-e8b"]}
+            ]
+          }
+        }
+      ]
+    }
