@@ -1,0 +1,1567 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-heating
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  heating.json: |
+    {
+      "title": "Ogrzewanie: temperatury",
+      "uid": "heating-temps",
+      "tags": [
+        "home",
+        "heating"
+      ],
+      "timezone": "browser",
+      "editable": true,
+      "graphTooltip": 1,
+      "refresh": "1m",
+      "time": {
+        "from": "now-48h",
+        "to": "now"
+      },
+      "schemaVersion": 39,
+      "annotations": {
+        "list": []
+      },
+      "links": [],
+      "panels": [
+        {
+          "type": "row",
+          "title": "Teraz",
+          "collapsed": false,
+          "id": 1,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Pokoje (TH01)",
+          "description": "Ostatni odczyt czujników TH01. Niebieski < 18 °C, zielony 18–22 °C, pomarańczowy > 22 °C. Brak kafelka = czujnik nie raportuje od > 6 h (bateria?).",
+          "id": 2,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 16,
+            "x": 0,
+            "y": 1
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "z2m_temperature_celsius{kind=\"th01\"}",
+              "legendFormat": "{{room}}",
+              "refId": "A",
+              "instant": true,
+              "range": false
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "decimals": 1,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#3987e5",
+                    "value": null
+                  },
+                  {
+                    "color": "#0ca30c",
+                    "value": 18
+                  },
+                  {
+                    "color": "#ec835a",
+                    "value": 22
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "salon"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Salon"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "gabinet"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Gabinet"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lazienka_dol"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Łazienka dół"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "sypialnia"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Sypialnia"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "dziewczyny"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Dziewczyny"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "bawialnia"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Bawialnia"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "goscinny"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Gościnny"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lazienka_gora"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Łazienka góra"
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "area",
+            "textMode": "value_and_name",
+            "justifyMode": "center",
+            "orientation": "auto"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Na zewnątrz",
+          "description": "Czujnik zewnętrzny kotła przez OpenTherm. Przy ciszy OT wartość zamarza.",
+          "id": 3,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 16,
+            "y": 1
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "otgw_outside_temperature_celsius",
+              "legendFormat": "z kotła",
+              "refId": "A",
+              "instant": true,
+              "range": false
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "decimals": 1,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "none",
+            "graphMode": "area",
+            "textMode": "value_and_name",
+            "justifyMode": "center",
+            "orientation": "auto"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Termostat (hol)",
+          "description": "Czujnik w termostacie Celcia 20 w holu przy kuchni (strefa podłogówki, zawyża).",
+          "id": 4,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 20,
+            "y": 1
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "otgw_room_temperature_celsius",
+              "legendFormat": "hol",
+              "refId": "A",
+              "instant": true,
+              "range": false
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "decimals": 1,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "none",
+            "graphMode": "area",
+            "textMode": "value_and_name",
+            "justifyMode": "center",
+            "orientation": "auto"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Woda w kotle",
+          "description": "",
+          "id": 5,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 16,
+            "y": 4
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "otgw_boiler_water_temperature_celsius",
+              "legendFormat": "zasilanie",
+              "refId": "A",
+              "instant": true,
+              "range": false
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "decimals": 1,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "none",
+            "graphMode": "area",
+            "textMode": "value_and_name",
+            "justifyMode": "center",
+            "orientation": "auto"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Ramki kotła",
+          "description": "Wszystkie ramki OpenTherm/s. ~1/s = tylko termostat, kocioł milczy (alert BoilerOpenThermSilent). ≥ 2/s = kocioł odpowiada.",
+          "id": 6,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 20,
+            "y": 4
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "rate(received_messages{topic=\"events/central_heating/otmonitor/Message\"}[10m])",
+              "legendFormat": "ramki/s",
+              "refId": "A",
+              "instant": true,
+              "range": false
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "decimals": 2,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d03b3b",
+                    "value": null
+                  },
+                  {
+                    "color": "#0ca30c",
+                    "value": 1.1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "area",
+            "textMode": "value_and_name",
+            "justifyMode": "center",
+            "orientation": "auto"
+          }
+        },
+        {
+          "type": "row",
+          "title": "Temperatura",
+          "collapsed": false,
+          "id": 7,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 7
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Temperatura w pokojach",
+          "description": "Czujniki TH01. Szara linia = cel 20 °C.",
+          "id": 8,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 24,
+            "x": 0,
+            "y": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "z2m_temperature_celsius{kind=\"th01\"}",
+              "legendFormat": "{{room}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "decimals": 1,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": 600000,
+                "axisSoftMin": 15,
+                "axisSoftMax": 23,
+                "thresholdsStyle": {
+                  "mode": "line+area"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "transparent",
+                    "value": null
+                  },
+                  {
+                    "color": "#7a7974",
+                    "value": 20
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "salon"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Salon"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#3987e5"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "gabinet"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Gabinet"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#d95926"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lazienka_dol"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Łazienka dół"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#199e70"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "sypialnia"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Sypialnia"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#c98500"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "dziewczyny"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Dziewczyny"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#d55181"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "bawialnia"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Bawialnia"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#008300"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "goscinny"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Gościnny"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#9085e9"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lazienka_gora"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Łazienka góra"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#e66767"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "lastNotNull",
+                "min",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Na zewnątrz i termostat w holu",
+          "description": "Z OpenTherm; podczas ciszy kotła linie są płaskie (zamrożony cache).",
+          "id": 9,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 19
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "otgw_outside_temperature_celsius",
+              "legendFormat": "na zewnątrz",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "otgw_room_temperature_celsius",
+              "legendFormat": "termostat (hol)",
+              "refId": "B"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "decimals": 1,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": 600000,
+                "axisSoftMin": null,
+                "axisSoftMax": null,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "na zewnątrz"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#3987e5"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "termostat (hol)"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#d95926"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "lastNotNull",
+                "min",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Wilgotność w pokojach",
+          "description": "Szara linia = 60 % RH, powyżej ryzyko kondensacji i pleśni.",
+          "id": 10,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 19
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "z2m_humidity_percent{kind=\"th01\"}",
+              "legendFormat": "{{room}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": 600000,
+                "axisSoftMin": null,
+                "axisSoftMax": null,
+                "thresholdsStyle": {
+                  "mode": "line+area"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "transparent",
+                    "value": null
+                  },
+                  {
+                    "color": "#7a7974",
+                    "value": 60
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "salon"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Salon"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#3987e5"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "gabinet"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Gabinet"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#d95926"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lazienka_dol"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Łazienka dół"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#199e70"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "sypialnia"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Sypialnia"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#c98500"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "dziewczyny"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Dziewczyny"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#d55181"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "bawialnia"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Bawialnia"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#008300"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "goscinny"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Gościnny"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#9085e9"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lazienka_gora"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Łazienka góra"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#e66767"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "lastNotNull",
+                "min",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "type": "row",
+          "title": "Kocioł",
+          "collapsed": false,
+          "id": 11,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 27
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Temperatura wody",
+          "description": "",
+          "id": 12,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 28
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "otgw_boiler_water_temperature_celsius",
+              "legendFormat": "woda (zasilanie)",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "otgw_control_setpoint_celsius",
+              "legendFormat": "zadana (SAT)",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "otgw_dhw_temperature_celsius",
+              "legendFormat": "CWU",
+              "refId": "C"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "decimals": 1,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": 600000,
+                "axisSoftMin": null,
+                "axisSoftMax": null,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "woda (zasilanie)"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#d95926"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "zadana (SAT)"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#7a7974"
+                    }
+                  },
+                  {
+                    "id": "custom.lineStyle",
+                    "value": {
+                      "fill": "dash",
+                      "dash": [
+                        6,
+                        4
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CWU"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#3987e5"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "lastNotNull",
+                "min",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Palnik: modulacja",
+          "description": "Modulacja × płomień (0 = palnik zgaszony).",
+          "id": 13,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 28
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "otgw_relative_modulation_percent * on() group_left otgw_flame",
+              "legendFormat": "modulacja przy płomieniu",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": 600000,
+                "axisSoftMin": 0,
+                "axisSoftMax": 100,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "modulacja przy płomieniu"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#d95926"
+                    }
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 20
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "lastNotNull",
+                "min",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "type": "row",
+          "title": "Głowice i baterie",
+          "collapsed": false,
+          "id": 14,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 36
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Głowice TRV: temperatura zadana",
+          "description": "Zadana wysłana do głowicy przez Better Thermostat (z kalibracją, więc nie równa się celowi pokoju).",
+          "id": 15,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 37
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "z2m_trv_setpoint_celsius{kind=\"trv\"}",
+              "legendFormat": "{{room}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "decimals": 1,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": 600000,
+                "axisSoftMin": null,
+                "axisSoftMax": null,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "salon"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Salon"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#3987e5"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "gabinet"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Gabinet"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#d95926"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lazienka_dol"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Łazienka dół"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#199e70"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "sypialnia"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Sypialnia"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#c98500"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "dziewczyny"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Dziewczyny"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#d55181"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "bawialnia"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Bawialnia"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#008300"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "goscinny"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Gościnny"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#9085e9"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lazienka_gora"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Łazienka góra"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#e66767"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "lastNotNull",
+                "min",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Baterie czujników",
+          "description": "Brak kafelka = urządzenie nie raportuje od > 6 h.",
+          "id": 16,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 37
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "z2m_battery_percent{kind=~\"th01|trv\"}",
+              "legendFormat": "{{room}} {{kind}}",
+              "refId": "A",
+              "instant": true,
+              "range": false
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 0,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d03b3b",
+                    "value": null
+                  },
+                  {
+                    "color": "#fab219",
+                    "value": 20
+                  },
+                  {
+                    "color": "#0ca30c",
+                    "value": 40
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "area",
+            "textMode": "value_and_name",
+            "justifyMode": "center",
+            "orientation": "auto"
+          }
+        }
+      ],
+      "id": null
+    }

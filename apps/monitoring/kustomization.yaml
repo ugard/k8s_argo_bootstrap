@@ -8,5 +8,6 @@ resources:
   - namespace.yaml
   - ntfy.sealed-secret.yaml
   - grafana-dashboard-disk.yaml
+  - grafana-dashboard-heating.yaml
   - zfs-exporter.yaml
   - mqtt2prometheus.yaml
