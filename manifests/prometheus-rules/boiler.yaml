@@ -1,0 +1,64 @@
+# Kociol (OpenTherm przez OTGW/otmonitor) - wykrywanie, ze kociol przestal
+# odpowiadac termostatowi.
+#
+# Metryki otgw_* nie nadaja sie do tego: otmonitor publikuje je tylko przy
+# zmianie, a mqtt2prometheus trzyma je w cache bez wygasania, wiec przy
+# awarii po prostu zamarzaja. Zamiast tego liczymy WSZYSTKIE ramki OT z tematu
+# events/central_heating/otmonitor/Message (licznik received_messages
+# mqtt2prometheusa, label topic zachowany w ServiceMonitorze):
+#   - termostat wysyla zapytanie (T...) co ~1 s       -> ~60 ramek/min
+#   - kazde zapytanie, na ktore kociol odpowie, daje
+#     dodatkowo ramke B... (+ ramki R/A bramki)        -> ~120-170 ramek/min
+# Kociol milczy (zero ramek B) => tempo spada do ~1 ramki/s. Prog 1.1/s
+# toleruje pojedyncze odpowiedzi; przy stabilnie dzialajacym kotle tempo w oknie
+# 10 min to 2.1-2.6/s (kalibracja na historii 2026-10-24..11-02).
+# Bezposredni licznik ramek B wymaga mqtt2prometheus >= 0.1.8 (raw_expression),
+# ktorego obrazu jeszcze nie opublikowano.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: boiler-alerts
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus-stack
+    release: prometheus
+spec:
+  groups:
+  - name: boiler
+    rules:
+    - alert: BoilerOpenThermSilent
+      expr: >-
+        rate(received_messages{job="mqtt2prometheus",container="otgw",status="success",topic="events/central_heating/otmonitor/Message"}[10m])
+          < 1.1 > 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Kociol nie odpowiada przez OpenTherm"
+        description: >-
+          Od ok. 15 minut OTGW widzi tylko zapytania termostatu, a kociol nie odsyla
+          ramek OpenTherm (B...): {{ $value | printf "%.2f" }} ramek/s (~1/s = same zapytania T,
+          przy dzialajacym kotle 2-2.6/s).
+          Ogrzewanie i CWU najpewniej nie dzialaja. Sprawdz: 1) czy kociol ma zasilanie -
+          wtyczka switch.piec_zasilanie w HA (jesli wylaczona celowo, wycisz alert);
+          2) wyswietlacz kotla / kod bledu; 3) przewody OpenTherm kociol <-> OTGW (zaciski BOILER);
+          4) czy termostat jest wpiety w OTGW (zaciski THERMOSTAT), a nie bezposrednio w kociol;
+          5) pod otgw w ns hass (kubectl -n hass logs deploy/otgw).
+          Podglad ramek: kubectl -n hass exec deploy/mosquitto -- mosquitto_sub -t events/central_heating/otmonitor/Message
+    - alert: OpenThermGatewayNoFrames
+      expr: >-
+        rate(received_messages{job="mqtt2prometheus",container="otgw",status="success",topic="events/central_heating/otmonitor/Message"}[10m]) == 0
+        or
+        absent(received_messages{job="mqtt2prometheus",container="otgw",status="success",topic="events/central_heating/otmonitor/Message"})
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Brak jakichkolwiek ramek OpenTherm z OTGW"
+        description: >-
+          Od ok. 15 minut na temat MQTT events/central_heating/otmonitor/Message nie przyszla
+          zadna ramka OpenTherm (ani zapytania termostatu, ani odpowiedzi kotla). Tor monitoringu
+          jest martwy, wiec stanu kotla nie widac (sam OTGW zwykle dalej przekazuje ramki, wiec
+          ogrzewanie moze dzialac). Sprawdz: pod otgw w ns hass (logi, czy widzi dongle USB/FTDI
+          na RPi), broker deploy/mosquitto w ns hass, kontener otgw poda mqtt2prometheus w ns
+          monitoring, oraz czy termostat jest podlaczony do OTGW (bez termostatu nie ma zapytan T).

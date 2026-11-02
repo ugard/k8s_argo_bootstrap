@@ -12,6 +12,11 @@ data:
       client_id: mqtt2prometheus-otgw
       topic_path: events/central_heating/otmonitor/+
       qos: 0
+    # bez wygasania celowo: otmonitor publikuje tylko przy zmianie, a setpointy
+    # (chsetpoint, dhwsetpoint, setpoint) potrafia nie zmieniac sie tygodniami
+    # - timeout by je wycinal. Skutek: przy awarii kotla otgw_* zamarzaja;
+    # awarie wykrywa alert BoilerOpenThermSilent (manifests/prometheus-rules/boiler.yaml)
+    # na liczniku received_messages{topic=".../Message"}.
     cache:
       timeout: -1
     metrics:
@@ -330,8 +335,15 @@ spec:
   - port: otgw-metrics
     interval: 30s
     metricRelabelings:
-    - action: labeldrop
-      regex: topic
+    # topic usuwamy tylko z otgw_* (sensor go dubluje). received_messages MUSI
+    # go zachowac: to licznik per temat (temat .../Message = kazda ramka
+    # OpenTherm, na nim stoi alert BoilerOpenThermSilent); bez topic serie
+    # sie zlewaly i Prometheus odrzucal duplikaty.
+    - sourceLabels:
+      - __name__
+      regex: 'otgw_.*'
+      targetLabel: topic
+      replacement: ''
   - port: z2m-metrics
     interval: 60s
     metricRelabelings:
@@ -465,5 +477,8 @@ spec:
       regex: '0x00124b00251335ea'
       targetLabel: kind
       replacement: th01
-    - action: labeldrop
-      regex: topic
+    - sourceLabels:
+      - __name__
+      regex: 'z2m_.*'
+      targetLabel: topic
+      replacement: ''
