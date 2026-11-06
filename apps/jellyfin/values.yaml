@@ -23,11 +23,13 @@ volumes:
   secret:
     secretName: rclone-rtorrent
     optional: false
-# YouTube dla dzieci pobierany przez pinchflat (apps/pinchflat)
+# YouTube dla dzieci pobierany przez sidecar pinchflat (PVC, sekret, ingress: apps/pinchflat)
 - name: youtube-media
   persistentVolumeClaim:
     claimName: youtube-media
-    readOnly: true
+- name: pinchflat-config
+  persistentVolumeClaim:
+    claimName: pinchflat-config
 - name: cache
   ephemeral:
     volumeClaimTemplate:
@@ -68,9 +70,61 @@ extraContainers:
     - name: rclone-config
       mountPath: /config/rclone
       readOnly: true
+  # pinchflat jako sidecar: dataset ZFS nie da się zamontować w dwóch podach
+  # (shared: "yes" w zfs-localpv kończy się "already mounted"), więc pobierający
+  # i czytający muszą dzielić pod
+  - name: pinchflat
+    # projekt w pauzie (#800); tylko `latest` (v2025.9.26) ma Deno wymagane przez yt-dlp,
+    # więc pin po digest. yt-dlp aktualizuje się sam przy starcie i codziennie.
+    image: ghcr.io/kieraneglin/pinchflat:latest@sha256:01b4f98aabaf3f5fe394213f7a32578c9e84e42080f52e2f8334021a4473b202
+    envFrom:
+    - secretRef:
+        name: pinchflat
+        optional: false
+    env:
+    - name: TZ
+      value: "Europe/Warsaw"
+    # mniej równoległych pobrań = mniejsze ryzyko blokady IP przez YouTube
+    - name: YT_DLP_WORKER_CONCURRENCY
+      value: "1"
+    - name: ENABLE_PROMETHEUS
+      value: "1"
+    ports:
+    - containerPort: 8945
+      name: pinchflat
+    # /healthcheck i /metrics są poza basic auth
+    startupProbe:
+      httpGet:
+        path: /healthcheck
+        port: pinchflat
+      periodSeconds: 10
+      failureThreshold: 30
+    livenessProbe:
+      httpGet:
+        path: /healthcheck
+        port: pinchflat
+      periodSeconds: 30
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: "2"
+        memory: 2Gi
+    # bez fsGroup/runAsUser: obraz nie obsługuje PUID/PGID, a fsGroup na zfs
+    # robi rekurencyjny chown całego wolumenu
+    volumeMounts:
+    - name: pinchflat-config
+      mountPath: /config
+    - name: youtube-media
+      mountPath: /downloads
 nodeSelector:
   kubernetes.io/hostname: talos-i8d-hmt
 volumeMounts:
 - name: youtube-media
   mountPath: /media-youtube
   readOnly: true
+# wolumeny ZFS (media, youtube-media) są RWO bez współdzielenia — nowy pod
+# nie wstanie, dopóki stary ich trzyma
+deploymentStrategy:
+  type: Recreate

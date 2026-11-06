@@ -27,8 +27,9 @@ reclaimPolicy: Retain
 provisioner: zfs.csi.openebs.io
 volumeBindingMode: WaitForFirstConsumer
 ---
-# jeden wolumen montowany przez kilka podów na tym samym węźle
-# (pinchflat zapisuje, jellyfin czyta) — bez shared driver odrzuca drugi mount
+# shared: "yes" przepuszcza verifyMount w zfs-localpv, ale dla datasetów drugi
+# `mount -t zfs` i tak kończy się "already mounted" (2.9.0, Talos) — do współdzielenia
+# danych między kontenerami trzeba jednego poda. Używana przez jellyfin/youtube-media.
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:

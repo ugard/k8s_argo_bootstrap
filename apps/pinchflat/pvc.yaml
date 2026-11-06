@@ -13,7 +13,7 @@ spec:
       storage: 2Gi
   storageClassName: rook-ceph-block
 ---
-# pobrane filmy; montowany też przez jellyfin (read-only) jako /media-youtube.
+# pobrane filmy; w podzie jellyfin: pinchflat pisze do /downloads, jellyfin czyta /media-youtube.
 # rozmiar = quota datasetu ZFS, twardy limit miejsca na YouTube
 apiVersion: v1
 kind: PersistentVolumeClaim
