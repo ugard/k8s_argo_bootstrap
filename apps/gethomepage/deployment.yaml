@@ -88,6 +88,10 @@ data:
             href: https://jellyfin.ugard.win
             description: Media server
             icon: jellyfin
+        - Pinchflat:
+            href: https://pinchflat.ugard.win
+            description: YouTube dla dzieci (whitelista kanałów)
+            icon: pinchflat
         - Obsidian:
             href: https://notes.ugard.win
             description: Note taking

@@ -1,0 +1,13 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pinchflat
+  namespace: jellyfin
+spec:
+  selector:
+    matchLabels:
+      app: pinchflat
+  endpoints:
+  - port: web
+    path: /metrics
+    interval: 60s

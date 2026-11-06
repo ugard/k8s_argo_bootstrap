@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pinchflat
+  namespace: jellyfin
+spec:
+  replicas: 1
+  # SQLite + wolumeny RWO
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pinchflat
+  template:
+    metadata:
+      labels:
+        app: pinchflat
+    spec:
+      # youtube-media jest współdzielony z jellyfin, który stoi na i8d
+      nodeSelector:
+        kubernetes.io/hostname: talos-i8d-hmt
+      containers:
+      - name: pinchflat
+        # projekt w pauzie (#800); tylko `latest` (v2025.9.26) ma Deno wymagane przez yt-dlp,
+        # więc pin po digest. yt-dlp aktualizuje się sam przy starcie i codziennie.
+        image: ghcr.io/kieraneglin/pinchflat:latest@sha256:01b4f98aabaf3f5fe394213f7a32578c9e84e42080f52e2f8334021a4473b202
+        envFrom:
+        - secretRef:
+            name: pinchflat
+            optional: false
+        env:
+        - name: TZ
+          value: "Europe/Warsaw"
+        # mniej równoległych pobrań = mniejsze ryzyko blokady IP przez YouTube
+        - name: YT_DLP_WORKER_CONCURRENCY
+          value: "1"
+        - name: ENABLE_PROMETHEUS
+          value: "1"
+        ports:
+        - containerPort: 8945
+          name: web
+        # /healthcheck i /metrics są poza basic auth
+        startupProbe:
+          httpGet:
+            path: /healthcheck
+            port: web
+          periodSeconds: 10
+          failureThreshold: 30
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: web
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /healthcheck
+            port: web
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: "2"
+            memory: 2Gi
+        # bez fsGroup/runAsUser: obraz nie obsługuje PUID/PGID, a fsGroup na zfs
+        # robi rekurencyjny chown całego wolumenu
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: downloads
+          mountPath: /downloads
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: pinchflat-config
+      - name: downloads
+        persistentVolumeClaim:
+          claimName: youtube-media
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pinchflat
+  namespace: jellyfin
+  labels:
+    app: pinchflat
+spec:
+  selector:
+    app: pinchflat
+  ports:
+  - port: 8945
+    targetPort: 8945
+    name: web
+    protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pinchflat
+  namespace: jellyfin
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
+spec:
+  rules:
+  - host: pinchflat.ugard.win
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: pinchflat
+              port:
+                number: 8945
+  tls:
+  - hosts:
+    - pinchflat.ugard.win
+    secretName: tls-pinchflat-ingress-http

@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pinchflat-config
+  namespace: jellyfin
+  labels:
+    backup-this-pvc: "true"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: rook-ceph-block
+---
+# pobrane filmy; montowany też przez jellyfin (read-only) jako /media-youtube.
+# rozmiar = quota datasetu ZFS, twardy limit miejsca na YouTube
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: youtube-media
+  namespace: jellyfin
+  labels:
+    disk-dashboard: "true"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 200Gi
+  storageClassName: openebs-zfspv-shared
