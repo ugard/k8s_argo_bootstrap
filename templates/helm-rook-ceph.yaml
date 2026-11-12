@@ -65,6 +65,17 @@ spec:
             osdMaintenanceTimeout: 30
           external: {}
           healthCheck:
+            # klucze CSI zostają na aes do czasu jądra 7.0 — te ostrzeżenia są
+            # spodziewane i bez wyciszenia trzymałyby HEALTH_WARN na stałe
+            muteHealthWarning:
+              AUTH_INSECURE_ROTATING_SERVICE_KEY_TYPE:
+                policy: mute
+              AUTH_INSECURE_CLIENT_KEY_TYPE:
+                policy: mute
+              AUTH_INSECURE_KEYS_ALLOWED:
+                policy: mute
+              AUTH_INSECURE_KEYS_CREATABLE:
+                policy: mute
             daemonHealth:
               mon:
                 interval: 45s
@@ -147,6 +158,15 @@ spec:
                 cpu: 500m
                 memory: 50Mi
           security:
+            # CVE-2025-30156: od ceph 19.2.6 klucze demonów przechodzą na aes256k
+            # (rotacja jednorazowa, podbić keyGeneration żeby obrócić ponownie)
+            cephx:
+              daemon:
+                keyRotationPolicy: KeyGeneration
+                keyGeneration: 2
+              # aes256k dla CSI wymaga jądra >= 7.0 (Talos 1.13 ma 6.18)
+              csi:
+                keyType: aes
             keyRotation:
               enabled: false
             kms: {}
