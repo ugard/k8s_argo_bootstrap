@@ -4,6 +4,10 @@ metadata:
   name: garage
 spec:
   replicas: 1
+  # wolumeny zfs-localpv są RWO bez współdzielenia, a dwie instancje nie mogą
+  # jednocześnie otworzyć tej samej bazy metadanych
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: garage
