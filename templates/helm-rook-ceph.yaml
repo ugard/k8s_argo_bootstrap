@@ -82,7 +82,7 @@ spec:
         # wersja Cepha przypięta jawnie: bump chartu Rooka nie może po cichu podbić Cepha
         cephImage:
           repository: quay.io/ceph/ceph
-          tag: v19.2.7
+          tag: v20.2.5
         # ceph CLI: kubectl -n rook-ceph2 exec deploy/rook-ceph-tools -- ceph status
         toolbox:
           enabled: true
