@@ -16,7 +16,7 @@ spec:
   sources:
   - chart: rook-ceph
     repoURL: https://charts.rook.io/release
-    targetRevision: v1.20.10
+    targetRevision: v1.21.2
     helm:
       release-name: rook-ceph
       valuesObject:
@@ -26,12 +26,12 @@ spec:
         monitoring:
           enabled: true
   # od Rooka 1.20 sterowniki CSI (Driver/OperatorConfig) konfiguruje ten chart;
-  # wersja = subchart ceph-csi-operator z chartu rook-ceph (1.20.10 -> 1.0.4).
+  # wersja = subchart ceph-csi-operator z chartu rook-ceph (1.21.2 -> 1.1.0).
   # Bazą są zalecane wartości Rooka (deploy/charts/ceph-csi-drivers/values.yaml)
   # z namespace rook-ceph2.
   - chart: ceph-csi-drivers
     repoURL: https://ceph.github.io/ceph-csi-operator
-    targetRevision: 1.0.4
+    targetRevision: 1.1.0
     helm:
       releaseName: ceph-csi-drivers
       valuesObject:
@@ -66,7 +66,7 @@ spec:
             enabled: false
   - chart: rook-ceph-cluster
     repoURL: https://charts.rook.io/release
-    targetRevision: v1.20.10
+    targetRevision: v1.21.2
     helm:
       release-name: rook-ceph-cluster
       valuesObject:
@@ -138,6 +138,9 @@ spec:
             connections:
               compression: {}
               encryption: {}
+              # Rook 1.21 domyślnie wymaga msgr2 i (od 1.21.2) wyłącza msgr1 na osd/mgr/mds;
+              # montowania CephFS przez jądro wciąż idą po msgr1 (mon_addr :6789), RBD już po v2
+              requireMsgr2: false
             multiClusterService: {}
           priorityClassNames:
             mgr: system-cluster-critical
