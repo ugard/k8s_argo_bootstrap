@@ -1,3 +1,6 @@
+# PVC jest RWO: RollingUpdate zakleszcza się na Multi-Attach, gdy nowy pod
+# trafi na inny węzeł niż stary
+deploymentStrategyType: Recreate
 persistence:
   storageClassName: "rook-ceph-block"
 config:
