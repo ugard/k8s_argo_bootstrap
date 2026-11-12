@@ -83,6 +83,48 @@ data:
                   entity_id: "{{ repeat.item }}"
                 data:
                   value: 0
+    # SAT (pyotgw) nie wraca sam po zerwaniu polaczenia z relay otgw:7686.
+    # Przeladowanie tylko gdy bramka nadaje ramki i nie czesciej niz co 30 min.
+    - id: sat_reload_unavailable
+      alias: "SAT: reload when unavailable"
+      mode: single
+      trigger:
+        - platform: state
+          entity_id: climate.living_room
+          to: unavailable
+          for: "00:10:00"
+      condition:
+        - condition: template
+          value_template: "{{ states('sensor.otgw_last_frame') not in ['unavailable', 'unknown'] }}"
+        - condition: template
+          value_template: >
+            {{ this.attributes.last_triggered is none
+               or (now() - this.attributes.last_triggered).total_seconds() > 1800 }}
+      action:
+        - service: homeassistant.reload_config_entry
+          target:
+            entity_id: climate.living_room
+    - id: sat_reload_not_controlling
+      alias: "SAT: reload when boiler ignores its setpoint"
+      mode: single
+      trigger:
+        - platform: template
+          value_template: >
+            {{ is_state('climate.living_room', 'heat')
+               and state_attr('climate.living_room', 'setpoint') | float(0) >= 30
+               and states('sensor.otgw_control_setpoint') | float(0) < 20 }}
+          for: "00:10:00"
+      condition:
+        - condition: template
+          value_template: "{{ states('sensor.otgw_last_frame') not in ['unavailable', 'unknown'] }}"
+        - condition: template
+          value_template: >
+            {{ this.attributes.last_triggered is none
+               or (now() - this.attributes.last_triggered).total_seconds() > 1800 }}
+      action:
+        - service: homeassistant.reload_config_entry
+          target:
+            entity_id: climate.living_room
   configuration.yaml: |-
     default_config:
     frontend:
@@ -105,6 +147,18 @@ data:
         unit_of_measurement: "°C"
         device_class: "temperature"
         value_template: "{{ value_json.value }}"
+      - name: "OTGW control setpoint"
+        unique_id: otgw_control_setpoint
+        state_topic: "events/central_heating/otmonitor/controlsetpoint"
+        unit_of_measurement: "°C"
+        device_class: "temperature"
+        value_template: "{{ value_json.value }}"
+      # kazda ramka OT; unavailable = bramka/USB/otmonitor nie nadaje
+      - name: "OTGW last frame"
+        unique_id: otgw_last_frame
+        state_topic: "events/central_heating/otmonitor/Message"
+        value_template: "{{ value_json.value }}"
+        expire_after: 120
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
