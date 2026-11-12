@@ -30,7 +30,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: dovecot
-          image: dovecot/dovecot:2.4.4
+          image: dovecot/dovecot:2.4.5
           securityContext:
             # Verified against this image: it writes only to /run, /tmp and the
             # mail volume, all of which are mounted below.

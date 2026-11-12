@@ -81,7 +81,7 @@ spec:
               type: RuntimeDefault
           containers:
             - name: repair
-              image: ghcr.io/manyfold3d/manyfold:0.149.0
+              image: ghcr.io/manyfold3d/manyfold:0.154.1
               workingDir: /usr/src/app
               command:
                 - /bin/ash

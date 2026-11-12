@@ -11,10 +11,13 @@ spec:
   sources:
   - chart: traefik
     repoURL: https://traefik.github.io/charts
-    targetRevision: 41.2.0
+    targetRevision: 41.7.1
     helm:
       release-name: traefik
       valuesObject:
+        # chart 41.7.1 domyślnie daje v3.7.14; 42.x to major chartu, więc obraz podbijamy osobno
+        image:
+          tag: v3.7.18
         service:
           annotations:
             tailscale.com/expose: "true"

@@ -21,14 +21,14 @@ spec:
   sources:
     - chart: firefly-iii
       repoURL: https://firefly-iii.github.io/kubernetes
-      targetRevision: 1.10.1
+      targetRevision: 1.10.2
       helm:
         release-name: firefly
         valueFiles:
           - $values/apps/firefly/values.yaml
     - chart: importer
       repoURL: https://firefly-iii.github.io/kubernetes
-      targetRevision: 1.6.0
+      targetRevision: 1.6.1
       helm:
         release-name: firefly-importer
         valueFiles:

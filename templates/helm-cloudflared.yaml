@@ -11,7 +11,7 @@ spec:
   sources:
   - chart: cloudflared
     repoURL: https://community-charts.github.io/helm-charts
-    targetRevision: 2.2.4
+    targetRevision: 2.2.19
     helm:
       releaseName: cloudflared
       valueFiles:

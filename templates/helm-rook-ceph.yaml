@@ -11,7 +11,7 @@ spec:
   sources:
   - chart: rook-ceph
     repoURL: https://charts.rook.io/release
-    targetRevision: v1.19.4
+    targetRevision: v1.19.12
     helm:
       release-name: rook-ceph
       valuesObject:
@@ -22,12 +22,16 @@ spec:
           enabled: true
   - chart: rook-ceph-cluster
     repoURL: https://charts.rook.io/release
-    targetRevision: v1.19.4
+    targetRevision: v1.19.12
     helm:
       release-name: rook-ceph-cluster
       valuesObject:
         clusterName: rook-ceph
         operatorNamespace: rook-ceph2
+        # wersja Cepha przypięta jawnie: bump chartu Rooka nie może po cichu podbić Cepha
+        cephImage:
+          repository: quay.io/ceph/ceph
+          tag: v19.2.3
         monitoring:
           enabled: true
           createPrometheusRules: true
