@@ -98,7 +98,10 @@ spec:
               method: quick
           crashCollector: {}
           csi:
-            cephfs: {}
+            # Rook przy requireMsgr2 przestawia monitory w CephConnection na :3300, ale
+            # ms_mode dodaje tylko dla RBD; bez tego jądro montuje CephFS po msgr1
+            cephfs:
+              kernelMountOptions: ms_mode=prefer-crc
             readAffinity:
               enabled: false
           dashboard:
@@ -144,9 +147,9 @@ spec:
             connections:
               compression: {}
               encryption: {}
-              # Rook 1.21 domyślnie wymaga msgr2 i (od 1.21.2) wyłącza msgr1 na osd/mgr/mds;
-              # montowania CephFS przez jądro wciąż idą po msgr1 (mon_addr :6789), RBD już po v2
-              requireMsgr2: false
+              # od 1.21.2 wyłącza też msgr1 na osd/mgr/mds — przełączenie wymagało zatrzymania
+              # konsumentów CephFS (mailarchive, paperless), by przemontowały się po v2
+              requireMsgr2: true
             multiClusterService: {}
           priorityClassNames:
             mgr: system-cluster-critical
