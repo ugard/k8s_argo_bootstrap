@@ -153,6 +153,10 @@ spec:
             - devices:
               - name: /dev/disk/by-id/usb-JMicron_Tech_DD564198838C4-0:0
               name: talos-95t-m8m
+            # osd.3; po by-id, bo nazwy nvme0n1/nvme1n1 zamieniają się między bootami
+            - devices:
+              - name: /dev/disk/by-id/nvme-ADATA_LEGEND_710_2N412LCH4BFT
+              name: talos-i8d-hmt
             - devices:
               - name: /dev/disk/by-id/usb-Realtek_RTL9210B-CG_012345678932-0:0
               - name: /dev/disk/by-id/t10.ATASPCC_M.2_SSDSP20241029A0100703
