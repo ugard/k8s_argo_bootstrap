@@ -8,6 +8,11 @@ spec:
     namespace: rook-ceph2
     server: {{ .Values.spec.destination.server }}
   project: default
+  syncPolicy:
+    syncOptions:
+    # CRD z csi.ceph.io (od Rooka 1.19.12) przekraczają limit 256KB annotacji
+    # last-applied-configuration przy client-side apply
+    - ServerSideApply=true
   sources:
   - chart: rook-ceph
     repoURL: https://charts.rook.io/release
