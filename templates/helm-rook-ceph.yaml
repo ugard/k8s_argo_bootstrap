@@ -25,6 +25,12 @@ spec:
           interval: 1m
         monitoring:
           enabled: true
+        # cephcsi >= 3.18 (domyślny w ceph-csi-operator 1.1.0) jest na el10 i wymaga
+        # x86-64-v3 -> CrashLoop na 95t i jly. 3.17.1 = ostatni działający na wszystkich.
+        csi:
+          cephcsi:
+            repository: quay.io/cephcsi/cephcsi
+            tag: v3.17.1
   # od Rooka 1.20 sterowniki CSI (Driver/OperatorConfig) konfiguruje ten chart;
   # wersja = subchart ceph-csi-operator z chartu rook-ceph (1.21.2 -> 1.1.0).
   # Bazą są zalecane wartości Rooka (deploy/charts/ceph-csi-drivers/values.yaml)
