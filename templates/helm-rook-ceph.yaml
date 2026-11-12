@@ -16,7 +16,7 @@ spec:
   sources:
   - chart: rook-ceph
     repoURL: https://charts.rook.io/release
-    targetRevision: v1.19.12
+    targetRevision: v1.20.10
     helm:
       release-name: rook-ceph
       valuesObject:
@@ -25,6 +25,45 @@ spec:
           interval: 1m
         monitoring:
           enabled: true
+  # od Rooka 1.20 sterowniki CSI (Driver/OperatorConfig) konfiguruje ten chart;
+  # wersja = subchart ceph-csi-operator z chartu rook-ceph (1.20.10 -> 1.0.4).
+  # Bazą są zalecane wartości Rooka (deploy/charts/ceph-csi-drivers/values.yaml)
+  # z namespace rook-ceph2.
+  - chart: ceph-csi-drivers
+    repoURL: https://ceph.github.io/ceph-csi-operator
+    targetRevision: 1.0.4
+    helm:
+      releaseName: ceph-csi-drivers
+      valuesObject:
+        operatorConfig:
+          namespace: rook-ceph2
+          driverSpecDefaults:
+            imageSet:
+              name: rook-csi-operator-image-set-configmap
+            nodePlugin:
+              priorityClassName: system-node-critical
+            controllerPlugin:
+              priorityClassName: system-cluster-critical
+        drivers:
+          # nazwy muszą zgadzać się z provisionerami w StorageClassach
+          # snapshotPolicy: bez tego znika csi-snapshotter, a Velero robi migawki CSI
+          # replicas: jak w 1.19 (chart domyślnie daje 1, per-driver nadpisuje defaults)
+          rbd:
+            enabled: true
+            name: rook-ceph2.rbd.csi.ceph.com
+            snapshotPolicy: volumeSnapshot
+            controllerPlugin:
+              replicas: 2
+          cephfs:
+            enabled: true
+            name: rook-ceph2.cephfs.csi.ceph.com
+            snapshotPolicy: volumeSnapshot
+            controllerPlugin:
+              replicas: 2
+          nfs:
+            enabled: false
+          nvmeof:
+            enabled: false
   - chart: rook-ceph-cluster
     repoURL: https://charts.rook.io/release
     targetRevision: v1.19.12
