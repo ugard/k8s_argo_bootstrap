@@ -13,12 +13,28 @@ spec:
     targetRevision: {{ .Values.spec.source.targetRevision }}
     path: apps/vikunja
   - repoURL: oci://ghcr.io/go-vikunja/helm-chart/vikunja
-    targetRevision: 1.0.0
+    targetRevision: 2.6.0
     path: .
     helm:
       release-name: vikunja
       valuesObject:
         vikunja:
+          # chart 2.x domyślnie używa SQLite (z własnym PVC) — bez tego Vikunja
+          # wstałaby z pustą bazą zamiast naszej w postgres.postgres
+          env:
+            VIKUNJA_DATABASE_TYPE: postgres
+            VIKUNJA_DATABASE_NAME: vikunja
+          persistence:
+            database:
+              enabled: false
+          configMaps:
+            config:
+              enabled: true
+              data:
+                config.yml: |
+                  service:
+                    # od 1.0 CORS jest domyślnie włączony i bez publicurl Vikunja nie startuje
+                    publicurl: "https://vikunja.ugard.win"
           ingress:
             main:
               enabled: true
@@ -32,24 +48,9 @@ spec:
                 - hosts:
                   - vikunja.ugard.win
                   secretName: tls-vikunja-ingress-http
+          # host/użytkownik/hasło bazy; Typesense usunięty w Vikunji 2.0 (wyszukiwanie idzie przez bazę)
           envFrom:
           - secretRef:
               name: vikunja
-        postgresql:
-          enabled: false
-          global:
-            postgresql:
-              auth:
-                database: vikunja
-          primary:
-            networkPolicy:
-              enabled: false
-          auth:
-            username: vikunja
-            database: vikunja
-            password: vikunja
-          service:
-            ports:
-              postgresql: 5432
 
 
