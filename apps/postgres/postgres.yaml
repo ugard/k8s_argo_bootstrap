@@ -38,7 +38,9 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:16
+          # przypięte: ruchomy tag :16 podmienił glibc (collation 2.36 -> 2.41) bez wiedzy baz;
+          # przy podbiciu wersji sprawdzić datcollversion i zrobić REINDEX + REFRESH COLLATION VERSION
+          image: postgres:16.15
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
