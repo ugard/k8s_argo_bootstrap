@@ -223,9 +223,6 @@ spec:
           storage:
             flappingRestartIntervalHours: 0
             nodes:
-            - devices:
-              - name: /dev/disk/by-id/usb-JMicron_Tech_DD564198838C4-0:0
-              name: talos-95t-m8m
             # osd.3; po by-id, bo nazwy nvme0n1/nvme1n1 zamieniają się między bootami
             - devices:
               - name: /dev/disk/by-id/nvme-ADATA_LEGEND_710_2N412LCH4BFT
@@ -236,6 +233,9 @@ spec:
               - name: /dev/disk/by-id/ata-SPCC_M.2_SSD_SP20241029A0100703
                 config:
                   deviceClass: ssd
+              # osd.1 (dawniej 95t w obudowie JMS583); na końcu dysku została stara
+              # zapasowa GPT z Windowsa, więc jądro pokazuje fantomowe partycje
+              - name: /dev/disk/by-id/nvme-ADATA_SX8200PNP_2J2820024545
               name: talos-83s-bb7
             - devices:
               - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6P7NF0T303215D
