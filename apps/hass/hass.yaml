@@ -112,7 +112,9 @@ data:
           value_template: >
             {{ is_state('climate.living_room', 'heat')
                and state_attr('climate.living_room', 'setpoint') | float(0) >= 30
-               and states('sensor.otgw_control_setpoint') | float(0) < 20 }}
+               and states('sensor.otgw_control_setpoint') | float(0) < 20
+               and (not state_attr('climate.living_room', 'pulse_width_modulation_enabled')
+                    or state_attr('climate.living_room', 'pulse_width_modulation_state') | string | lower == 'on') }}
           for: "00:10:00"
       condition:
         - condition: template
