@@ -214,9 +214,17 @@ spec:
               daemon:
                 keyRotationPolicy: KeyGeneration
                 keyGeneration: 2
-              # aes256k dla CSI wymaga jądra >= 7.0 (Talos 1.13 ma 6.18)
+              # aes256k dla CSI wymaga w kernelu libceph AES256KRB5: mainline 7.0,
+              # a Talos 1.14 ma backport w 6.18 (siderolabs/pkgs 84c1b8752)
               csi:
-                keyType: aes
+                keyRotationPolicy: KeyGeneration
+                keyGeneration: 1
+                keepPriorKeyCountMax: 1
+                keyType: aes256k
+              rbdMirrorPeer:
+                keyRotationPolicy: KeyGeneration
+                keyGeneration: 1
+                keyType: aes256k
             keyRotation:
               enabled: false
             kms: {}
