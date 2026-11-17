@@ -54,9 +54,9 @@ spec:
           value: "true"
         - name: HBOX_WEB_MAX_UPLOAD_SIZE
           value: "20"
-        # pierwsze konto wymaga rejestracji - po założeniu przestawić na "false"
+        # pierwsze konto zakłada się przy "true" (false blokuje też pierwszego użytkownika)
         - name: HBOX_OPTIONS_ALLOW_REGISTRATION
-          value: "true"
+          value: "false"
         volumeMounts:
         - name: data
           mountPath: /data
