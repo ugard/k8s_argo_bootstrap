@@ -1,6 +1,7 @@
 #!/bin/bash
 # Zakłada bazę i użytkownika homebox we współdzielonym postgresie i generuje
 # apps/homebox/sealed_secret.yaml. Hasło nie trafia na dysk w postaci jawnej.
+# Ponowne uruchomienie generuje nowy pepper - unieważnia wydane klucze API.
 
 set -euo pipefail
 
@@ -35,6 +36,7 @@ fi
 kubectl create secret generic homebox -n homebox --dry-run=client -o yaml \
     --from-literal=HBOX_DATABASE_USERNAME="$DB_USER" \
     --from-literal=HBOX_DATABASE_PASSWORD="$PASSWORD" \
+    --from-literal=HBOX_AUTH_API_KEY_PEPPER="$(openssl rand -base64 48)" \
     | kubeseal --format yaml > "$OUT"
 
 echo "Gotowe: baza ${DB}, użytkownik ${DB_USER}, ${OUT}"
