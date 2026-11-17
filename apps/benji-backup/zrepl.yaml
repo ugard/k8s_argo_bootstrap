@@ -144,6 +144,11 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: talos-95t-m8m
+      # 95t ma taint dedicated=backup (NoSchedule+NoExecute), żeby chodził na nim tylko zrepl
+      tolerations:
+        - key: dedicated
+          operator: Equal
+          value: backup
       containers:
         - name: zrepl
           image: registry.ugard.win/zrepl:latest
