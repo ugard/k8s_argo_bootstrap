@@ -18,13 +18,9 @@ spec:
         speaker:
           frr:
             enabled: true
-          # 95t to jedyny węzeł bez etykiety exclude-from-external-load-balancers
-          # (Talos nadaje ją CP i sam ją odtwarza), więc ogłasza wszystkie VIP-y L2.
-          # Ma taint dedicated=backup — speaker musi go tolerować, inaczej znika DNS.
-          tolerations:
-            - key: dedicated
-              operator: Equal
-              value: backup
+  # VIP-y L2 ogłaszają m920q/i8d/k1y: Talos ma tam w machine.nodeLabels usuniętą
+  # etykietę exclude-from-external-load-balancers (domyślną dla CP, Talos ją odtwarza).
+  # 95t (taint dedicated=backup) ma ją ustawioną na "true" i nie ma speakera.
   - repoURL: {{ .Values.spec.source.repoURL }}
     targetRevision: {{ .Values.spec.source.targetRevision }}
     path: apps/metallb
