@@ -126,6 +126,20 @@ spec:
 apiVersion: velero.io/v1
 kind: Schedule
 metadata:
+  name: homebox-backup
+  namespace: velero
+spec:
+  schedule: "15 5 * * *"
+  template:
+    includedNamespaces:
+      - homebox
+    snapshotMoveData: true
+    storageLocation: garage
+    ttl: 720h0m0s
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
   name: paperless-backup
   namespace: velero
 spec:

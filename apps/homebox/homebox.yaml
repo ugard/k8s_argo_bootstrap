@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homebox
+  namespace: homebox
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: homebox
+  template:
+    metadata:
+      labels:
+        app: homebox
+    spec:
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+        runAsNonRoot: true
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+      - name: homebox
+        image: ghcr.io/sysadminsmedia/homebox:0.27.1-rootless
+        ports:
+        - containerPort: 7745
+          name: http
+        env:
+        - name: TZ
+          value: "Europe/Warsaw"
+        - name: HBOX_OPTIONS_TRUST_PROXY
+          value: "true"
+        - name: HBOX_WEB_MAX_UPLOAD_SIZE
+          value: "20"
+        # pierwsze konto wymaga rejestracji - po założeniu przestawić na "false"
+        - name: HBOX_OPTIONS_ALLOW_REGISTRATION
+          value: "true"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        livenessProbe:
+          httpGet:
+            path: /api/v1/status
+            port: 7745
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /api/v1/status
+            port: 7745
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: homebox-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homebox
+  namespace: homebox
+spec:
+  ports:
+  - name: http
+    port: 7745
+    protocol: TCP
+    targetPort: 7745
+  selector:
+    app: homebox
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homebox
+  namespace: homebox
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
+spec:
+  rules:
+  - host: homebox.ugard.win
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: homebox
+              port:
+                number: 7745
+  tls:
+  - hosts:
+    - homebox.ugard.win
+    secretName: tls-homebox-ingress-http
