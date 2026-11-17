@@ -21,9 +21,15 @@ spec:
         runAsNonRoot: true
         fsGroup: 65532
         fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: homebox
         image: ghcr.io/sysadminsmedia/homebox:0.27.1-rootless
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
         ports:
         - containerPort: 7745
           name: http
