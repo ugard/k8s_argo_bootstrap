@@ -27,9 +27,23 @@ spec:
         ports:
         - containerPort: 7745
           name: http
+        envFrom:
+        - secretRef:
+            name: homebox
+            optional: false
         env:
         - name: TZ
           value: "Europe/Warsaw"
+        - name: HBOX_DATABASE_DRIVER
+          value: "postgres"
+        - name: HBOX_DATABASE_HOST
+          value: postgres.postgres
+        - name: HBOX_DATABASE_PORT
+          value: "5432"
+        - name: HBOX_DATABASE_DATABASE
+          value: "homebox"
+        - name: HBOX_DATABASE_SSL_MODE
+          value: "disable"
         - name: HBOX_OPTIONS_TRUST_PROXY
           value: "true"
         - name: HBOX_WEB_MAX_UPLOAD_SIZE
