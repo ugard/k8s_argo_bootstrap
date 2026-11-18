@@ -25,6 +25,53 @@ spec:
         fsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
+      # Idempotentnie zakłada w LLDAP konto bind "authelia" (hasło z secretu
+      # authelia) i grupę homelab_users, zanim Authelia zrobi startup check LDAP.
+      # Celowo nie jako PostSync hook: ten czeka na zdrową aplikację, a Authelia
+      # bez konta bind nie wstanie (zakleszczenie).
+      initContainers:
+      - name: lldap-bootstrap
+        image: lldap/lldap:v0.6.3-alpine-rootless
+        command: ["/app/bootstrap.sh"]
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+        env:
+        - name: LLDAP_URL
+          value: "http://lldap.authelia.svc.cluster.local:17170"
+        - name: LLDAP_ADMIN_USERNAME
+          value: "admin"
+        - name: LLDAP_ADMIN_PASSWORD_FILE
+          value: /secrets/lldap/LLDAP_LDAP_USER_PASS
+        - name: USER_CONFIGS_DIR
+          value: /bootstrap/user-configs
+        - name: GROUP_CONFIGS_DIR
+          value: /bootstrap/group-configs
+        # nie usuwaj użytkowników/grup zakładanych ręcznie w UI
+        - name: DO_CLEANUP
+          value: "false"
+        volumeMounts:
+        - name: bootstrap-lldap-secret
+          mountPath: /secrets/lldap
+          readOnly: true
+        - name: bootstrap-authelia-secret
+          mountPath: /secrets/authelia
+          readOnly: true
+        - name: bootstrap-users
+          mountPath: /bootstrap/user-configs
+          readOnly: true
+        - name: bootstrap-groups
+          mountPath: /bootstrap/group-configs
+          readOnly: true
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 64Mi
       containers:
       - name: authelia
         image: ghcr.io/authelia/authelia:4.39.28
@@ -100,6 +147,24 @@ spec:
         emptyDir: {}
       - name: tmp
         emptyDir: {}
+      - name: bootstrap-lldap-secret
+        secret:
+          secretName: lldap
+          items:
+          - key: LLDAP_LDAP_USER_PASS
+            path: LLDAP_LDAP_USER_PASS
+      - name: bootstrap-authelia-secret
+        secret:
+          secretName: authelia
+          items:
+          - key: LDAP_PASSWORD
+            path: LDAP_PASSWORD
+      - name: bootstrap-users
+        configMap:
+          name: lldap-bootstrap-users
+      - name: bootstrap-groups
+        configMap:
+          name: lldap-bootstrap-groups
 ---
 apiVersion: v1
 kind: Service

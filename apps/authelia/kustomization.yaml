@@ -7,7 +7,6 @@ resources:
   - sealed_secret_authelia.yaml
   - sealed_secret_lldap.yaml
   - lldap.yaml
-  - lldap-bootstrap.yaml
   - authelia.yaml
   - middleware.yaml
 # hash w nazwie -> zmiana configu restartuje poda
