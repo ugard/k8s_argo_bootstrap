@@ -136,10 +136,16 @@ data:
             href: http://192.168.100.139
             description: Klipper UI
             icon: mdi-printer-3d
+            widget:
+                type: moonraker
+                url: http://192.168.100.139:7125
         - AD5M:
             href: http://192.168.101.190
             description: Flashforge Adventurer 5M (zmod)
             icon: mdi-printer-3d
+            widget:
+                type: moonraker
+                url: http://192.168.101.190:7125
 
     - Monitoring:
         - Healthchecks:
