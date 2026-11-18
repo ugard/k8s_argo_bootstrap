@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kustomize-stella-scope
+  namespace: argocd
+spec:
+  destination:
+    namespace: stella-scope
+    server: {{ .Values.spec.destination.server }}
+  project: default
+  source:
+    path: apps/stella-scope
+    repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}

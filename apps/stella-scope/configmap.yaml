@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: stella-scope
+  namespace: stella-scope
+data:
+  # Konfiguracja startowa. Init-container kopiuje ją na PVC tylko gdy jej tam
+  # nie ma - Stella Scope sam dopisuje do tego pliku (wybrany model 3D, zmiany
+  # z UI). Żeby wymusić wersję z gita: usuń /data/config/stella-scope.json
+  # w podzie i zrestartuj deployment.
+  # bind musi być loopbackiem (walidacja w aplikacji) - z zewnątrz wchodzi się
+  # przez sidecar nginx. controls_enabled domyślnie false = tylko odczyt.
+  stella-scope.json: |
+    {
+      "bind": "127.0.0.1",
+      "port": 7420,
+      "database": "/data/stella-scope.sqlite3",
+      "keep_days": 30,
+      "max_db_mb": 8192,
+      "printers": [
+        {
+          "id": "voron",
+          "name": "Voron",
+          "driver": "moonraker",
+          "address": "http://192.168.100.139:7125",
+          "accent": "#e53935"
+        },
+        {
+          "id": "ad5m",
+          "name": "AD5M",
+          "driver": "moonraker",
+          "address": "http://192.168.101.190:7125",
+          "accent": "#1e88e5"
+        }
+      ]
+    }
+  # Stella Scope przyjmuje zapisy (POST) tylko z Host/Origin = adres loopbacka,
+  # na którym słucha (ochrona przed DNS rebinding). Za ingressem przychodzi
+  # Host stella.ugard.win, więc nginx podmienia oba nagłówki. Ochronę przed
+  # dostępem z zewnątrz robi Authelia na ingressie.
+  nginx.conf: |
+    map $http_origin $stella_origin {
+      ""      "";
+      default "http://127.0.0.1:7420";
+    }
+    server {
+      listen 8080;
+      client_max_body_size 512m;
+      location / {
+        proxy_pass http://127.0.0.1:7420;
+        proxy_http_version 1.1;
+        proxy_set_header Host 127.0.0.1:7420;
+        proxy_set_header Origin $stella_origin;
+        proxy_set_header Connection "";
+        proxy_buffering off;
+        proxy_request_buffering off;
+        proxy_read_timeout 1h;
+      }
+    }

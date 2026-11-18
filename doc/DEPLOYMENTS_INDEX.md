@@ -39,7 +39,7 @@ appflowy admin/web, auth (authelia), bookshelf, bytestash, drone, flashweb, gara
 grafana, hass, hc (healthchecks), hoarder, home (gethomepage), immich, jellyfin,
 kiosk (immich-kiosk), lldap, lychee, manyfold, minio, nodered, notes (obsidian),
 openarchiver, otgw, paperless, pico (picoshare), prowlarr, radarr, rtorrent,
-sonarr, spoolman, syncthing, vault (vaultwarden). Also `prom.ugard.win`,
+sonarr, spoolman, stella (stella-scope), syncthing, vault (vaultwarden). Also `prom.ugard.win`,
 `monitoring.ugard.win`, `registry.ugard.win`, `vikunja.ugard.win` (from helm-* apps).
 
 ## TLS / certificates
@@ -115,6 +115,7 @@ See `doc/backup/README.md` for full backup topology (Velero/Benji/Zrepl/Postgres
 | mqtt-xmpp-bridge (`kustomize-mqtt-xmpp-bridge`) | xmpp-bridge | kustomize | xmpp-omemo-core (MQTT→XMPP/OMEMO bridge, image `registry.ugard.win/xmpp-omemo-core`); trasy w `configmap-routes.yaml` (alerts/# → k8s-alerts@conference.xmpp.jp, printer/*); secret `xmpp-credentials` (sealed), PVC omemo-store, replicas 1 + Recreate |
 | immich-kiosk (`kustomize-immich-kiosk`) | immich-kiosk | kustomize | `apps/immich-kiosk/argo-app`; ghcr.io/damongolding/immich-kiosk (host kiosk.ugard.win) |
 | spoolman (`kustomize-spoolman`) | spoolman | kustomize | spoolman (3D filament) |
+| stella-scope (`kustomize-stella-scope`) | stella-scope | kustomize | Stella Scope 0.6.3 (rejestrator/kokpit drukarek Voron + AD5M przez Moonraker); binarka z GitHub release .deb pobierana init-containerem na PVC, debian:trixie-slim + sidecar nginx (Host/Origin → loopback), Authelia, host stella.ugard.win, amd64 only |
 | zmod-telegram (`kustomize-zmod-telegram`) | zmod-telegram | kustomize | moonraker-telegram-bot for 3D printer |
 | flashforge/flashweb (`kustomize-flashforge`) | flashweb | kustomize | custom flashforge printer web; image `registry.ugard.win/flashweb:1` |
 

@@ -146,6 +146,10 @@ data:
             widget:
                 type: moonraker
                 url: http://192.168.101.190:7125
+        - Stella Scope:
+            href: https://stella.ugard.win
+            description: Kokpit i rejestrator obu drukarek
+            icon: mdi-printer-3d-nozzle
 
     - Monitoring:
         - Healthchecks:
