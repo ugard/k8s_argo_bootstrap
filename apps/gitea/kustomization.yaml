@@ -6,5 +6,8 @@ resources:
   - gitea.yaml
   - namespace.yaml
   - sealed_secret.yaml
+  # sekret klienta OIDC (Authelia) - nie montowany, tylko do wklejenia w UI Gitei
+  # scripts/create-oidc-client-secret.sh gitea gitea gitea-oidc OAUTH_CLIENT_SECRET apps/gitea/sealed_secret_oidc.yaml
+  - sealed_secret_oidc.yaml
   # - migrate.yaml
 
