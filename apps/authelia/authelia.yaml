@@ -98,11 +98,11 @@ spec:
           value: /secrets/STORAGE_PASSWORD
         - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE
           value: /secrets/LDAP_PASSWORD
-        # przy włączeniu OIDC (patrz configuration.yml):
-        # - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET_FILE
-        #   value: /secrets/OIDC_HMAC_SECRET
-        # - name: X_AUTHELIA_CONFIG_FILTERS
-        #   value: template
+        - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET_FILE
+          value: /secrets/OIDC_HMAC_SECRET
+        # {{ secret "..." }} w configuration.yml (klucz JWKS, digesty klientów OIDC)
+        - name: X_AUTHELIA_CONFIG_FILTERS
+          value: template
         volumeMounts:
         - name: config
           mountPath: /config

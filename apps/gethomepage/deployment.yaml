@@ -4,6 +4,8 @@ metadata:
   name: homepage
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
+    # SSO przez Authelię (apps/authelia/middleware.yaml)
+    traefik.ingress.kubernetes.io/router.middlewares: authelia-forwardauth@kubernetescrd
 spec:
   rules:
   - host: home.ugard.win
