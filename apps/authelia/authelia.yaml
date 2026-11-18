@@ -78,7 +78,8 @@ spec:
         args: ["--config", "/config/configuration.yml"]
         securityContext:
           allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
+          # readOnlyRootFilesystem: true wywala startup checks Authelii 4.39 bez
+          # żadnego komunikatu (sprawdzone lokalnie), więc zostaje wyłączone
           capabilities:
             drop: ["ALL"]
         ports:
