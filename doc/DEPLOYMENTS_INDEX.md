@@ -35,9 +35,9 @@ SEALED_SECRET_MANAGEMENT.md # workflow for sealed secrets
 - `openebs-zfspv-affinity` — variant with affinity
 
 ## Domains (hosts exposed via ingress, zone `ugard.win`)
-appflowy admin/web, bookshelf, bytestash, drone, flashweb, garage, gitea, gotify,
+appflowy admin/web, auth (authelia), bookshelf, bytestash, drone, flashweb, garage, gitea, gotify,
 grafana, hass, hc (healthchecks), hoarder, home (gethomepage), immich, jellyfin,
-kiosk (immich-kiosk), lychee, manyfold, minio, nodered, notes (obsidian),
+kiosk (immich-kiosk), lldap, lychee, manyfold, minio, nodered, notes (obsidian),
 openarchiver, otgw, paperless, pico (picoshare), prowlarr, radarr, rtorrent,
 sonarr, spoolman, syncthing, vault (vaultwarden). Also `prom.ugard.win`,
 `monitoring.ugard.win`, `registry.ugard.win`, `vikunja.ugard.win` (from helm-* apps).
@@ -148,6 +148,7 @@ See `doc/backup/README.md` for full backup topology (Velero/Benji/Zrepl/Postgres
 | minio (`kustomize-minio`) | minio | kustomize | minio dev + PVC; host minio.ugard.win |
 | syncthing (`kustomize-syncthing`) | syncthing | kustomize | syncthing + PVC; host syncthing.ugard.win |
 | garage (`kustomize-garage`) | garage | kustomize | dxflrs/garage v2.2.0 (S3-compatible); sealed secret; backed up by Velero+Zrepl; host garage.ugard.win |
+| authelia (`kustomize-authelia`) | authelia | kustomize | SSO: authelia 4.39 (forward-auth + OIDC gotowe do włączenia) + lldap 0.6 jako backend LDAP; obie bazy we wspólnym postgresie; sesje w pamięci; notifier filesystem (`/data/notification.txt`); Traefik Middleware `authelia-forwardauth@kubernetescrd`; PostSync job `lldap-bootstrap` zakłada konto bind `authelia` i grupę `homelab_users`; hosty auth.ugard.win, lldap.ugard.win; secrety z `scripts/create-authelia-sealed-secrets.sh` |
 | ai-agent-readonly (`kustomize-ai-agent-readonly`) | ai-agent | kustomize | namespace + RBAC only (read-only service account for AI agents) |
 
 ## Internal container registry
@@ -158,6 +159,7 @@ See `doc/backup/README.md` for full backup topology (Velero/Benji/Zrepl/Postgres
 - `create-cloudflared-sealed-secret.sh`, `create-cloudflare-secret.sh` — cloudflare tunnel secrets
 - `create-openarchiver-postgres-user.sh`, `generate-openarchiver-secrets.sh` — openarchiver DB/secrets
 - `setup-sonarr-postgres.sh` — sonarr postgres bootstrap
+- `create-authelia-sealed-secrets.sh` — bazy authelia/lldap + oba sealed secrety (`--force` rotuje wszystko)
 
 ## Convention quick-reference (for agents editing this repo)
 - Per-app dir `apps/<name>/` with `kustomization.yaml`; resources: `namespace.yaml`,

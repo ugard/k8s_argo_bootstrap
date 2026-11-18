@@ -1,0 +1,7 @@
+{
+  "id": "authelia",
+  "email": "authelia@ugard.win",
+  "displayName": "Authelia (bind)",
+  "password_file": "/secrets/authelia/LDAP_PASSWORD",
+  "groups": ["lldap_password_manager"]
+}

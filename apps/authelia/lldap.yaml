@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lldap
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: lldap
+  template:
+    metadata:
+      labels:
+        app: lldap
+    spec:
+      # bez tego k8s wstrzykuje LLDAP_PORT itp., które LLDAP czyta jako config
+      enableServiceLinks: false
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: lldap
+        image: lldap/lldap:v0.6.3-alpine-rootless
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+        ports:
+        - containerPort: 3890
+          name: ldap
+        - containerPort: 17170
+          name: http
+        # LLDAP_JWT_SECRET, LLDAP_KEY_SEED, LLDAP_LDAP_USER_PASS, LLDAP_DATABASE_URL
+        envFrom:
+        - secretRef:
+            name: lldap
+            optional: false
+        env:
+        - name: TZ
+          value: "Europe/Warsaw"
+        - name: LLDAP_LDAP_BASE_DN
+          value: "dc=ugard,dc=win"
+        - name: LLDAP_HTTP_URL
+          value: "https://lldap.ugard.win"
+        volumeMounts:
+        # dane są w postgresie; /data trzyma tylko kopię domyślnego lldap_config.toml
+        - name: data
+          mountPath: /data
+        livenessProbe:
+          tcpSocket:
+            port: 3890
+          initialDelaySeconds: 15
+          periodSeconds: 30
+        readinessProbe:
+          tcpSocket:
+            port: 17170
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 128Mi
+      volumes:
+      - name: data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lldap
+spec:
+  type: ClusterIP
+  selector:
+    app: lldap
+  ports:
+  - name: ldap
+    port: 3890
+    targetPort: 3890
+  - name: http
+    port: 17170
+    targetPort: 17170
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lldap
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
+spec:
+  rules:
+  - host: lldap.ugard.win
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: lldap
+              port:
+                number: 17170
+  tls:
+  - hosts:
+    - lldap.ugard.win
+    secretName: tls-lldap-ingress-http

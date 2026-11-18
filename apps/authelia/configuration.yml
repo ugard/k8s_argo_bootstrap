@@ -1,0 +1,105 @@
+# Authelia 4.39 - sekrety wchodzą przez zmienne *_FILE (patrz authelia.yaml),
+# nic wrażliwego w tym pliku.
+theme: auto
+
+server:
+  address: 'tcp://:9091/'
+  endpoints:
+    authz:
+      forward-auth:
+        implementation: ForwardAuth
+
+log:
+  level: info
+
+totp:
+  issuer: ugard.win
+
+webauthn:
+  display_name: ugard.win
+  # logowanie samym passkeyem (pierwszy składnik). access_control używa
+  # one_factor, więc passkey wystarcza (ale samo hasło też).
+  enable_passkey_login: true
+  attestation_conveyance_preference: indirect
+  selection_criteria:
+    user_verification: preferred
+    discoverability: preferred
+
+authentication_backend:
+  password_reset:
+    disable: false
+  refresh_interval: 1m
+  ldap:
+    implementation: lldap
+    address: 'ldap://lldap.authelia.svc.cluster.local:3890'
+    base_dn: 'dc=ugard,dc=win'
+    user: 'uid=authelia,ou=people,dc=ugard,dc=win'
+    # password: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE
+
+password_policy:
+  zxcvbn:
+    enabled: true
+    min_score: 3
+
+access_control:
+  default_policy: deny
+  rules:
+    # tylko aplikacje, których ingress ma middleware authelia-forwardauth@kubernetescrd
+    - domain: '*.ugard.win'
+      subject: 'group:lldap_admin'
+      policy: one_factor
+    - domain: '*.ugard.win'
+      subject: 'group:homelab_users'
+      policy: one_factor
+
+session:
+  # brak redisa -> sesje w pamięci, restart poda = ponowne logowanie
+  # secret: AUTHELIA_SESSION_SECRET_FILE
+  name: authelia_session
+  expiration: 12h
+  inactivity: 2h
+  remember_me: 1M
+  cookies:
+    - domain: 'ugard.win'
+      authelia_url: 'https://auth.ugard.win'
+      default_redirection_url: 'https://home.ugard.win'
+
+regulation:
+  max_retries: 5
+  find_time: 10m
+  ban_time: 30m
+
+storage:
+  # encryption_key: AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE
+  postgres:
+    address: 'tcp://postgres.postgres.svc.cluster.local:5432'
+    database: authelia
+    username: authelia
+    # password: AUTHELIA_STORAGE_POSTGRES_PASSWORD_FILE
+
+notifier:
+  # brak SMTP w klastrze - kody weryfikacyjne (rejestracja passkeya/TOTP, reset
+  # hasła) lądują w pliku:
+  #   kubectl -n authelia exec deploy/authelia -- cat /data/notification.txt
+  filesystem:
+    filename: /data/notification.txt
+
+# OIDC: odkomentuj przy pierwszym kliencie (Authelia nie startuje z pustą listą).
+# Klucze są już w secrecie authelia (OIDC_HMAC_SECRET, OIDC_JWKS_KEY), w
+# authelia.yaml trzeba odkomentować env AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET_FILE
+# i X_AUTHELIA_CONFIG_FILTERS=template (potrzebny dla funkcji `secret` poniżej).
+# identity_providers:
+#   oidc:
+#     jwks:
+#       - key_id: main
+#         algorithm: RS256
+#         use: sig
+#         key: {{ secret "/secrets/OIDC_JWKS_KEY" | mindent 10 "|" | msquote }}
+#     clients:
+#       - client_id: grafana
+#         client_name: Grafana
+#         client_secret: '$pbkdf2-sha512$...'   # authelia crypto hash generate pbkdf2
+#         authorization_policy: one_factor
+#         redirect_uris:
+#           - 'https://grafana.ugard.win/login/generic_oauth'
+#         scopes: [openid, profile, email, groups]

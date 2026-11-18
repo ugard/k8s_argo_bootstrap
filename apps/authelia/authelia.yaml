@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authelia
+spec:
+  # sesje w pamięci (bez redisa) -> tylko jedna replika
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: authelia
+  template:
+    metadata:
+      labels:
+        app: authelia
+    spec:
+      # bez tego k8s wstrzykuje AUTHELIA_SERVICE_PORT itp., a Authelia traktuje
+      # każdą zmienną AUTHELIA_* jako config i nie startuje
+      enableServiceLinks: false
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+        runAsNonRoot: true
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: authelia
+        image: ghcr.io/authelia/authelia:4.39.28
+        args: ["--config", "/config/configuration.yml"]
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+        ports:
+        - containerPort: 9091
+          name: http
+        env:
+        - name: TZ
+          value: "Europe/Warsaw"
+        - name: AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE
+          value: /secrets/RESET_PASSWORD_JWT_SECRET
+        - name: AUTHELIA_SESSION_SECRET_FILE
+          value: /secrets/SESSION_SECRET
+        - name: AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE
+          value: /secrets/STORAGE_ENCRYPTION_KEY
+        - name: AUTHELIA_STORAGE_POSTGRES_PASSWORD_FILE
+          value: /secrets/STORAGE_PASSWORD
+        - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE
+          value: /secrets/LDAP_PASSWORD
+        # przy włączeniu OIDC (patrz configuration.yml):
+        # - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET_FILE
+        #   value: /secrets/OIDC_HMAC_SECRET
+        # - name: X_AUTHELIA_CONFIG_FILTERS
+        #   value: template
+        volumeMounts:
+        - name: config
+          mountPath: /config
+          readOnly: true
+        - name: secrets
+          mountPath: /secrets
+          readOnly: true
+        # notification.txt (filesystem notifier)
+        - name: data
+          mountPath: /data
+        - name: tmp
+          mountPath: /tmp
+        startupProbe:
+          httpGet:
+            path: /api/health
+            port: 9091
+          periodSeconds: 5
+          failureThreshold: 24
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 9091
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 9091
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            memory: 256Mi
+      volumes:
+      - name: config
+        configMap:
+          name: authelia-config
+      - name: secrets
+        secret:
+          secretName: authelia
+      - name: data
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authelia
+spec:
+  type: ClusterIP
+  selector:
+    app: authelia
+  ports:
+  - name: http
+    port: 9091
+    targetPort: 9091
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: authelia
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-cloudflare"
+spec:
+  rules:
+  - host: auth.ugard.win
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: authelia
+              port:
+                number: 9091
+  tls:
+  - hosts:
+    - auth.ugard.win
+    secretName: tls-authelia-ingress-http
