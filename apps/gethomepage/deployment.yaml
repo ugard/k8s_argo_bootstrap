@@ -131,6 +131,16 @@ data:
             description: DNS ad blocker
             icon: adguard
 
+    - Drukarki 3D:
+        - Voron:
+            href: http://192.168.100.139
+            description: Klipper UI
+            icon: mdi-printer-3d
+        - AD5M:
+            href: http://192.168.101.190
+            description: Flashforge Adventurer 5M (zmod)
+            icon: mdi-printer-3d
+
     - Monitoring:
         - Healthchecks:
             href: https://hc.ugard.win
