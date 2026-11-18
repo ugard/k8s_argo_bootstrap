@@ -3,5 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - sealed_secret.yaml
+  # scripts/create-oidc-client-secret.sh homebox homebox homebox-oidc HBOX_OIDC_CLIENT_SECRET apps/homebox/sealed_secret_oidc.yaml
+  - sealed_secret_oidc.yaml
   - homebox.pvc.yaml
   - homebox.yaml

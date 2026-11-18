@@ -148,3 +148,19 @@ identity_providers:
         access_token_signed_response_alg: none
         userinfo_signed_response_alg: none
         token_endpoint_auth_method: client_secret_basic
+      # Homebox: konfiguracja przez env w apps/homebox/homebox.yaml
+      - client_id: homebox
+        client_name: Homebox
+        client_secret: {{ secret "/secrets/OIDC_CLIENT_HOMEBOX_DIGEST" | msquote }}
+        public: false
+        authorization_policy: one_factor
+        require_pkce: true
+        pkce_challenge_method: S256
+        redirect_uris:
+          - 'https://homebox.ugard.win/api/v1/users/login/oidc/callback'
+        scopes: [openid, profile, email, groups]
+        response_types: [code]
+        grant_types: [authorization_code]
+        access_token_signed_response_alg: none
+        userinfo_signed_response_alg: none
+        token_endpoint_auth_method: client_secret_basic

@@ -37,6 +37,10 @@ spec:
         - secretRef:
             name: homebox
             optional: false
+        # HBOX_OIDC_CLIENT_SECRET, z scripts/create-oidc-client-secret.sh
+        - secretRef:
+            name: homebox-oidc
+            optional: false
         env:
         - name: TZ
           value: "Europe/Warsaw"
@@ -57,6 +61,22 @@ spec:
         # pierwsze konto zakłada się przy "true" (false blokuje też pierwszego użytkownika)
         - name: HBOX_OPTIONS_ALLOW_REGISTRATION
           value: "false"
+        # SSO przez Authelię (client "homebox" w apps/authelia/configuration.yml).
+        # Istniejące konto łączy się po e-mailu przy pierwszym logowaniu OIDC.
+        - name: HBOX_OIDC_ENABLED
+          value: "true"
+        - name: HBOX_OIDC_ISSUER_URL
+          value: "https://auth.ugard.win"
+        - name: HBOX_OIDC_CLIENT_ID
+          value: "homebox"
+        - name: HBOX_OIDC_SCOPE
+          value: "openid profile email groups"
+        - name: HBOX_OIDC_ALLOWED_GROUPS
+          value: "homelab_users,lldap_admin"
+        - name: HBOX_OIDC_BUTTON_TEXT
+          value: "Zaloguj przez Authelię"
+        # po sprawdzeniu, że SSO działa: HBOX_OIDC_AUTO_REDIRECT=true
+        # i HBOX_OPTIONS_ALLOW_LOCAL_LOGIN=false
         volumeMounts:
         - name: data
           mountPath: /data
