@@ -5,4 +5,7 @@ resources:
   - immich.pvc.yaml
   # - migrate.yaml
   - sealed_secret.yaml
+  # sekret klienta OIDC (Authelia) - nie montowany, tylko do wklejenia w UI Immicha
+  # scripts/create-oidc-client-secret.sh immich immich immich-oidc OAUTH_CLIENT_SECRET apps/immich/sealed_secret_oidc.yaml
+  - sealed_secret_oidc.yaml
   - postgres.yaml
