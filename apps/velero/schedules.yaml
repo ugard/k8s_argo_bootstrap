@@ -1,8 +1,14 @@
+# Monitoring: velero-healthcheck (velero-healthcheck.yaml) sprawdza co godzinę
+# każdy Schedule z annotacją healthchecks.ugard.win/ping-url i pinguje ten URL
+# (albo <url>/fail z powodem). Schedule'e o wspólnym URL-u = jeden check.
+# Opcjonalnie healthchecks.ugard.win/max-age (domyślnie 25h).
 apiVersion: velero.io/v1
 kind: Schedule
 metadata:
   name: garage-meta-ceph
   namespace: velero
+  annotations:
+    healthchecks.ugard.win/ping-url: http://healthchecks.healthchecks.svc.cluster.local/ping/b2a8aa84-740c-42a3-8d2c-dc4879f8ebc3
 spec:
   schedule: "0 3 * * *"
   template:
@@ -22,6 +28,8 @@ kind: Schedule
 metadata:
   name: garage-data-zfs
   namespace: velero
+  annotations:
+    healthchecks.ugard.win/ping-url: http://healthchecks.healthchecks.svc.cluster.local/ping/b2a8aa84-740c-42a3-8d2c-dc4879f8ebc3
 spec:
   schedule: "0 3 * * *"
   template:
@@ -41,6 +49,8 @@ kind: Schedule
 metadata:
   name: postgres-backup
   namespace: velero
+  annotations:
+    healthchecks.ugard.win/ping-url: http://healthchecks.healthchecks.svc.cluster.local/ping/0fab098b-990b-4de5-b317-5e66a62054c2
 spec:
   schedule: "0 4 * * *"
   template:
@@ -86,6 +96,8 @@ kind: Schedule
 metadata:
   name: hoarder-backup
   namespace: velero
+  annotations:
+    healthchecks.ugard.win/ping-url: http://healthchecks.healthchecks.svc.cluster.local/ping/ad8a3d86-4794-4c74-8a71-7f8162f92f0d
 spec:
   schedule: "0 5 * * *"
   template:
@@ -100,6 +112,8 @@ kind: Schedule
 metadata:
   name: gitea-backup
   namespace: velero
+  annotations:
+    healthchecks.ugard.win/ping-url: http://healthchecks.healthchecks.svc.cluster.local/ping/05d7580c-638f-4263-98ab-11561425580b
 spec:
   schedule: "0 5 * * *"
   template:
@@ -114,6 +128,8 @@ kind: Schedule
 metadata:
   name: manyfold-backup
   namespace: velero
+  annotations:
+    healthchecks.ugard.win/ping-url: http://healthchecks.healthchecks.svc.cluster.local/ping/ad5f57a9-4b29-44c1-bf7e-0223ddd61648
 spec:
   schedule: "0 5 * * *"
   template:
@@ -128,6 +144,8 @@ kind: Schedule
 metadata:
   name: homebox-backup
   namespace: velero
+  annotations:
+    healthchecks.ugard.win/ping-url: http://healthchecks.healthchecks.svc.cluster.local/ping/e7968f5e-be7e-4463-9801-bf8f311efe48
 spec:
   schedule: "15 5 * * *"
   template:
@@ -142,6 +160,8 @@ kind: Schedule
 metadata:
   name: paperless-backup
   namespace: velero
+  annotations:
+    healthchecks.ugard.win/ping-url: http://healthchecks.healthchecks.svc.cluster.local/ping/3895e0b8-97f6-4f08-b06e-3a1a883ca758
 spec:
   schedule: "0 5 * * *"
   template:
@@ -156,6 +176,8 @@ kind: Schedule
 metadata:
   name: vikunja-backup
   namespace: velero
+  annotations:
+    healthchecks.ugard.win/ping-url: http://healthchecks.healthchecks.svc.cluster.local/ping/01d5b4ee-ea25-40aa-a2ca-368b8f4ceca5
 spec:
   schedule: "0 5 * * *"
   template:
@@ -170,6 +192,8 @@ kind: Schedule
 metadata:
   name: vaultwarden-backup
   namespace: velero
+  annotations:
+    healthchecks.ugard.win/ping-url: http://healthchecks.healthchecks.svc.cluster.local/ping/b0a65948-cb84-47f2-b2e1-7cf85b3db188
 spec:
   schedule: "0 5 * * *"
   template:
@@ -185,6 +209,8 @@ kind: Schedule
 metadata:
   name: jellyfin-config-backup
   namespace: velero
+  annotations:
+    healthchecks.ugard.win/ping-url: http://healthchecks.healthchecks.svc.cluster.local/ping/68935811-15b6-49a9-8f47-04728443711b
 spec:
   schedule: "0 3 * * *"
   template:
@@ -198,3 +224,19 @@ spec:
     snapshotMoveData: true
     storageLocation: scaleway
     ttl: 720h0m0s
+---
+# założony kiedyś ręcznie, przejęty do repo 2026-11-22 (spec jak w klastrze)
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: immich
+  namespace: velero
+  annotations:
+    healthchecks.ugard.win/ping-url: http://healthchecks.healthchecks.svc.cluster.local/ping/95fecc61-7345-4b37-902d-3f8d28072aa8
+spec:
+  schedule: "0 4 * * *"
+  template:
+    includedNamespaces:
+      - immich
+    snapshotMoveData: true
+    storageLocation: garage
