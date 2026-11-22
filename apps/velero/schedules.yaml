@@ -5,27 +5,6 @@
 apiVersion: velero.io/v1
 kind: Schedule
 metadata:
-  name: garage-meta-ceph
-  namespace: velero
-  annotations:
-    healthchecks.ugard.win/ping-url: http://healthchecks.healthchecks.svc.cluster.local/ping/b2a8aa84-740c-42a3-8d2c-dc4879f8ebc3
-spec:
-  schedule: "0 3 * * *"
-  template:
-    includedNamespaces:
-      - garage
-    includedResources:
-      - persistentvolumeclaims
-    labelSelector:
-      matchLabels:
-        backup-this-pvc: "true"
-    snapshotMoveData: true
-    storageLocation: scaleway
-    ttl: 720h0m0s
----
-apiVersion: velero.io/v1
-kind: Schedule
-metadata:
   name: garage-data-zfs
   namespace: velero
   annotations:

@@ -11,30 +11,9 @@ The cluster utilizes three main backup/replication mechanisms:
 
 ## 1. Velero Backup Flows
 
-Velero is configured with two specific schedules targeting the `garage` namespace.
+Velero is configured with one schedule targeting the `garage` namespace (metadata PVC `garage-meta-zfs` and data PVC `garage-data`, both on ZFS). The former `garage-meta-ceph` schedule was removed on 2026-11-22: after the metadata moved from Ceph to ZFS it matched no PVCs and produced empty backups.
 
-### 1.1 Garage Metadata Backup (Ceph)
-*   **Schedule Name**: `garage-meta-ceph`
-*   **Frequency**: Daily at 03:00
-*   **Target**: PVCs in `garage` namespace with label `backup-this-pvc: "true"`
-*   **Storage**: Scaleway Object Storage
-*   **Mechanism**: CSI Snapshot + Data Mover (`snapshotMoveData: true`)
-
-```mermaid
-graph LR
-    subgraph Cluster
-        PVC["PVC (garage/backup-this-pvc=true)"]
-        Velero[Velero Controller]
-    end
-    subgraph Scaleway
-        S3[Object Storage]
-    end
-
-    Velero -- Triggers --> PVC
-    PVC -- Snapshot Data --> S3
-```
-
-### 1.2 Garage Data Backup (ZFS Local)
+### 1.1 Garage Data + Metadata Backup (ZFS Local)
 *   **Schedule Name**: `garage-data-zfs`
 *   **Frequency**: Daily at 03:00
 *   **Target**: PVCs in `garage` namespace with label `backup-strategy: zfs-local`
