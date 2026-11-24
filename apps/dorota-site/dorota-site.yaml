@@ -20,7 +20,7 @@ spec:
       containers:
       - name: nginx
         # Hugo -> nginx, źródło: git.ugard.win/lkrzyzak/dorota-site (build: Drone CI)
-        image: registry.ugard.win/dorota-site:dd2fa0f0
+        image: registry.ugard.win/dorota-site:24e9414d
         ports:
         - containerPort: 8080
           name: http
