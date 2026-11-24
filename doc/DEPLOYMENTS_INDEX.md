@@ -141,6 +141,7 @@ See `doc/backup/README.md` for full backup topology (Velero/Benji/Zrepl/Postgres
 | healthchecks (`kustomize-healthchecks`) | healthchecks | kustomize | healthchecks.io self-host; ingress hc.ugard.win |
 | hoarder | (see databases) | | |
 | picoshare (`kustomize-picoshare`) | picoshare | kustomize | mtlynch/picoshare; host pico.ugard.win |
+| dorota-site (`kustomize-dorota-site`) | dorota-site | kustomize | registry.ugard.win/dorota-site (Hugo+nginx, Drone CI); host dorota.ugard.win |
 | bytestash (`kustomize-bytestash`) | bytestash | kustomize | ghcr.io/jordan-dalby/bytestash; host bytestash.ugard.win |
 | gethomepage (`kustomize-gethomepage`) | gethomepage | kustomize | homepage v1.9.0 dashboard; host home.ugard.win |
 | gotify (`kustomize-gotify`) | gotify | kustomize | gotify server; host gotify.ugard.win |
